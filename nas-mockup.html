@@ -1,0 +1,1512 @@
+<title>NAS-T-BOX Build Mockup</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@62..125,400..800&family=IBM+Plex+Mono:wght@400;500;600&display=swap">
+<style>
+/* Layout: a one-screen workbench. The 3D stage fills the left and a docked spec sheet sits on the right; they stack on phones. */
+:root {
+  --bg: #e3e6e9;
+  --stage: #d3d9de;
+  --panel: #f4f5f6;
+  --ink: #15181c;
+  --muted: #59626d;
+  --line: #c9d0d7;
+  --accent: #c8651a;
+  --air: #2f7cc0;
+  --hot: #d9541e;
+  --ok: #23794b;
+  --warn: #8f5d0e;
+  --bad: #b3352d;
+  --display: "Archivo", "Arial Narrow", "Helvetica Neue", Arial, sans-serif;
+  --body: "Archivo", system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  --mono: "IBM Plex Mono", ui-monospace, "Cascadia Mono", Menlo, Consolas, monospace;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #101317; --stage: #181d23; --panel: #15191e; --ink: #e6e9ed; --muted: #98a2ad; --line: #29303a;
+    --accent: #f08d3a; --air: #6db3ef; --hot: #ff7a45; --ok: #5cc48c; --warn: #e3b14f; --bad: #f2776d;
+    color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --bg: #101317; --stage: #181d23; --panel: #15191e; --ink: #e6e9ed; --muted: #98a2ad; --line: #29303a;
+  --accent: #f08d3a; --air: #6db3ef; --hot: #ff7a45; --ok: #5cc48c; --warn: #e3b14f; --bad: #f2776d;
+  color-scheme: dark;
+}
+*, *::before, *::after { box-sizing: border-box; }
+html, body { height: 100%; }
+body {
+  margin: 0;
+  background: var(--bg);
+  color: var(--ink);
+  font-family: var(--body);
+  font-size: 14px;
+  line-height: 1.5;
+  padding-block: 16px;
+  padding-left: max(16px, env(safe-area-inset-left, 0px));
+  padding-right: max(16px, env(safe-area-inset-right, 0px));
+}
+.app { height: 100%; display: grid; grid-template-columns: minmax(0, 1fr) 380px; gap: 16px; }
+
+/* Stage */
+.stage { position: relative; min-width: 0; min-height: 0; border: 1px solid var(--line); border-radius: 10px; overflow: hidden; background: var(--stage); }
+.stage > canvas { position: absolute; inset: 0; width: 100%; height: 100%; display: block; touch-action: none; outline: none; }
+.labels { position: absolute; inset: 0; pointer-events: none; overflow: hidden; z-index: 1; }
+.hud { position: absolute; top: 10px; left: 10px; right: 10px; z-index: 2; display: flex; flex-wrap: wrap; gap: 8px; justify-content: space-between; align-items: flex-start; pointer-events: none; }
+.hud > * { pointer-events: auto; }
+.chipbar { display: flex; flex-wrap: wrap; gap: 2px; padding: 3px; border: 1px solid var(--line); border-radius: 8px; background: color-mix(in srgb, var(--panel) 88%, transparent); backdrop-filter: blur(6px); }
+.chipbar button, .chipbar label { font: 500 12px/1 var(--body); color: var(--ink); background: none; border: 0; border-radius: 5px; padding: 7px 9px; cursor: pointer; display: inline-flex; align-items: center; gap: 6px; }
+.chipbar button:hover, .chipbar label:hover { background: color-mix(in srgb, var(--ink) 8%, transparent); }
+.chipbar button[aria-pressed="true"], .chipbar button[aria-pressed="true"]:hover { background: var(--ink); color: var(--panel); }
+.chipbar input { accent-color: var(--accent); margin: 0; }
+:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+.hud .hud-right { display: flex; flex-wrap: wrap; gap: 8px; justify-content: flex-end; pointer-events: none; }
+.hud-right > * { pointer-events: auto; }
+.chipbar button:disabled { opacity: .4; cursor: not-allowed; }
+.chipbar button:disabled:hover { background: none; }
+.chipbar svg { flex: none; }
+.foot { position: absolute; left: 10px; right: 10px; bottom: 10px; z-index: 2; display: flex; flex-wrap: wrap-reverse; align-items: flex-end; justify-content: space-between; gap: 8px; pointer-events: none; }
+.legend { display: flex; align-items: center; gap: 8px; padding: 6px 10px; font: 500 11px/1 var(--mono); color: var(--muted); border: 1px solid var(--line); border-radius: 8px; background: color-mix(in srgb, var(--panel) 88%, transparent); }
+.legend .ramp { width: 84px; height: 6px; border-radius: 3px; background: linear-gradient(90deg, var(--air), var(--hot)); }
+.hint { padding: 0 2px 4px; font: 500 11px/1 var(--mono); color: var(--muted); }
+.dock { display: none; flex-wrap: wrap; align-items: center; justify-content: center; gap: 6px; margin: 0 auto; pointer-events: auto; }
+.dock .status { background: color-mix(in srgb, var(--panel) 88%, transparent); backdrop-filter: blur(6px); }
+.notice { position: absolute; inset: 0; z-index: 3; display: grid; place-items: center; padding: 24px; text-align: center; font: 500 13px/1.5 var(--mono); color: var(--muted); background: var(--stage); }
+.notice[hidden] { display: none; }
+.tag { margin-top: -26px; padding: 3px 6px; font: 500 11px/1.25 var(--mono); color: var(--ink); white-space: nowrap; border: 1px solid var(--line); border-radius: 4px; background: color-mix(in srgb, var(--panel) 90%, transparent); }
+.tag.petg { color: var(--accent); border-color: var(--accent); }
+.tag.bad { color: var(--bad); border-color: var(--bad); }
+.tag.dim { margin-top: 0; color: var(--panel); background: var(--ink); border-color: var(--ink); }
+.stage.hide-tags .tag:not(.dim) { display: none !important; }
+.stage.hide-dims .tag.dim { display: none !important; }
+
+/* Panel */
+.panel { min-width: 0; min-height: 0; overflow-y: auto; display: flex; flex-direction: column; gap: 22px; padding: 2px 6px 24px 2px; }
+.eyebrow { margin: 0; font: 600 11px/1.3 var(--mono); letter-spacing: .08em; text-transform: uppercase; color: var(--muted); }
+h1 { margin: 6px 0 8px; font: 760 36px/0.95 var(--display); font-stretch: 70%; letter-spacing: -.01em; text-wrap: balance; }
+.lede { margin: 0; color: var(--muted); max-width: 60ch; }
+h2, legend { margin: 0 0 10px; padding: 0; font: 700 13px/1.2 var(--display); font-stretch: 85%; letter-spacing: .07em; text-transform: uppercase; }
+fieldset { margin: 0; padding: 0; border: 0; min-width: 0; }
+.options { display: grid; gap: 6px; }
+.option { display: grid; grid-template-columns: auto minmax(0, 1fr); gap: 2px 10px; padding: 10px 12px; border: 1px solid var(--line); border-radius: 8px; background: var(--panel); cursor: pointer; }
+.option input { grid-row: 1 / span 2; margin: 3px 0 0; accent-color: var(--accent); }
+.option b { font-weight: 650; }
+.option span { color: var(--muted); font-size: 13px; }
+.option:has(input:checked) { border-color: var(--accent); background: color-mix(in srgb, var(--accent) 7%, var(--panel)); }
+.seg { display: inline-grid; grid-auto-flow: column; border: 1px solid var(--line); border-radius: 8px; overflow: hidden; background: var(--panel); }
+.seg label { position: relative; display: grid; gap: 2px; padding: 8px 14px; cursor: pointer; font-weight: 600; font-size: 13px; }
+.seg label + label { border-left: 1px solid var(--line); }
+.seg input { position: absolute; inset: 0; margin: 0; opacity: 0; cursor: pointer; }
+.seg small { font: 500 11px/1.2 var(--mono); color: var(--muted); }
+.seg label:has(input:checked) { background: var(--ink); color: var(--panel); }
+.seg label:has(input:checked) small { color: color-mix(in srgb, var(--panel) 72%, transparent); }
+.seg label:has(input:focus-visible) { outline: 2px solid var(--accent); outline-offset: -2px; }
+fieldset:disabled .seg { opacity: .45; }
+fieldset:disabled .seg label, fieldset:disabled .seg input { cursor: not-allowed; }
+.slot-note { margin: 8px 0 0; font-size: 13px; color: var(--muted); }
+.readout { border-top: 1px solid var(--line); padding-top: 16px; }
+.status { display: inline-flex; align-items: center; gap: 8px; padding: 6px 11px; font: 600 12px/1 var(--mono); border: 1px solid currentColor; border-radius: 999px; }
+.status::before { content: ""; width: 8px; height: 8px; border-radius: 50%; background: currentColor; }
+.status.ok { color: var(--ok); }
+.status.warn { color: var(--warn); }
+.status.bad { color: var(--bad); }
+.status.info { color: var(--muted); }
+.status-note { margin: 10px 0 0; max-width: 60ch; }
+dl.metrics { margin: 14px 0 0; display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 7px 14px; }
+dl.metrics dt { color: var(--muted); min-width: 0; }
+dl.metrics dd { margin: 0; text-align: right; font: 500 12.5px/1.5 var(--mono); font-variant-numeric: tabular-nums; }
+ul.list, ol.list { margin: 0; padding-left: 18px; display: grid; gap: 7px; }
+ul.list li::marker { color: var(--accent); }
+ol.list li::marker { font: 600 12px var(--mono); color: var(--muted); }
+.model { display: block; font: 500 12px/1.5 var(--mono); color: var(--muted); font-variant-numeric: tabular-nums; }
+.fine { margin: 0; padding-top: 14px; border-top: 1px solid var(--line); color: var(--muted); font-size: 12px; }
+.drawer-close { display: none; float: right; margin: -2px -4px 0 12px; width: 34px; height: 34px; place-items: center; color: var(--ink); background: var(--panel); border: 1px solid var(--line); border-radius: 8px; cursor: pointer; }
+
+/* Full screen: the stage fills the window; the panel becomes a drawer and a dock holds the main switches. */
+.app.full { position: fixed; inset: 0; z-index: 20; height: auto; grid-template-columns: minmax(0, 1fr); grid-template-rows: minmax(0, 1fr); gap: 0; background: var(--bg); }
+.app.full .stage { height: auto; min-height: 0; border: 0; border-radius: 0; }
+.app.full .panel { position: absolute; top: 0; right: 0; bottom: 0; z-index: 5; width: min(400px, 100%); padding: 18px 20px 28px; overflow-y: auto; background: var(--bg); border-left: 1px solid var(--line); box-shadow: -16px 0 40px rgb(0 0 0 / .2); transform: translateX(100%); visibility: hidden; transition: transform .22s ease, visibility 0s linear .22s; }
+.app.full.drawer .panel { transform: none; visibility: visible; transition: transform .22s ease; }
+.app.full .drawer-close { display: inline-grid; }
+.app.full .dock { display: flex; }
+.app.full .hint { display: none; }
+@media (prefers-reduced-motion: reduce) { .app.full .panel, .app.full.drawer .panel { transition: none; } }
+
+@media (max-width: 900px) {
+  html, body { height: auto; }
+  .app { height: auto; grid-template-columns: minmax(0, 1fr); }
+  .stage { height: 66svh; min-height: 380px; }
+  .panel { overflow: visible; padding-right: 0; }
+}
+@media (max-width: 560px) {
+  .hint { display: none; }
+  .app.full .legend { display: none; }
+  h1 { font-size: 30px; }
+  .tag { margin-top: -20px; padding: 2px 4px; font-size: 9.5px; }
+  .tag.dim { margin-top: 0; }
+}
+</style>
+
+<div class="app">
+  <section class="stage" id="stage" aria-label="3D model of the NAS build">
+    <div class="hud">
+      <div class="chipbar" role="group" aria-label="Camera view">
+        <button type="button" data-cam="iso" aria-pressed="false">3/4</button>
+        <button type="button" data-cam="side" aria-pressed="true">Side</button>
+        <button type="button" data-cam="front" aria-pressed="false">Front</button>
+        <button type="button" data-cam="top" aria-pressed="false">Top</button>
+        <button type="button" data-cam="duct" aria-pressed="false">Duct</button>
+      </div>
+      <div class="hud-right">
+        <div class="chipbar" role="group" aria-label="Show in the model">
+          <label><input type="checkbox" id="tg-labels"> Labels</label>
+          <label><input type="checkbox" id="tg-air" checked> Airflow</label>
+          <label><input type="checkbox" id="tg-xray" checked> X-ray</label>
+          <label><input type="checkbox" id="tg-dims"> Dimensions</label>
+          <label><input type="checkbox" id="tg-glass"> Side panel</label>
+        </div>
+        <div class="chipbar">
+          <button type="button" id="btn-full" aria-pressed="false" title="Full screen (F)"><svg width="14" height="14" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.7" aria-hidden="true"><path id="full-icon" d="M2 6V2h4M10 2h4v4M14 10v4h-4M6 14H2v-4"/></svg><span>Full screen</span></button>
+        </div>
+      </div>
+    </div>
+    <div class="foot">
+      <div class="legend" aria-hidden="true"><span>intake</span><span class="ramp"></span><span>heated exhaust</span></div>
+      <div class="dock" role="group" aria-label="Quick controls">
+        <div class="chipbar" role="group" aria-label="Layout">
+          <button type="button" data-q-scn="today">Today</button>
+          <button type="button" data-q-scn="top2">Bays 3–4</button>
+          <button type="button" data-q-scn="mid2">Bays 2–3</button>
+        </div>
+        <div class="chipbar" role="group" aria-label="V100 cards">
+          <button type="button" data-q-cards="1">1 × V100</button>
+          <button type="button" data-q-cards="2">2 × V100</button>
+        </div>
+        <div class="chipbar" role="group" aria-label="V100 slot">
+          <button type="button" data-q-slot="PCIEX16_2">x16_2</button>
+          <button type="button" data-q-slot="PCIEX16_1">x16_1</button>
+        </div>
+        <span class="status info" id="dock-status">Loading</span>
+        <div class="chipbar"><button type="button" id="btn-drawer" aria-expanded="false">Details</button></div>
+      </div>
+      <div class="hint">drag to orbit · scroll to zoom · right-drag to pan · F full screen · X x-ray</div>
+    </div>
+    <div class="notice" id="notice">Loading the 3D model…</div>
+  </section>
+
+  <aside class="panel">
+    <header>
+      <button type="button" class="drawer-close" id="drawer-close" aria-label="Close details"><svg width="14" height="14" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path d="M3 3l10 10M13 3L3 13"/></svg></button>
+      <p class="eyebrow">NAS-T-BOX · DARKROCK Classico Storage Master</p>
+      <h1>Build mockup</h1>
+      <p class="lede">Your parts at spec-sheet size, with the AIO flipped, the drive cages moved up, one or two Tesla V100s, and printed ducts to feed them.</p>
+    </header>
+
+    <fieldset>
+      <legend>Layout</legend>
+      <div class="options">
+        <label class="option"><input type="radio" name="scn" id="scn-today" value="today"><b>Today</b><span>As in your photos: cages in bays 1 and 2, AIO tubes at the front, no V100 yet.</span></label>
+        <label class="option"><input type="radio" name="scn" id="scn-top2" value="top2" checked><b>Plan: cages in bays 3 and 4</b><span>The top two bays, tubes at the rear. Bays 1 and 2 are clear, so two front fans and two middle fans feed the card, or both cards.</span></label>
+        <label class="option"><input type="radio" name="scn" id="scn-mid2" value="mid2"><b>Fallback: cages in bays 2 and 3</b><span>If bay 4 won't clear the radiator. Only bay 1 is clear, so a low duct feeds one card in PCIEX16_2.</span></label>
+      </div>
+    </fieldset>
+
+    <fieldset id="cards-set">
+      <legend>V100 cards</legend>
+      <div class="seg">
+        <label><input type="radio" name="cards" value="1" checked>One<small>single duct</small></label>
+        <label><input type="radio" name="cards" value="2">Two<small>dual duct · x8 + x8</small></label>
+      </div>
+    </fieldset>
+
+    <fieldset id="slot-set">
+      <legend>V100 slot</legend>
+      <div class="seg">
+        <label><input type="radio" name="slot" id="slot-2" value="PCIEX16_2">PCIEX16_2<small>PCIe 3.0 x8</small></label>
+        <label><input type="radio" name="slot" id="slot-1" value="PCIEX16_1" checked>PCIEX16_1<small>PCIe 3.0 x16</small></label>
+      </div>
+      <p class="slot-note" id="slot-note"></p>
+    </fieldset>
+
+    <section class="readout" aria-live="polite">
+      <span class="status info" id="status">Loading</span>
+      <p class="status-note" id="status-note"></p>
+      <dl class="metrics" id="metrics"></dl>
+    </section>
+
+    <section>
+      <h2>What the model shows</h2>
+      <ul class="list">
+        <li>The case has four bay positions. Bay 1, at the bottom, lines up with PCIEX16_2, and bay 2 with PCIEX16_1.</li>
+        <li>With the cages in bays 3 and 4, bays 1 and 2 are clear, about 155 mm. That fits the 2 + 2 fan duct on either slot, or a dual duct for two cards.</li>
+        <li>The two middle fans sit 20 mm apart with a printed straightener between them. Two fans pressed together reach about 1.5 times the pressure of one; with the straightener it's closer to 1.8 times.</li>
+        <li>This plan assumes the bay 4 cage clears the radiator fans. If it doesn't, cages in bays 2 and 3 still leave bay 1 for a low duct.</li>
+        <li>PCIEX16_2 runs at PCIe 3.0 x8, and with two cards both slots run at x8. For inference that mostly means slower model loads.</li>
+        <li>Two V100s and the 9900K can draw about 750 W at full load from the 850 W PSU. Give each card its own power feed.</li>
+        <li>Each V100 covers the x1 slot just below its x16 slot. Two cards leave one empty slot between them.</li>
+      </ul>
+    </section>
+
+    <section>
+      <h2>Duct parts</h2>
+      <ul class="list" id="parts"></ul>
+    </section>
+
+    <section>
+      <h2>Measure next</h2>
+      <ol class="list">
+        <li>Top of bay 4 to the bottom of the radiator fans, to confirm the cage clears.<span class="model">model: 30 mm</span></li>
+        <li>Rear slot bracket to the front fan frame, at PCIEX16_2 height.<span class="model">model: 398 mm</span></li>
+        <li>PSU shroud top to the bottom of each drive bay.<span class="model">model: 15 / 85 / 155 / 225 mm</span></li>
+        <li>PSU shroud top to the center of each front fan.<span class="model">model: 23 / 143 / 263 mm</span></li>
+        <li>Motherboard tray to the side panel.<span class="model">model: 180 mm</span></li>
+        <li>When the card arrives: the end opening, its screw holes, and where the power plug sits.</li>
+      </ol>
+    </section>
+
+    <p class="fine">Part sizes come from spec sheets: V100 267 × 111 mm, ATX board 305 × 244 mm, slot pitch 20.32 mm, EVGA 850 G5 150 × 150 × 86 mm, Pure Loop 2 radiator 397 × 120 × 27 mm. The case interior, bay heights and fan heights are estimates from your build photos and DARKROCK's side diagram, roughly ±15 mm.</p>
+  </aside>
+</div>
+
+<script type="importmap">
+{ "imports": {
+  "three": "https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js",
+  "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.160.0/examples/jsm/"
+} }
+</script>
+<script>
+  setTimeout(function () {
+    if (!window.__mockupReady) {
+      var n = document.getElementById('notice');
+      if (n) n.textContent = "The 3D view didn't load. Check your connection and reload the page.";
+    }
+  }, 15000);
+</script>
+<script type="module">
+import * as THREE from 'three';
+import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
+import { CSS2DRenderer, CSS2DObject } from 'three/addons/renderers/CSS2DRenderer.js';
+import { RoomEnvironment } from 'three/addons/environments/RoomEnvironment.js';
+
+// ---------------------------------------------------------------------------
+// Dimensions in mm. X runs rear wall → front, Y floor → top, Z motherboard tray → side panel.
+// Part sizes are from spec sheets; positions inside the case are estimated from the build photos.
+const D = {
+  boardTop: 413, boardBottom: 108, boardRear: 6, boardFront: 250,
+  shroudTop: 103,
+  frontFrameX: 398,
+  slot1FromTop: 160, slotPitch: 20.32,
+  // Four dual-drive bay positions, bottom to top. Bay 1 lines up with PCIEX16_2, bay 2 with PCIEX16_1.
+  bays: [
+    { name: 'Bay 1', y0: 118, y1: 186 },
+    { name: 'Bay 2', y0: 188, y1: 256 },
+    { name: 'Bay 3', y0: 258, y1: 326 },
+    { name: 'Bay 4', y0: 328, y1: 396 },
+  ],
+  bayX0: 294, bayX1: 397, bayZ0: 4, bayZ1: 172,
+  frontFanY: [366, 246, 126], fanZ: 85,
+  radFanY0: 426,
+  card: { len: 267, z0: 16, z1: 121, below: 36, above: 4 },
+  // Fan box of the 2 + 2 ducts: front end, fan thickness, and the straightener gap between the two fans.
+  fanBoxX1: 385, fanT: 25, vaneGap: 20,
+};
+const slotY = pos => D.boardTop - (D.slot1FromTop + D.slotPitch * (pos - 1));
+const SLOTS = {
+  PCIEX16_1: { pos: 2, link: 'PCIe 3.0 x16' },
+  PCIEX16_2: { pos: 5, link: 'PCIe 3.0 x8' },
+};
+const SCENARIOS = {
+  today: { bays: [0, 1], tubes: 'front', card: false, duct: null },
+  top2: { bays: [2, 3], tubes: 'rear', card: true, duct: 'B' },
+  mid2: { bays: [1, 2], tubes: 'rear', card: true, duct: 'A' },
+};
+const DRIVES = ['WD Purple 4TB', 'WD Purple 4TB', 'WD Purple 4TB', 'SkyHawk 4TB'];
+
+const reduceMotion = matchMedia('(prefers-reduced-motion: reduce)').matches;
+const narrow = matchMedia('(max-width: 560px)').matches;
+const state = { scn: 'top2', cards: 1, slot: 'PCIEX16_1', labels: false, air: true, xray: true, dims: false, glass: false };
+// Bumped with the defaults, so saved settings from an older version don't hide them.
+const STORE = 'nas-mockup-v3';
+try {
+  const saved = JSON.parse(localStorage.getItem(STORE) || '{}');
+  if (saved && SCENARIOS[saved.scn]) state.scn = saved.scn;
+  if (saved && SLOTS[saved.slot]) state.slot = saved.slot;
+  if (saved && (saved.cards === 1 || saved.cards === 2)) state.cards = saved.cards;
+  for (const k of ['labels', 'air', 'xray', 'dims', 'glass']) if (typeof saved[k] === 'boolean') state[k] = saved[k];
+} catch (e) { /* storage unavailable */ }
+const save = () => { try { localStorage.setItem(STORE, JSON.stringify(state)); } catch (e) { /* ignore */ } };
+
+const stageEl = document.getElementById('stage');
+const noticeEl = document.getElementById('notice');
+
+let renderer;
+try {
+  renderer = new THREE.WebGLRenderer({ antialias: true });
+} catch (e) {
+  noticeEl.textContent = "This browser couldn't start the 3D view (WebGL is off or unsupported). The panel still lists the findings and measurements.";
+  window.__mockupReady = true;
+  throw e;
+}
+renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 2));
+renderer.toneMapping = THREE.ACESFilmicToneMapping;
+renderer.toneMappingExposure = 1.25;
+stageEl.prepend(renderer.domElement);
+const maxAniso = renderer.capabilities.getMaxAnisotropy();
+
+const labelRenderer = new CSS2DRenderer();
+labelRenderer.domElement.className = 'labels';
+stageEl.insertBefore(labelRenderer.domElement, renderer.domElement.nextSibling);
+
+const scene = new THREE.Scene();
+const pmrem = new THREE.PMREMGenerator(renderer);
+scene.environment = pmrem.fromScene(new RoomEnvironment(), 0.04).texture;
+scene.add(new THREE.HemisphereLight(0xffffff, 0x8a9099, 1.1));
+const sun = new THREE.DirectionalLight(0xffffff, 2.2); sun.position.set(700, 1000, 900); scene.add(sun);
+const fill = new THREE.DirectionalLight(0xcfdcff, 0.9); fill.position.set(-600, 300, 500); scene.add(fill);
+const under = new THREE.DirectionalLight(0xffffff, 0.6); under.position.set(300, -400, 600); scene.add(under);
+
+const camera = new THREE.PerspectiveCamera(30, 1, 5, 9000);
+const controls = new OrbitControls(camera, renderer.domElement);
+controls.enableDamping = true;
+controls.dampingFactor = 0.08;
+controls.screenSpacePanning = true;
+controls.minDistance = 120;
+controls.maxDistance = 3200;
+
+// ---------------------------------------------------------------------------
+// Helpers
+const v = (x, y, z) => new THREE.Vector3(x, y, z);
+const std = (color, metalness = 0.3, roughness = 0.6, extra = {}) => new THREE.MeshStandardMaterial({ color, metalness, roughness, ...extra });
+const shared = new Set();
+const keep = g => { shared.add(g); return g; };
+
+function box(x0, x1, y0, y1, z0, z1, mat) {
+  const m = new THREE.Mesh(new THREE.BoxGeometry(x1 - x0, y1 - y0, z1 - z0), mat);
+  m.position.set((x0 + x1) / 2, (y0 + y1) / 2, (z0 + z1) / 2);
+  return m;
+}
+function rrect(path, x, y, w, h, r) {
+  path.moveTo(x + r, y); path.lineTo(x + w - r, y); path.quadraticCurveTo(x + w, y, x + w, y + r);
+  path.lineTo(x + w, y + h - r); path.quadraticCurveTo(x + w, y + h, x + w - r, y + h);
+  path.lineTo(x + r, y + h); path.quadraticCurveTo(x, y + h, x, y + h - r);
+  path.lineTo(x, y + r); path.quadraticCurveTo(x, y, x + r, y);
+}
+function rectPath(u0, v0, u1, v1) {
+  const p = new THREE.Path();
+  p.moveTo(u0, v0); p.lineTo(u1, v0); p.lineTo(u1, v1); p.lineTo(u0, v1); p.lineTo(u0, v0);
+  return p;
+}
+// Sheet in the YZ plane at x, thickness t toward +X. Holes: {z0,z1,y0,y1} or {z,y,r}.
+function plateYZ(x, t, z0, z1, y0, y1, holes, mat) {
+  const s = new THREE.Shape();
+  s.moveTo(-z1, y0); s.lineTo(-z0, y0); s.lineTo(-z0, y1); s.lineTo(-z1, y1); s.lineTo(-z1, y0);
+  for (const h of holes) {
+    if (h.r) { const p = new THREE.Path(); p.absarc(-h.z, h.y, h.r, 0, Math.PI * 2, true); s.holes.push(p); }
+    else s.holes.push(rectPath(-h.z1, h.y0, -h.z0, h.y1));
+  }
+  const m = new THREE.Mesh(new THREE.ExtrudeGeometry(s, { depth: t, bevelEnabled: false, curveSegments: 40 }), mat);
+  m.rotation.y = Math.PI / 2;
+  m.position.x = x;
+  return m;
+}
+// Sheet in the XZ plane at y, thickness t toward +Y. Points are [x, z].
+function plateXZ(y, t, pts, mat) {
+  const s = new THREE.Shape(pts.map(([x, z]) => new THREE.Vector2(x, z)));
+  const m = new THREE.Mesh(new THREE.ExtrudeGeometry(s, { depth: t, bevelEnabled: false }), mat);
+  m.rotation.x = Math.PI / 2;
+  m.position.y = y + t;
+  return m;
+}
+// Sheet in the XY plane at z, thickness t toward +Z. Holes: {x0,x1,y0,y1}.
+function plateXY(z, t, x0, x1, y0, y1, holes, mat) {
+  const s = new THREE.Shape();
+  s.moveTo(x0, y0); s.lineTo(x1, y0); s.lineTo(x1, y1); s.lineTo(x0, y1); s.lineTo(x0, y0);
+  for (const h of holes) s.holes.push(rectPath(h.x0, h.y0, h.x1, h.y1));
+  const m = new THREE.Mesh(new THREE.ExtrudeGeometry(s, { depth: t, bevelEnabled: false }), mat);
+  m.position.z = z;
+  return m;
+}
+function canvasTex(w, h, draw) {
+  const c = document.createElement('canvas');
+  c.width = w; c.height = h;
+  draw(c.getContext('2d'), w, h);
+  const t = new THREE.CanvasTexture(c);
+  t.colorSpace = THREE.SRGBColorSpace;
+  t.anisotropy = maxAniso;
+  return t;
+}
+function decal(w, h, tex, opts = {}) {
+  return new THREE.Mesh(new THREE.PlaneGeometry(w, h), new THREE.MeshStandardMaterial({ map: tex, metalness: opts.metal ?? 0.2, roughness: opts.rough ?? 0.6 }));
+}
+function tag(text, x, y, z, cls = '') {
+  const el = document.createElement('div');
+  el.className = 'tag' + (cls ? ' ' + cls : '');
+  el.textContent = text;
+  const o = new CSS2DObject(el);
+  o.position.set(x, y, z);
+  return o;
+}
+function mulberry32(a) {
+  return function () {
+    a |= 0; a = (a + 0x6D2B79F5) | 0;
+    let t = Math.imul(a ^ (a >>> 15), 1 | a);
+    t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t;
+    return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
+  };
+}
+
+await Promise.race([document.fonts.ready, new Promise(r => setTimeout(r, 2500))]);
+
+// ---------------------------------------------------------------------------
+// Materials and textures
+const MAT = {
+  steel: std(0x2a2d32, 0.55, 0.55),
+  tray: std(0x303338, 0.5, 0.62),
+  pcb: std(0x17181b, 0.2, 0.7),
+  slot: std(0x2a2c30, 0.1, 0.6),
+  armor: std(0x9097a0, 0.85, 0.35),
+  black: std(0x111214, 0.2, 0.7),
+  darkMetal: std(0x2c2f34, 0.7, 0.4),
+  silver: std(0xbcc0c6, 0.85, 0.3),
+  gold: std(0xc9a463, 0.9, 0.3),
+  ram: std(0x18191c, 0.5, 0.5),
+  rad: std(0x1a1b1e, 0.4, 0.7),
+  tube: std(0x151618, 0.1, 0.85),
+  psu: std(0x141517, 0.4, 0.6),
+  hddBody: std(0x23262b, 0.5, 0.5),
+  hddTop: std(0xb6bac0, 0.8, 0.35),
+  hddPcb: std(0x1d3a2a, 0.2, 0.7),
+  v100: std(0x16171a, 0.45, 0.45),
+  foam: std(0x2a2a2a, 0, 1),
+  mesh: new THREE.MeshStandardMaterial({ color: 0x1b1d20, metalness: 0.4, roughness: 0.7, transparent: true, opacity: 0.3, depthWrite: false }),
+  glass: new THREE.MeshPhysicalMaterial({ color: 0xaab8c4, roughness: 0.05, transparent: true, opacity: 0.12, depthWrite: false }),
+  petg: new THREE.MeshPhysicalMaterial({ color: 0xe0782a, roughness: 0.3, clearcoat: 0.6, transparent: true, opacity: 0.5, side: THREE.DoubleSide, depthWrite: false }),
+  petgBad: new THREE.MeshPhysicalMaterial({ color: 0xd8382c, roughness: 0.3, clearcoat: 0.6, transparent: true, opacity: 0.5, side: THREE.DoubleSide, depthWrite: false }),
+  line: new THREE.LineBasicMaterial({ color: 0x3b4149 }),
+  petgLine: new THREE.LineBasicMaterial({ color: 0xb85a14 }),
+  petgSolid: new THREE.MeshPhysicalMaterial({ color: 0xe0782a, roughness: 0.4, side: THREE.DoubleSide }),
+  badLine: new THREE.LineBasicMaterial({ color: 0xa8302a }),
+  dimLine: new THREE.LineBasicMaterial({ color: 0x15181c }),
+};
+
+const perfTex = canvasTex(64, 64, (g, w, h) => {
+  g.fillStyle = '#fff'; g.fillRect(0, 0, w, h);
+  g.fillStyle = '#000';
+  for (const [x, y] of [[16, 16], [48, 16], [0, 48], [32, 48], [64, 48]]) { g.beginPath(); g.arc(x, y, 10, 0, Math.PI * 2); g.fill(); }
+});
+perfTex.colorSpace = THREE.NoColorSpace;
+perfTex.wrapS = perfTex.wrapT = THREE.RepeatWrapping;
+function perfMat(ru, rv) {
+  const t = perfTex.clone();
+  t.repeat.set(ru, rv);
+  t.needsUpdate = true;
+  return new THREE.MeshStandardMaterial({ color: 0x2b2e33, metalness: 0.55, roughness: 0.55, alphaMap: t, alphaTest: 0.5, side: THREE.DoubleSide });
+}
+const MAT_CAGE_FLAT = perfMat(9, 14);
+const MAT_CAGE_END = perfMat(14, 6);
+
+const stickerTex = (bg, fg, text) => canvasTex(128, 128, (g) => {
+  g.fillStyle = bg; g.beginPath(); g.arc(64, 64, 64, 0, Math.PI * 2); g.fill();
+  g.fillStyle = fg; g.font = '700 21px Archivo, Arial, sans-serif'; g.textAlign = 'center'; g.textBaseline = 'middle';
+  g.fillText(text, 64, 66);
+});
+const FAN = {
+  darkrock: { frame: std(0x141517, 0.2, 0.7), blade: std(0x17181a, 0.1, 0.6), sticker: new THREE.MeshStandardMaterial({ map: stickerTex('#b8773f', '#1b1410', 'DARKROCK'), roughness: 0.5 }) },
+  bequiet: { frame: std(0x141516, 0.2, 0.65), blade: std(0x1b1c1e, 0.1, 0.55), sticker: new THREE.MeshStandardMaterial({ map: stickerTex('#151515', '#f07d1e', 'be quiet!'), roughness: 0.5 }), ring: new THREE.MeshStandardMaterial({ color: 0xf3f5f7, emissive: 0xe6edf5, emissiveIntensity: 0.45, roughness: 0.3 }) },
+  arctic: { frame: std(0x101112, 0.2, 0.6), blade: std(0x141516, 0.1, 0.55), sticker: new THREE.MeshStandardMaterial({ map: stickerTex('#141414', '#f2f2f2', 'ARCTIC'), roughness: 0.5 }) },
+};
+
+const TEX = {
+  board: canvasTex(488, 610, (g, w, h) => {
+    g.fillStyle = '#18191c'; g.fillRect(0, 0, w, h);
+    const rnd = mulberry32(7);
+    g.strokeStyle = 'rgba(200,210,220,0.06)'; g.lineWidth = 1.5;
+    for (let i = 0; i < 90; i++) {
+      let x = rnd() * w, y = rnd() * h;
+      g.beginPath(); g.moveTo(x, y);
+      for (let k = 0; k < 4; k++) { if (rnd() < 0.5) x += (rnd() - 0.5) * 160; else y += (rnd() - 0.5) * 160; g.lineTo(x, y); }
+      g.stroke();
+    }
+    g.font = '600 11px "IBM Plex Mono", monospace'; g.fillStyle = 'rgba(226,229,233,0.55)';
+    for (const [t, p] of [['PCIEX16_1', 2], ['PCIEX16_2', 5], ['PCIEX16_3', 7]]) g.fillText(t, 300, 2 * (D.slot1FromTop + D.slotPitch * (p - 1)) + 4);
+    g.fillText('SupremeFX', 22, 2 * 262);
+  }),
+  psu: canvasTex(600, 344, (g, w, h) => {
+    g.fillStyle = '#121315'; g.fillRect(0, 0, w, h);
+    g.fillStyle = '#f4f4f4'; g.font = '800 58px Archivo, Arial, sans-serif'; g.fillText('EVGA', 34, 86);
+    g.fillStyle = '#c3272b'; g.fillRect(34, 98, 150, 6);
+    g.fillStyle = '#c9ccd1'; g.font = '600 18px Archivo, Arial, sans-serif'; g.fillText('SUPERNOVA', 36, 130);
+    g.fillStyle = '#f2b631'; g.font = '800 74px Archivo, Arial, sans-serif'; g.fillText('850 G5', 32, 222);
+    g.fillStyle = '#c9ccd1'; g.font = '500 16px Archivo, Arial, sans-serif'; g.fillText('80 PLUS GOLD · FULLY MODULAR', 36, 260);
+    g.strokeStyle = 'rgba(220,224,230,0.35)'; g.lineWidth = 1.5;
+    for (let i = 0; i < 6; i++) { g.beginPath(); g.moveTo(330, 40 + i * 26); g.lineTo(570, 40 + i * 26); g.stroke(); }
+  }),
+  rad: canvasTex(1444, 108, (g, w, h) => {
+    g.fillStyle = '#17181a'; g.fillRect(0, 0, w, h);
+    g.fillStyle = '#f2f3f5'; g.textBaseline = 'middle';
+    g.font = '800 62px Archivo, Arial, sans-serif'; const a = 'PURE '; const aw = g.measureText(a).width;
+    g.font = '500 62px Archivo, Arial, sans-serif'; const b = 'LOOP 2'; const bw = g.measureText(b).width;
+    const x = (w - aw - bw) / 2;
+    g.font = '800 62px Archivo, Arial, sans-serif'; g.fillText(a, x, h / 2 + 2);
+    g.font = '500 62px Archivo, Arial, sans-serif'; g.fillText(b, x + aw, h / 2 + 2);
+  }),
+  pump: canvasTex(224, 224, (g, w, h) => {
+    const r = g.createRadialGradient(w / 2, h / 2, 10, w / 2, h / 2, 150);
+    r.addColorStop(0, '#f1f2f4'); r.addColorStop(1, '#b9bdc3');
+    g.fillStyle = r; g.fillRect(0, 0, w, h);
+    g.fillStyle = '#2a2b2e'; g.font = '600 38px Archivo, Arial, sans-serif'; g.textAlign = 'center'; g.textBaseline = 'middle';
+    g.fillText('be quiet!', w / 2, h / 2);
+  }),
+  // Shroud side of the V100, drawn like NVIDIA's product shot: bracket end on the left, gold fingers along the bottom.
+  // Installed, this side faces down toward the PSU shroud.
+  v100Face: canvasTex(1068, 420, (g, w, h) => {
+    g.fillStyle = '#111214'; g.fillRect(0, 0, w, h);
+    g.fillStyle = '#1a1c20'; g.fillRect(232, 92, 806, h - 184);
+    g.strokeStyle = 'rgba(160,170,182,0.2)'; g.lineWidth = 2;
+    for (let y = 106; y < h - 96; y += 14) { g.beginPath(); g.moveTo(244, y); g.lineTo(800, y); g.stroke(); }
+    for (let x = 812; x < 1030; x += 11) { g.beginPath(); g.moveTo(x, 100); g.lineTo(x, h - 100); g.stroke(); }
+    const gold = g.createLinearGradient(0, 0, w, 0);
+    gold.addColorStop(0, '#cbb68a'); gold.addColorStop(0.5, '#e3d5b0'); gold.addColorStop(1, '#baa377');
+    g.fillStyle = gold;
+    const panel = (yEdge, yIn) => { g.beginPath(); g.moveTo(246, yEdge); g.lineTo(822, yEdge); g.lineTo(792, yIn); g.lineTo(276, yIn); g.closePath(); g.fill(); };
+    panel(0, 100); panel(h, h - 100);
+    g.fillStyle = '#0c0d0f';
+    for (const [x, dir] of [[246, 1], [822, -1]]) for (const [y0, y1] of [[0, 100], [h, h - 100]]) {
+      g.beginPath(); g.moveTo(x, y0); g.lineTo(x + dir * 30, y1); g.lineTo(x - dir * 24, y1); g.lineTo(x - dir * 24, y0); g.closePath(); g.fill();
+    }
+    g.fillStyle = '#34383e';
+    for (const [x, y] of [[248, 122], [818, 122], [248, h - 122], [818, h - 122]]) { g.beginPath(); g.arc(x, y, 9, 0, Math.PI * 2); g.fill(); }
+    g.save(); g.translate(76, h / 2); g.rotate(-Math.PI / 2);
+    g.fillStyle = '#cdb98e'; g.font = '700 64px Archivo, Arial, sans-serif'; g.textAlign = 'center'; g.textBaseline = 'middle';
+    g.fillText('TESLA', 0, 0); g.restore();
+    g.strokeStyle = 'rgba(255,255,255,0.08)'; g.lineWidth = 6; g.strokeRect(3, 3, w - 6, h - 6);
+  }),
+  // Back of the card (faces up): plain backplate with a service sticker.
+  v100Back: canvasTex(1068, 420, (g, w, h) => {
+    g.fillStyle = '#151619'; g.fillRect(0, 0, w, h);
+    g.strokeStyle = 'rgba(255,255,255,0.06)'; g.lineWidth = 6; g.strokeRect(3, 3, w - 6, h - 6);
+    g.fillStyle = '#2c3035';
+    for (const [x, y] of [[40, 40], [40, h - 40], [520, 60], [520, h - 60], [1020, 40], [1020, h - 40]]) { g.beginPath(); g.arc(x, y, 8, 0, Math.PI * 2); g.fill(); }
+    g.fillStyle = '#e8eaec'; g.fillRect(610, 150, 230, 96);
+    g.fillStyle = '#1a1a1a';
+    for (let x = 622; x < 760; x += 4) g.fillRect(x, 162, (x * 7) % 3 + 1, 40);
+    g.font = '600 15px "IBM Plex Mono", monospace'; g.fillText('V100 PCIe 32GB', 622, 228);
+  }),
+  // Top edge, facing the side panel: the gold panel wraps over it and carries the NVIDIA mark.
+  v100Edge: canvasTex(1068, 160, (g, w, h) => {
+    g.fillStyle = '#131416'; g.fillRect(0, 0, w, h);
+    g.fillStyle = '#0c0d0f'; g.fillRect(0, 0, w, 20);
+    const gold = g.createLinearGradient(0, 0, 0, h);
+    gold.addColorStop(0, '#e6d8b4'); gold.addColorStop(1, '#bfa87c');
+    g.fillStyle = gold;
+    g.beginPath(); g.moveTo(258, 24); g.lineTo(810, 24); g.lineTo(822, h - 8); g.lineTo(246, h - 8); g.closePath(); g.fill();
+    g.fillStyle = 'rgba(28,24,16,0.85)';
+    g.fillRect(452, 64, 30, 30); g.fillStyle = gold; g.beginPath(); g.arc(467, 79, 9, 0, Math.PI * 2); g.fill();
+    g.fillStyle = 'rgba(28,24,16,0.85)'; g.font = '800 36px Archivo, Arial, sans-serif'; g.textBaseline = 'middle';
+    g.fillText('NVIDIA', 494, 81);
+  }),
+  // Rear I/O bracket: silver with the big diamond vent. Used as an alpha map, white is solid.
+  v100Bracket: canvasTex(456, 162, (g, w, h) => {
+    g.fillStyle = '#fff'; g.fillRect(0, 0, w, h);
+    g.fillStyle = '#000'; g.fillRect(44, 14, w - 88, h - 28);
+    g.save(); g.beginPath(); g.rect(44, 14, w - 88, h - 28); g.clip();
+    g.strokeStyle = '#fff'; g.lineWidth = 9;
+    for (let x = -h; x < w + h; x += 46) {
+      g.beginPath(); g.moveTo(x, 0); g.lineTo(x + h, h); g.stroke();
+      g.beginPath(); g.moveTo(x + h, 0); g.lineTo(x, h); g.stroke();
+    }
+    g.lineWidth = 8; g.beginPath(); g.moveTo(0, h / 2); g.lineTo(w, h / 2); g.stroke();
+    g.restore();
+  }),
+  chipset: canvasTex(296, 276, (g, w, h) => {
+    g.fillStyle = '#2b2e33'; g.fillRect(0, 0, w, h);
+    g.strokeStyle = 'rgba(255,255,255,0.08)'; g.lineWidth = 3;
+    for (let i = -h; i < w; i += 22) { g.beginPath(); g.moveTo(i, h); g.lineTo(i + h, 0); g.stroke(); }
+    g.fillStyle = '#e4e6e9'; g.textAlign = 'center'; g.textBaseline = 'middle';
+    g.font = '800 64px Archivo, Arial, sans-serif'; g.fillText('ROG', w / 2, h / 2 - 34);
+    g.font = '700 40px Archivo, Arial, sans-serif'; g.fillText('STRIX', w / 2, h / 2 + 30);
+  }),
+  v100End: canvasTex(432, 160, (g, w, h) => {
+    g.fillStyle = '#15161a'; g.fillRect(0, 0, w, h);
+    g.fillStyle = '#07080a'; g.fillRect(20, 14, w - 40, h - 28);
+    g.strokeStyle = '#2b2f35'; g.lineWidth = 2;
+    for (let x = 26; x < w - 24; x += 7) { g.beginPath(); g.moveTo(x, 18); g.lineTo(x, h - 18); g.stroke(); }
+  }),
+};
+TEX.v100Bracket.colorSpace = THREE.NoColorSpace;
+const MAT_BRACKET = new THREE.MeshStandardMaterial({ color: 0xbcc0c6, metalness: 0.85, roughness: 0.3, alphaMap: TEX.v100Bracket, alphaTest: 0.5, side: THREE.DoubleSide });
+const driveTexCache = {};
+const driveTex = name => driveTexCache[name] ||= canvasTex(406, 104, (g, w, h) => {
+  g.fillStyle = '#24272c'; g.fillRect(0, 0, w, h);
+  g.fillStyle = '#e9ebee'; g.fillRect(20, 16, 300, 50);
+  g.fillStyle = '#1a1a1a';
+  for (let x = 30; x < 150; x += 4) g.fillRect(x, 24, (x * 7) % 3 + 1, 22);
+  g.fillStyle = name.startsWith('WD') ? '#5b2d82' : '#1f6f3f';
+  g.font = '700 17px Archivo, Arial, sans-serif'; g.fillText(name, 160, 46);
+});
+
+// ---------------------------------------------------------------------------
+// Fans: frame, struts and a spinning rotor. The local +Z axis is the airflow direction.
+const fanFrameGeo = keep((() => {
+  const s = new THREE.Shape(); rrect(s, -60, -60, 120, 120, 7);
+  const h = new THREE.Path(); h.absarc(0, 0, 57, 0, Math.PI * 2, true); s.holes.push(h);
+  const g = new THREE.ExtrudeGeometry(s, { depth: 25, bevelEnabled: false, curveSegments: 48 });
+  g.translate(0, 0, -12.5);
+  return g;
+})());
+const hubGeo = keep(new THREE.CylinderGeometry(19, 19, 15, 32).rotateX(Math.PI / 2));
+const bladeGeo = keep(new THREE.BoxGeometry(37, 22, 1.6));
+const strutGeo = keep(new THREE.BoxGeometry(40, 3, 3));
+const ringGeo = keep(new THREE.TorusGeometry(56.5, 1.6, 8, 72));
+const stickerGeo = keep(new THREE.CircleGeometry(14, 32));
+const fans = [];
+function makeFan(style, axis, x, y, z) {
+  const s = FAN[style];
+  const g = new THREE.Group();
+  g.add(new THREE.Mesh(fanFrameGeo, s.frame));
+  for (let i = 0; i < 4; i++) {
+    const p = new THREE.Group(); p.rotation.z = i * Math.PI / 2 + Math.PI / 4;
+    const st = new THREE.Mesh(strutGeo, s.frame); st.position.set(38, 0, 10); p.add(st); g.add(p);
+  }
+  const rotor = new THREE.Group();
+  rotor.add(new THREE.Mesh(hubGeo, s.blade));
+  for (let i = 0; i < 7; i++) {
+    const p = new THREE.Group(); p.rotation.z = i * Math.PI * 2 / 7;
+    const b = new THREE.Mesh(bladeGeo, s.blade); b.position.x = 37; b.rotation.x = 0.6; p.add(b); rotor.add(p);
+  }
+  const st = new THREE.Mesh(stickerGeo, s.sticker); st.position.z = 7.6; rotor.add(st);
+  g.add(rotor);
+  if (s.ring) g.add(new THREE.Mesh(ringGeo, s.ring));
+  if (axis === '-x') g.rotation.y = -Math.PI / 2;
+  else if (axis === '+y') g.rotation.x = -Math.PI / 2;
+  g.position.set(x, y, z);
+  g.userData.rotor = rotor;
+  fans.push(g);
+  return g;
+}
+// Printed straightener: a hub, an outer ring and fixed vanes angled against the upstream fan's spin.
+const VANES = 9;
+const vaneGeo = keep(new THREE.BoxGeometry(40, 1.6, D.vaneGap - 3));
+const statorHubGeo = keep(new THREE.CylinderGeometry(19, 19, D.vaneGap, 32).rotateX(Math.PI / 2));
+const statorRingGeo = keep(new THREE.CylinderGeometry(59, 59, D.vaneGap, 72, 1, true).rotateX(Math.PI / 2));
+function makeStraightener(x, y, z, mat) {
+  const g = new THREE.Group();
+  g.add(new THREE.Mesh(statorHubGeo, mat), new THREE.Mesh(statorRingGeo, mat));
+  for (let i = 0; i < VANES; i++) {
+    const p = new THREE.Group(); p.rotation.z = i * Math.PI * 2 / VANES;
+    const b = new THREE.Mesh(vaneGeo, mat); b.position.x = 39; b.rotation.x = -0.4; p.add(b); g.add(p);
+  }
+  g.rotation.y = -Math.PI / 2;
+  g.position.set(x, y, z);
+  return g;
+}
+
+// ---------------------------------------------------------------------------
+// The parts that never move
+const root = new THREE.Group();
+scene.add(root);
+const staticG = new THREE.Group();
+root.add(staticG);
+let glassMesh;
+
+function buildStatic() {
+  const S = staticG;
+  // Case shell
+  S.add(box(-2, 436, -3, 0, -34, 184, MAT.steel));
+  const rearHoles = [
+    { z0: 8, z1: 52, y0: 262, y1: 413 },
+    { z: 117, y: 363, r: 57 },
+    { z0: 14, z1: 164, y0: 6, y1: 92 },
+  ];
+  for (let n = 1; n <= 7; n++) rearHoles.push({ z0: 14, z1: 120, y0: slotY(n) - 17, y1: slotY(n) + 3 });
+  S.add(plateYZ(-2, 2, -34, 184, 0, 485, rearHoles, MAT.steel));
+  S.add(box(-3, -1, 262, 413, 8, 52, MAT.silver));
+  S.add(box(-2, 436, 482, 485, -34, 184, MAT.mesh));
+  S.add(box(432, 436, 0, 482, -34, 184, MAT.mesh));
+  S.add(plateYZ(398, 2, 0, 178, 0, 430, D.frontFanY.map(y => ({ z: D.fanZ, y, r: 58 })), MAT.steel));
+  S.add(plateXY(-2, 2, 0, 398, 103, 482, [
+    { x0: 258, x1: 288, y0: 150, y1: 215 }, { x0: 258, x1: 288, y0: 255, y1: 330 }, { x0: 258, x1: 288, y0: 360, y1: 425 },
+    { x0: 80, x1: 190, y0: 275, y1: 385 },
+  ], MAT.tray));
+  S.add(box(-2, 436, -3, 485, -34, -32, MAT.steel));
+  glassMesh = box(-2, 436, -3, 485, 182, 184, MAT.glass);
+  S.add(glassMesh);
+  const edges = new THREE.LineSegments(new THREE.EdgesGeometry(new THREE.BoxGeometry(438, 488, 218)), MAT.line);
+  edges.position.set(217, 241, 75);
+  S.add(edges);
+  for (const [x, z] of [[24, -12], [412, -12], [24, 162], [412, 162]]) {
+    const f = new THREE.Mesh(new THREE.CylinderGeometry(13, 13, 12, 24), MAT.black); f.position.set(x, -9, z); S.add(f);
+  }
+
+  // PSU shroud, PSU and the two 2.5" plates on top
+  S.add(box(0, 396, 101, 103, 0, 180, MAT.steel));
+  S.add(plateXY(178, 2, 0, 396, 0, 101, [{ x0: 18, x1: 150, y0: 14, y1: 90 }], MAT.steel));
+  S.add(box(394, 396, 0, 101, 0, 178, MAT.steel));
+  S.add(box(4, 154, 6, 92, 14, 164, MAT.psu));
+  const psuLabel = decal(150, 86, TEX.psu); psuLabel.position.set(79, 49, 164.3); S.add(psuLabel);
+  for (const x0 of [45, 180]) {
+    S.add(box(x0, x0 + 110, 112, 114, 30, 150, MAT.steel));
+    S.add(box(x0, x0 + 3, 103, 112, 30, 150, MAT.steel));
+    S.add(box(x0 + 107, x0 + 110, 103, 112, 30, 150, MAT.steel));
+  }
+
+  // Motherboard: ROG Strix Z390-F
+  S.add(box(D.boardRear, D.boardFront, D.boardBottom, D.boardTop, 6.35, 7.95, MAT.pcb));
+  const silk = decal(244, 305, TEX.board, { rough: 0.75 }); silk.position.set(128, 260.5, 8.0); S.add(silk);
+  S.add(box(6, 80, 262, 413, 8, 44, MAT.darkMetal));
+  S.add(box(14, 74, 300, 400, 44, 45, MAT.silver));
+  S.add(box(80, 168, 386, 410, 8, 36, MAT.darkMetal));
+  S.add(box(98, 166, 295, 363, 8, 12, MAT.black));
+  S.add(box(100, 164, 297, 361, 12, 50, MAT.black));
+  S.add(box(104, 160, 301, 357, 50, 56, MAT.silver));
+  const cap = decal(56, 56, TEX.pump, { metal: 0.3, rough: 0.35 }); cap.position.set(132, 329, 56.2); S.add(cap);
+  for (let i = 0; i < 4; i++) { const x = 183 + i * 10.5; S.add(box(x, x + 7, 274, 407, 8, 42, MAT.ram)); }
+  S.add(box(238, 250, 300, 356, 8, 26, MAT.black));
+  S.add(box(85, 165, 254, 276, 8, 10.5, MAT.black));
+  S.add(box(120, 160, 257, 273, 10.5, 10.8, std(0xd8742a, 0.1, 0.6)));
+  S.add(box(158, 232, 178, 247, 8, 14, MAT.darkMetal));
+  const pch = decal(74, 69, TEX.chipset, { metal: 0.5, rough: 0.45 }); pch.position.set(195, 212.5, 14.1); S.add(pch);
+  for (const [pos, len, armor] of [[1, 25], [2, 89, true], [4, 25], [5, 89, true], [6, 25], [7, 89]]) {
+    const y = slotY(pos);
+    S.add(box(52, 52 + len, y - 3.75, y + 3.75, 8, 17, armor ? MAT.armor : MAT.slot));
+  }
+  for (let i = 0; i < 6; i++) S.add(box(60 + i * 30, 80 + i * 30, 112, 119, 8, 15, MAT.black));
+  // The small x1 card in the top slot and its gold bracket
+  const s1 = slotY(1);
+  S.add(box(0, 98, s1 - 0.8, s1 + 0.8, 14, 80, std(0x1c2433, 0.2, 0.7)));
+  S.add(box(30, 62, s1 - 9, s1 - 0.8, 30, 62, MAT.silver));
+  S.add(box(-4, -2, s1 - 17, s1 + 3, 12, 122, MAT.gold));
+
+  // Radiator: Pure Loop 2 360 on top, fans underneath
+  S.add(box(48, 409, 451, 478, 25, 145, MAT.rad));
+  S.add(box(30, 48, 449, 480, 22, 148, MAT.darkMetal));
+  S.add(box(409, 427, 449, 480, 22, 148, MAT.darkMetal));
+  const radLabel = decal(361, 27, TEX.rad); radLabel.position.set(228.5, 464.5, 145.3); S.add(radLabel);
+  for (let i = 0; i < 3; i++) S.add(makeFan('bequiet', '+y', 108.5 + i * 120, 438.5, D.fanZ));
+
+  // Front intakes (stock DARKROCK 3-pin) and the rear exhaust
+  for (const y of D.frontFanY) S.add(makeFan('darkrock', '-x', 414.5, y, D.fanZ));
+  S.add(makeFan('darkrock', '-x', 12.5, 363, 117));
+
+  S.add(tag('Pure Loop 2 · 360', 228, 492, 85));
+  S.add(tag('Rear exhaust', 12, 432, 120));
+  S.add(tag('EVGA 850 G5', 79, 70, 178));
+  S.add(tag('ROG Strix Z390-F', 196, 395, 10));
+  S.add(tag('Front intakes · stock 3-pin', 425, 58, 150));
+}
+
+// ---------------------------------------------------------------------------
+// Duct design. Stations are inner cross-sections {x, y0, y1, z0, z1} from the card collar to the front frame.
+function cardRect(slot) {
+  const sy = slotY(SLOTS[slot].pos);
+  return { sy, y0: sy - D.card.below, y1: sy + D.card.above, z0: D.card.z0, z1: D.card.z1 };
+}
+function freeGaps(bays) {
+  const blocks = [[-Infinity, D.shroudTop], ...bays.map(i => [D.bays[i].y0, D.bays[i].y1]), [D.radFanY0, Infinity]].sort((a, b) => a[0] - b[0]);
+  const gaps = [];
+  let top = blocks[0][1];
+  for (const [a, b] of blocks.slice(1)) { if (a - top >= 45) gaps.push([top, a]); top = Math.max(top, b); }
+  return gaps.length ? gaps : [[D.shroudTop, D.shroudTop + 45]];
+}
+// Cross-section of a station list at x, interpolated.
+function secAt(st, x) {
+  let i = 1;
+  while (i < st.length - 1 && st[i].x < x) i++;
+  const a = st[i - 1], b = st[i], f = Math.min(1, Math.max(0, (x - a.x) / (b.x - a.x)));
+  const r = { x };
+  for (const k of ['y0', 'y1', 'z0', 'z1']) r[k] = a[k] + (b[k] - a[k]) * f;
+  return r;
+}
+// One card gets duct A or B. Two cards always get the fan-box design, with a twin collar (C).
+function designDuct(kind, bays, slots) {
+  const cards = slots.map(cardRect);
+  if (cards.length === 2) kind = 'C';
+  const card = { y0: Math.min(...cards.map(c => c.y0)), y1: Math.max(...cards.map(c => c.y1)), z0: D.card.z0, z1: D.card.z1 };
+  const collar = { y0: card.y0 - 1.5, y1: card.y1 + 1.5, z0: card.z0 - 1.5, z1: card.z1 + 1.5 };
+  const score = g => {
+    const ov = Math.min(g[1], card.y1) - Math.max(g[0], card.y0);
+    return ov > 0 ? ov : -Math.min(Math.abs(g[0] - card.y1), Math.abs(card.y0 - g[1]));
+  };
+  const gap = freeGaps(bays).reduce((a, b) => (score(b) > score(a) ? b : a));
+  const band = { lo: gap[0] + 2.5, hi: gap[1] - 2.5 };
+  const overlaps = cards.map(c => Math.max(0, Math.min(gap[1], c.y1) - Math.max(gap[0], c.y0)) / (c.y1 - c.y0));
+  const overlap = Math.min(...overlaps);
+  const feeders = D.frontFanY.map((y, i) => ({ i, y0: y - 60, y1: y + 60 }))
+    .filter(f => Math.min(f.y1, band.hi) - Math.max(f.y0, band.lo) > 30);
+  const inlet = {
+    y0: Math.max(band.lo, Math.min(...feeders.map(f => f.y0))),
+    y1: Math.min(band.hi, Math.max(...feeders.map(f => f.y1))),
+    z0: D.fanZ - 60, z1: D.fanZ + 60,
+  };
+  let stations, mids = [], vanes = null, funnelEnd;
+  if (kind === 'A') {
+    const s2 = { y0: Math.max(band.lo, Math.min(collar.y0, band.hi - 46)), y1: Math.min(collar.y1, band.hi), z0: 12, z1: 128 };
+    stations = [{ x: 258, ...collar }, { x: 272, ...collar }, { x: 292, ...s2 }, { x: 396, ...inlet }];
+    funnelEnd = 3;
+  } else {
+    const mid = (card.y0 + card.y1) / 2, lo = band.lo + 61, hi = band.hi - 61;
+    const cy = hi >= lo ? Math.min(Math.max(mid, lo), hi) : Math.max(mid, lo);
+    const fanBox = { y0: cy - 61, y1: cy + 61, z0: D.fanZ - 61, z1: D.fanZ + 61 };
+    // Two fans in series, spaced by a printed straightener that takes the first fan's swirl out of the air.
+    const up = D.fanBoxX1 - 14.5, down = up - D.fanT - D.vaneGap;
+    stations = [{ x: 258, ...collar }, { x: 272, ...collar }, { x: down - 14.5, ...fanBox }, { x: D.fanBoxX1, ...fanBox }, { x: 396, ...inlet }];
+    mids = [{ x: down, y: cy }, { x: up, y: cy }];
+    vanes = { x: (up + down) / 2, y: cy };
+    funnelEnd = 2;
+  }
+  let maxAngle = 0;
+  for (let i = 1; i < funnelEnd; i++) {
+    const a = stations[i], b = stations[i + 1], dx = b.x - a.x;
+    for (const k of ['y0', 'y1', 'z0', 'z1']) maxAngle = Math.max(maxAngle, Math.atan(Math.abs(b[k] - a[k]) / dx) * 180 / Math.PI);
+  }
+  const minSec = stations.slice(2).map(s => ({ h: s.y1 - s.y0, w: s.z1 - s.z0 })).reduce((a, b) => (a.h * a.w <= b.h * b.w ? a : b));
+  const ys = stations.flatMap(s => [s.y0, s.y1]);
+  const zs = stations.flatMap(s => [s.z0, s.z1]);
+  const bbox = [stations.at(-1).x - stations[0].x + 2, Math.max(...ys) - Math.min(...ys) + 4, Math.max(...zs) - Math.min(...zs) + 4].map(Math.round);
+  const fitsBed = [...bbox].sort((a, b) => b - a).every((d, i) => d <= [250, 220, 220][i]);
+  // A narrowing funnel costs little pressure, so steep walls only matter for printing (see the panel note).
+  const status = overlap < 0.5 ? 'bad' : 'ok';
+  return { kind, cards, slots, card, collar, band, overlap, overlaps, feeders, inlet, stations, mids, vanes, maxAngle, minSec, bbox, fitsBed, status };
+}
+
+function ringPts(s, n = 7, r = 5) {
+  const pts = [];
+  const corners = [[s.z1 - r, s.y1 - r, 0], [s.z0 + r, s.y1 - r, 0.5], [s.z0 + r, s.y0 + r, 1], [s.z1 - r, s.y0 + r, 1.5]];
+  for (const [cz, cy, a0] of corners) {
+    for (let k = 0; k < n; k++) { const a = (a0 + (k / (n - 1)) * 0.5) * Math.PI; pts.push([cz + Math.cos(a) * r, cy + Math.sin(a) * r]); }
+  }
+  return pts;
+}
+function loft(stations, mat, lineMat) {
+  const rings = stations.map(s => ringPts(s));
+  const N = rings[0].length;
+  const pos = [], idx = [];
+  stations.forEach((s, i) => rings[i].forEach(([z, y]) => pos.push(s.x, y, z)));
+  for (let i = 0; i < stations.length - 1; i++) {
+    for (let j = 0; j < N; j++) {
+      const a = i * N + j, b = i * N + (j + 1) % N, c = (i + 1) * N + (j + 1) % N, d = (i + 1) * N + j;
+      idx.push(a, b, c, a, c, d);
+    }
+  }
+  const geo = new THREE.BufferGeometry();
+  geo.setAttribute('position', new THREE.Float32BufferAttribute(pos, 3));
+  geo.setIndex(idx);
+  geo.computeVertexNormals();
+  const g = new THREE.Group();
+  const mesh = new THREE.Mesh(geo, mat);
+  mesh.renderOrder = 2;
+  g.add(mesh);
+  stations.forEach((s, i) => {
+    g.add(new THREE.LineLoop(new THREE.BufferGeometry().setFromPoints(rings[i].map(([z, y]) => v(s.x, y, z))), lineMat));
+  });
+  for (const j of [3, 10, 17, 24]) {
+    g.add(new THREE.Line(new THREE.BufferGeometry().setFromPoints(stations.map((s, i) => v(s.x, rings[i][j][1], rings[i][j][0]))), lineMat));
+  }
+  return g;
+}
+
+// ---------------------------------------------------------------------------
+// Airflow particles that follow polylines. Node a/b are the half-spreads across the stream:
+// a runs along Y for flow that moves sideways and along X where it rises (node vt 0 → 1), b along Z.
+const dotTex = canvasTex(64, 64, (g) => {
+  const r = g.createRadialGradient(32, 32, 0, 32, 32, 32);
+  r.addColorStop(0, 'rgba(255,255,255,1)'); r.addColorStop(0.45, 'rgba(255,255,255,0.75)'); r.addColorStop(1, 'rgba(255,255,255,0)');
+  g.fillStyle = r; g.fillRect(0, 0, 64, 64);
+});
+const airMat = new THREE.PointsMaterial({ size: 18, map: dotTex, vertexColors: true, transparent: true, depthWrite: false, sizeAttenuation: true });
+const C = { cool: new THREE.Color(0x4ea6ff), pale: new THREE.Color(0x9cc7ee), drive: new THREE.Color(0xf2c58a), warm: new THREE.Color(0xff9a3c), hot: new THREE.Color(0xff5a2a), rad: new THREE.Color(0xffb46a) };
+const clamp01 = x => Math.min(1, Math.max(0, x));
+const gpuColor = (s, out) => {
+  if (s.x > D.card.len) return out.copy(C.cool);
+  if (s.x < 0) return out.copy(C.hot);
+  return out.copy(C.cool).lerp(C.warm, (D.card.len - s.x) / D.card.len);
+};
+const caseColor = (s, out, t) => out.copy(C.cool).lerp(C.pale, clamp01(t * 1.5));
+const driveColor = (s, out) => out.copy(C.cool).lerp(C.drive, clamp01((D.bayX1 - s.x) / (D.bayX1 - D.bayX0)) * 0.75);
+const radColor = (s, out) => out.copy(C.pale).lerp(C.rad, clamp01((s.y - 451) / 27));
+const exhaustColor = (s, out, t) => out.copy(C.pale).lerp(C.drive, t * 0.5);
+const psuColor = (s, out) => out.copy(C.cool).lerp(C.warm, s.y < 6 ? 0 : clamp01((95 - s.x) / 95) * 0.85);
+
+function makeStream(nodes, { count, speed, color, seed = 1 }) {
+  nodes = nodes.map(n => ({ vt: 0, ...n }));
+  const L = [0];
+  for (let i = 1; i < nodes.length; i++) L.push(L[i - 1] + Math.hypot(nodes[i].x - nodes[i - 1].x, nodes[i].y - nodes[i - 1].y, nodes[i].z - nodes[i - 1].z));
+  const total = L.at(-1);
+  const rnd = mulberry32(seed * 7919 + count * 31 + nodes.length);
+  const t = new Float32Array(count), u = new Float32Array(count), w = new Float32Array(count), sp = new Float32Array(count);
+  for (let i = 0; i < count; i++) {
+    t[i] = rnd(); const r = Math.sqrt(rnd()), th = rnd() * Math.PI * 2;
+    u[i] = r * Math.cos(th); w[i] = r * Math.sin(th); sp[i] = 0.8 + rnd() * 0.4;
+  }
+  const pos = new Float32Array(count * 3), col = new Float32Array(count * 4);
+  const geo = new THREE.BufferGeometry();
+  geo.setAttribute('position', new THREE.BufferAttribute(pos, 3));
+  geo.setAttribute('color', new THREE.BufferAttribute(col, 4));
+  const points = new THREE.Points(geo, airMat);
+  points.frustumCulled = false;
+  points.renderOrder = 3;
+  const tmp = new THREE.Color();
+  const s = { x: 0, y: 0, z: 0, a: 0, b: 0, vt: 0 };
+  function sample(d) {
+    let i = 1;
+    while (i < L.length - 1 && L[i] < d) i++;
+    const A = nodes[i - 1], B = nodes[i], f = Math.min(1, Math.max(0, (d - L[i - 1]) / ((L[i] - L[i - 1]) || 1)));
+    s.x = A.x + (B.x - A.x) * f; s.y = A.y + (B.y - A.y) * f; s.z = A.z + (B.z - A.z) * f;
+    s.a = A.a + (B.a - A.a) * f; s.b = A.b + (B.b - A.b) * f; s.vt = A.vt + (B.vt - A.vt) * f;
+    return s;
+  }
+  function update(dt) {
+    for (let i = 0; i < count; i++) {
+      t[i] = (t[i] + dt * speed * sp[i] / total) % 1;
+      const p = sample(t[i] * total);
+      const x = p.x + u[i] * p.a * p.vt, y = p.y + u[i] * p.a * (1 - p.vt), z = p.z + w[i] * p.b;
+      pos[i * 3] = x; pos[i * 3 + 1] = y; pos[i * 3 + 2] = z;
+      color(p, tmp, t[i]);
+      const fade = Math.min(1, t[i] * 8, (1 - t[i]) * 8);
+      col[i * 4] = tmp.r; col[i * 4 + 1] = tmp.g; col[i * 4 + 2] = tmp.b; col[i * 4 + 3] = fade * 0.9;
+    }
+    geo.attributes.position.needsUpdate = true;
+    geo.attributes.color.needsUpdate = true;
+  }
+  update(0);
+  return { points, update };
+}
+
+// Whole-case airflow: the ducted card air, each front fan's share through a cage or across the board,
+// the radiator fans out the top, the rear exhaust and the PSU's own path. X-ray shows it inside the parts.
+const cut = (spans, c0, c1) => spans.flatMap(([a, b]) => [[a, Math.min(b, c0)], [Math.max(a, c1), b]]).filter(([a, b]) => b - a > 1);
+function buildAir(design, scn) {
+  const out = [];
+  let seed = 1;
+  const stream = (nodes, opts) => out.push(makeStream(nodes, { seed: seed++, ...opts }));
+  const node = (x, s) => ({ x, y: (s.y0 + s.y1) / 2, z: (s.z0 + s.z1) / 2, a: (s.y1 - s.y0) * 0.4, b: (s.z1 - s.z0) * 0.4 });
+
+  // Front fans → duct → along each card's fins → out through its slot bracket. Two cards split every section.
+  if (design) {
+    const st = design.stations.slice(1).reverse();
+    const two = design.cards.length === 2;
+    design.cards.forEach((c, ci) => {
+      const upper = two && c.y0 > design.cards[1 - ci].y0;
+      const part = s => (!two ? s : upper ? { ...s, y0: (s.y0 + s.y1) / 2 } : { ...s, y1: (s.y0 + s.y1) / 2 });
+      const cy = (c.y0 + c.y1) / 2, cz = (c.z0 + c.z1) / 2;
+      stream([node(455, part(st[0])), node(410, part(st[0])), ...st.map(s => node(s.x, part(s))),
+        { x: D.card.len, y: cy, z: cz, a: 13, b: 40 }, { x: 0, y: cy, z: cz, a: 13, b: 40 }, { x: -70, y: cy, z: cz, a: 28, b: 56 }],
+        { count: two ? 240 : 340, speed: 150, color: gpuColor });
+    });
+  }
+
+  // What the duct doesn't take: through the gap between the drives in a cage, or straight across the board.
+  // Air leaving the cages alternates between the radiator fans and the rear exhaust.
+  const cages = scn.bays.map(i => D.bays[i]);
+  let toRad = true;
+  for (const fy of D.frontFanY) {
+    let spans = [[Math.max(fy - 60, D.shroudTop), fy + 60]];
+    if (design) spans = cut(spans, design.inlet.y0, design.inlet.y1);
+    for (const cg of cages) {
+      for (const [a, b] of spans.map(([a, b]) => [Math.max(a, cg.y0), Math.min(b, cg.y1)]).filter(([a, b]) => b - a > 20)) {
+        const ey = (a + b) / 2, gy = cg.y0 + 34;
+        const after = toRad
+          ? [{ x: 238, y: Math.max(gy + 60, 392), z: 86, a: 30, b: 44, vt: 0.6 }, { x: 228.5, y: D.radFanY0, z: D.fanZ, a: 44, b: 46, vt: 1 }]
+          : [{ x: 160, y: Math.max(gy + 30, 328), z: 108, a: 32, b: 40 }, { x: 12.5, y: 363, z: 117, a: 44, b: 44 }, { x: -70, y: 363, z: 117, a: 46, b: 46 }];
+        toRad = !toRad;
+        stream([
+          { x: 455, y: ey, z: D.fanZ, a: (b - a) * 0.4, b: 44 }, { x: 402, y: ey, z: D.fanZ, a: (b - a) * 0.4, b: 50 },
+          { x: D.bayX1, y: gy, z: 87.5, a: 2.4, b: 66 }, { x: D.bayX0, y: gy, z: 87.5, a: 2.4, b: 66 },
+          { x: 266, y: gy + 8, z: 92, a: 16, b: 50 }, ...after,
+        ], { count: 64, speed: 115, color: driveColor });
+      }
+      spans = cut(spans, cg.y0, cg.y1);
+    }
+    for (const [a, b] of spans) {
+      if (b - a <= 30) continue;
+      const y = (a + b) / 2;
+      stream([
+        { x: 455, y, z: D.fanZ, a: (b - a) * 0.35, b: 44 }, { x: 398, y, z: D.fanZ, a: (b - a) * 0.35, b: 44 },
+        { x: 300, y, z: D.fanZ, a: 28, b: 56 }, { x: 236, y: Math.max(y, 300) + 25, z: 92, a: 28, b: 50, vt: 0.5 },
+        { x: 210, y: D.radFanY0, z: 88, a: 40, b: 50, vt: 1 },
+      ], { count: Math.round(80 * (b - a) / 120), speed: 120, color: caseColor });
+    }
+  }
+
+  // Radiator fans pull case air up through the Pure Loop 2 and out the top.
+  for (const x of [108.5, 228.5, 348.5]) {
+    stream([
+      { x, y: 396, z: D.fanZ, a: 44, b: 44, vt: 1 }, { x, y: D.radFanY0, z: D.fanZ, a: 50, b: 50, vt: 1 },
+      { x, y: 482, z: D.fanZ, a: 54, b: 52, vt: 1 }, { x, y: 548, z: D.fanZ, a: 58, b: 54, vt: 1 },
+    ], { count: 56, speed: 110, color: radColor });
+  }
+  // Across the CPU, RAM and VRM to the rear exhaust.
+  stream([{ x: 205, y: 318, z: 104, a: 40, b: 40 }, { x: 90, y: 350, z: 115, a: 44, b: 44 }, { x: 12.5, y: 363, z: 117, a: 46, b: 46 }, { x: -80, y: 363, z: 117, a: 46, b: 46 }],
+    { count: 70, speed: 120, color: exhaustColor });
+  // The PSU breathes on its own: in through the floor vent, out the back.
+  stream([
+    { x: 79, y: -70, z: 89, a: 50, b: 50, vt: 1 }, { x: 79, y: -3, z: 89, a: 50, b: 50, vt: 1 }, { x: 79, y: 28, z: 89, a: 40, b: 56, vt: 1 },
+    { x: 52, y: 50, z: 89, a: 26, b: 58 }, { x: 4, y: 50, z: 89, a: 30, b: 58 }, { x: -70, y: 50, z: 89, a: 34, b: 58 },
+  ], { count: 64, speed: 100, color: psuColor });
+  return out;
+}
+
+// ---------------------------------------------------------------------------
+// Everything that changes with the layout and slot
+let dynG = null, dimsG = null, airG = null, streams = [], design = null;
+
+function dimLine(x0, x1, y, z, text) {
+  const g = new THREE.Group();
+  g.add(new THREE.Line(new THREE.BufferGeometry().setFromPoints([v(x0, y, z), v(x1, y, z)]), MAT.dimLine));
+  for (const x of [x0, x1]) g.add(new THREE.Line(new THREE.BufferGeometry().setFromPoints([v(x, y - 8, z), v(x, y + 8, z)]), MAT.dimLine));
+  g.add(tag(text, (x0 + x1) / 2, y, z, 'dim'));
+  return g;
+}
+function dimLineV(x, y0, y1, z, text, at = 0.5) {
+  const g = new THREE.Group();
+  g.add(new THREE.Line(new THREE.BufferGeometry().setFromPoints([v(x, y0, z), v(x, y1, z)]), MAT.dimLine));
+  for (const y of [y0, y1]) g.add(new THREE.Line(new THREE.BufferGeometry().setFromPoints([v(x - 8, y, z), v(x + 8, y, z)]), MAT.dimLine));
+  g.add(tag(text, x, y0 + (y1 - y0) * at, z, 'dim'));
+  return g;
+}
+
+function buildTubes(g, side) {
+  const paths = side === 'rear' ? [
+    [[39, 468, 148], [39, 466, 164], [46, 428, 166], [64, 392, 128], [86, 366, 82], [100, 350, 44]],
+    [[39, 452, 148], [39, 450, 160], [56, 414, 160], [74, 378, 122], [94, 356, 78], [100, 332, 44]],
+  ] : [
+    [[418, 468, 148], [418, 466, 164], [408, 426, 166], [340, 392, 132], [244, 364, 88], [166, 350, 44]],
+    [[418, 452, 148], [418, 450, 160], [398, 414, 160], [330, 380, 126], [236, 352, 84], [166, 330, 44]],
+  ];
+  for (const pts of paths) {
+    const curve = new THREE.CatmullRomCurve3(pts.map(p => v(...p)));
+    g.add(new THREE.Mesh(new THREE.TubeGeometry(curve, 72, 7, 12), MAT.tube));
+    const port = new THREE.Mesh(new THREE.CylinderGeometry(8.5, 8.5, 8, 20).rotateX(Math.PI / 2), MAT.black);
+    port.position.set(pts[0][0], pts[0][1], 151);
+    g.add(port);
+  }
+  if (side === 'rear') g.add(tag('AIO tubes · rear', 62, 392, 160));
+  else g.add(tag('AIO tubes · front', 290, 362, 120));
+}
+
+function buildCage(g, bayIndex, driveOffset) {
+  const b = D.bays[bayIndex];
+  const { bayX0: x0, bayX1: x1, bayZ0: z0, bayZ1: z1 } = D;
+  g.add(box(x0, x1, b.y0, b.y0 + 1.2, z0, z1, MAT_CAGE_FLAT));
+  g.add(box(x0, x1, b.y1 - 1.2, b.y1, z0, z1, MAT_CAGE_FLAT));
+  g.add(box(x0, x0 + 1.2, b.y0, b.y1, z0, z1, MAT_CAGE_END));
+  g.add(box(x1 - 1.2, x1, b.y0, b.y1, z0, z1, MAT_CAGE_END));
+  for (const z of [z0, z1 - 2]) {
+    g.add(box(x0, x1, b.y0, b.y0 + 6, z, z + 2, MAT.steel));
+    g.add(box(x0, x1, b.y1 - 6, b.y1, z, z + 2, MAT.steel));
+  }
+  [b.y0 + 5, b.y0 + 37].forEach((yd, k) => {
+    const name = DRIVES[(driveOffset + k) % DRIVES.length];
+    const hdd = new THREE.Mesh(new THREE.BoxGeometry(101.6, 26.1, 147), [MAT.hddBody, MAT.hddBody, MAT.hddTop, MAT.hddPcb, MAT.hddBody, MAT.hddBody]);
+    hdd.position.set(x0 + 1.4 + 50.8, yd + 13.05, 14 + 73.5);
+    g.add(hdd);
+    const lab = decal(101.6, 26.1, driveTex(name)); lab.position.set(x0 + 1.4 + 50.8, yd + 13.05, 161.2); g.add(lab);
+  });
+  g.add(tag(`${b.name} · 2 drives`, (x0 + x1) / 2, b.y1 + 2, z1));
+}
+
+function buildCard(g, slot, bad, dual) {
+  const c = cardRect(slot);
+  const yc = (c.y0 + c.y1) / 2, zc = (c.z0 + c.z1) / 2, L = D.card.len;
+  g.add(box(0, L, c.y0, c.y1, c.z0, c.z1, MAT.v100));
+  // Shroud side faces down (component side of a PCIe card), backplate up, gold-wrapped top edge toward the glass.
+  const face = decal(L, c.z1 - c.z0, TEX.v100Face, { metal: 0.5, rough: 0.4 }); face.rotation.x = Math.PI / 2; face.position.set(L / 2, c.y0 - 0.15, zc); g.add(face);
+  const back = decal(L, c.z1 - c.z0, TEX.v100Back, { metal: 0.4, rough: 0.55 }); back.rotation.x = -Math.PI / 2; back.position.set(L / 2, c.y1 + 0.15, zc); g.add(back);
+  const edge = decal(L, c.y1 - c.y0, TEX.v100Edge, { metal: 0.5, rough: 0.4 }); edge.position.set(L / 2, yc, c.z1 + 0.15); g.add(edge);
+  const end = decal(c.z1 - c.z0, c.y1 - c.y0, TEX.v100End); end.rotation.y = Math.PI / 2; end.position.set(L + 0.15, yc, zc); g.add(end);
+  g.add(box(52, 141, c.sy - 0.8, c.sy + 0.8, 10, c.z0, MAT.gold));
+  const p = SLOTS[slot].pos;
+  g.add(box(-4, -2, slotY(p + 1) - 17, slotY(p) + 3, 10, 124, [MAT_BRACKET, MAT_BRACKET, MAT.silver, MAT.silver, MAT.silver, MAT.silver]));
+  // EPS 8-pin power plug at the card end (position estimated) and its cable to the rear grommet
+  g.add(box(L, L + 12, c.y1 - 13, c.y1 - 3, 98, 116, MAT.black));
+  const cable = new THREE.CatmullRomCurve3([v(L + 12, c.y1 - 8, 107), v(L + 25, c.y1 - 8, 128), v(L + 23, c.y1 + 40, 142), v(281, 292, 70), v(273, 300, 1)]);
+  g.add(new THREE.Mesh(new THREE.TubeGeometry(cable, 60, 4.5, 10), MAT.tube));
+  const tx = !dual ? 140 : slot === 'PCIEX16_1' ? 165 : 75;
+  g.add(tag(`Tesla V100 32 GB · ${slot}`, tx, c.y1 + 4, c.z1, bad ? 'bad' : ''));
+}
+
+function buildDuct(g, d) {
+  const bad = d.status === 'bad';
+  const mat = bad ? MAT.petgBad : MAT.petg;
+  g.add(loft(d.stations, mat, bad ? MAT.badLine : MAT.petgLine));
+  const inl = d.inlet;
+  g.add(plateYZ(396, 2, inl.z0 - 7, inl.z1 + 7, inl.y0 - 7, inl.y1 + 7, [{ z0: inl.z0, z1: inl.z1, y0: inl.y0, y1: inl.y1 }], MAT.foam));
+  for (const m of d.mids) g.add(makeFan('arctic', '-x', m.x, m.y, D.fanZ));
+  if (d.vanes) g.add(makeStraightener(d.vanes.x, d.vanes.y, D.fanZ, MAT.petgSolid));
+  if (d.cards.length === 2) {
+    // Twin collar: a web blanks the gap between the card ends, and a splitter vane halves the airflow.
+    const [lo, hi] = [...d.cards].sort((a, b) => a.y0 - b.y0);
+    const L = D.card.len, c = d.stations[0], ys = (lo.y1 + hi.y0) / 2;
+    g.add(box(L, L + 2, lo.y1, hi.y0, c.z0, c.z1, mat));
+    const a = secAt(d.stations, L + 2), b = secAt(d.stations, 318);
+    g.add(plateXZ(ys - 1, 2, [[L + 2, a.z0 + 1], [318, b.z0 + 1], [318, b.z1 - 1], [L + 2, a.z1 - 1]], mat));
+  }
+  const topY = Math.max(...d.stations.map(s => s.y1));
+  const name = d.cards.length === 2 ? 'PETG dual duct' : 'PETG duct';
+  const label = bad ? `${name} · blocked` : d.mids.length ? `${name} + 2 × P12 Max + straightener` : name;
+  g.add(tag(label, 330, topY + 4, 128, bad ? 'bad' : 'petg'));
+}
+
+function clearDynamic() {
+  if (!dynG) return;
+  dynG.traverse(o => {
+    if (o.isCSS2DObject) o.element.remove();
+    if (o.geometry && !shared.has(o.geometry)) o.geometry.dispose();
+  });
+  for (let i = fans.length - 1; i >= 0; i--) {
+    let p = fans[i];
+    while (p && p !== dynG) p = p.parent;
+    if (p === dynG) fans.splice(i, 1);
+  }
+  root.remove(dynG);
+}
+
+function buildDynamic() {
+  clearDynamic();
+  dynG = new THREE.Group();
+  dimsG = new THREE.Group();
+  airG = new THREE.Group();
+  dynG.add(dimsG, airG);
+  const scn = SCENARIOS[state.scn];
+  const slots = !scn.card ? [] : state.cards === 2 ? ['PCIEX16_1', 'PCIEX16_2'] : [state.slot];
+  design = slots.length ? designDuct(scn.duct, scn.bays, slots) : null;
+
+  const occupied = new Set([1]);
+  for (const s of slots) { occupied.add(SLOTS[s].pos); occupied.add(SLOTS[s].pos + 1); }
+  for (let n = 1; n <= 7; n++) if (!occupied.has(n)) dynG.add(box(-4, -2, slotY(n) - 17, slotY(n) + 3, 12, 122, MAT.steel));
+
+  scn.bays.forEach((b, i) => buildCage(dynG, b, i * 2));
+  buildTubes(dynG, scn.tubes);
+  slots.forEach((s, i) => buildCard(dynG, s, design.overlaps[i] < 0.5, slots.length === 2));
+  if (design) {
+    buildDuct(dynG, design);
+    dimsG.add(dimLine(D.card.len, D.frontFrameX, design.card.y1 + 14, 177, `${D.frontFrameX - D.card.len} mm · card end → front frame`));
+    dimsG.add(dimLineV(392, design.band.lo - 2.5, design.band.hi + 2.5, 177, `${Math.round(design.band.hi - design.band.lo + 5)} mm clear`, 0.3));
+  } else {
+    dimsG.add(dimLine(0, D.bayX0, 212, 177, `${D.bayX0} mm · rear bracket → cages`));
+  }
+  if (scn.bays.includes(3)) {
+    dimsG.add(dimLineV(300, D.bays[3].y1, D.radFanY0, 4, `${D.radFanY0 - D.bays[3].y1} mm (est.) · bay 4 → radiator fans`, 0.5));
+  }
+
+  streams = buildAir(design, scn);
+  for (const s of streams) airG.add(s.points);
+  root.add(dynG);
+  applyXray(dynG);
+  applyToggles();
+  updatePanel();
+}
+
+// ---------------------------------------------------------------------------
+// Panel
+const $ = id => document.getElementById(id);
+function setList(el, items) {
+  el.replaceChildren(...items.map(t => { const li = document.createElement('li'); li.textContent = t; return li; }));
+}
+// Parts and setup shared by the 2 + 2 ducts (B and C).
+const FAN_TRAIN = to => [
+  `2 × Arctic P12 Max in the fan box, ${D.vaneGap} mm apart, both blowing toward the ${to}.`,
+  `Straightener, PETG: a ${D.vaneGap} mm spacer between the two fans with ${VANES} fixed vanes angled against the first fan’s spin. Use a vane count that differs from the fans’ blade count, and clamp the stack with 4 long M4 bolts.`,
+  'Replace the two stock front fans that feed the duct with P12 Max, or run them at full speed. A slow fan in the chain holds the others back.',
+  'Run the duct fans at a fixed high speed. The board’s fan headers follow the CPU temperature, not the card’s.',
+  'Foam gasket where the duct meets the front fan frame, and tape or gasket every seam. Leaks cost more pressure than anything else.',
+];
+function updatePanel() {
+  const scn = SCENARIOS[state.scn];
+  const n = design ? design.cards.length : 0;
+  $('cards-set').disabled = !scn.card;
+  $('slot-set').disabled = n !== 1;
+  $('slot-note').textContent = !scn.card ? 'No card in this view yet.'
+    : n === 2 ? 'Two cards use both x16 slots, so each runs at PCIe 3.0 x8, with one empty slot between them.'
+    : state.slot === 'PCIEX16_2' ? 'Bottom x16 slot (position 5). Lines up with bay 1 and the bottom intake.' : 'Top x16 slot (position 2). Lines up with bay 2.';
+
+  const st = $('status'), note = $('status-note');
+  let rows;
+  if (!design) {
+    st.className = 'status info'; st.textContent = 'No V100 yet';
+    note.textContent = `The cages sit ${D.bayX0} mm from the rear bracket. The V100 is ${D.card.len} mm long, so it would fit, but it would leave no room for a duct.`;
+    rows = [['Rear bracket → cages', `${D.bayX0} mm`], ['V100 length', `${D.card.len} mm`], ['Empty front bays', 'Bays 3 and 4']];
+    setList($('parts'), ['No duct in this view. Pick a plan above to see one.']);
+  } else {
+    const d = design, c = d.cards[0], two = n === 2;
+    const blocker = scn.bays.map(i => D.bays[i]).find(b => d.cards.some(k => Math.min(b.y1, k.y1) - Math.max(b.y0, k.y0) > 20));
+    const where = blocker ? `The cage in ${blocker.name.toLowerCase()}` : 'A drive cage';
+    if (d.status === 'bad') {
+      st.className = 'status bad'; st.textContent = 'Blocked';
+      note.textContent = two
+        ? `${where} sits ${D.bayX0 - D.card.len} mm in front of the upper card, so there's no room for a dual duct. Two cards need bays 1 and 2 clear.`
+        : `${where} sits ${D.bayX0 - D.card.len} mm in front of the card end, so the duct would have to dive under it. Use PCIEX16_2, or move that cage.`;
+    } else {
+      st.className = 'status ok'; st.textContent = 'Fits';
+      const steep = d.maxAngle > 45
+        ? ` The funnel walls reach ${Math.round(d.maxAngle)}°. That costs little pressure, because the air speeds up as the duct narrows, but the funnel needs supports to print.`
+        : '';
+      note.textContent = (d.kind === 'A'
+        ? 'A straight, low duct runs from the bottom intake to the card end. One fan does all the pushing, so make it a strong one.'
+        : d.kind === 'B'
+          ? 'Two front fans feed two middle fans in series. A printed straightener between them turns the first fan’s swirl back into straight flow, and a funnel narrows the air down to the card end.'
+          : 'The same 2 + 2 fan train, straightener included, feeds both cards. The two card ends together are about the size of a 120 mm fan, so the funnel stays fairly straight. A splitter vane gives each card half the air.') + steep;
+    }
+    rows = [
+      ['Card end → front frame', `${D.frontFrameX - D.card.len} mm`],
+      ['Clear height at the bays', `${Math.round(d.band.hi - d.band.lo + 5)} mm`],
+      ['Duct length', `${d.stations.at(-1).x - d.stations[0].x + 2} mm`],
+      ['Narrowest section', `${Math.round(d.minSec.h)} × ${Math.round(d.minSec.w)} mm`],
+      [two ? 'Card intakes (est.)' : 'Card intake (est.)', `${two ? '2 × ' : ''}${c.y1 - c.y0 - 6} × ${c.z1 - c.z0 - 8} mm`],
+      ['Steepest funnel wall', `${Math.round(d.maxAngle)}°`],
+      [two ? 'Fans pushing the cards' : 'Fans pushing the card', d.kind === 'A' ? `${d.feeders.length} front` : `${d.feeders.length} front + 2 middle`],
+      ['PCIe link', two ? 'x8 + x8 (PCIe 3.0)' : SLOTS[d.slots[0]].link],
+      ['Full-load power (est.)', two ? 'about 750 W of 850 W' : 'about 500 W of 850 W'],
+      ['Prints on the Ender', `${d.fitsBed ? 'Yes' : 'No'} · ${d.bbox.join(' × ')} mm`],
+    ];
+    setList($('parts'), d.kind === 'A' ? [
+      'Low duct, PETG, one print: a collar over the card end and a flat channel under the bay 2 cage.',
+      'Swap the bottom front fan for an Arctic P12 Max (PWM, about 4.3 mmH₂O at full speed).',
+      'Foam gasket where the duct meets the front fan frame.',
+      'A window in the collar for the EPS power cable.',
+    ] : d.kind === 'B' ? [
+      'Duct, PETG, two prints: the plenum and fan box, then the funnel and collar.',
+      ...FAN_TRAIN('card'),
+      'A window in the collar for the EPS power cable.',
+    ] : [
+      'Dual duct, PETG, two prints: the plenum and fan box, then the funnel with its splitter vane and the twin collar.',
+      ...FAN_TRAIN('cards'),
+      'A web across the gap between the card ends, so air can’t slip past them.',
+      'Two windows in the collar for the EPS power cables.',
+      'Power for the second card: another 030-0571-000 style adapter on its own pair of PCIe 8-pin leads. Don’t feed both cards from the split EPS cable.',
+    ]);
+  }
+  $('metrics').replaceChildren(...rows.flatMap(([k, val]) => {
+    const dt = document.createElement('dt'); dt.textContent = k;
+    const dd = document.createElement('dd'); dd.textContent = val;
+    return [dt, dd];
+  }));
+  const ds = $('dock-status');
+  ds.className = st.className; ds.textContent = st.textContent;
+  syncControls();
+}
+// Keep the panel radios and the full-screen dock in step with the state.
+function syncControls() {
+  const scn = SCENARIOS[state.scn];
+  document.querySelectorAll('input[name="scn"]').forEach(r => { r.checked = r.value === state.scn; });
+  document.querySelectorAll('input[name="cards"]').forEach(r => { r.checked = +r.value === state.cards; });
+  document.querySelectorAll('input[name="slot"]').forEach(r => { r.checked = r.value === state.slot; });
+  document.querySelectorAll('[data-q-scn]').forEach(b => b.setAttribute('aria-pressed', String(b.dataset.qScn === state.scn)));
+  document.querySelectorAll('[data-q-cards]').forEach(b => {
+    b.disabled = !scn.card;
+    b.setAttribute('aria-pressed', String(scn.card && +b.dataset.qCards === state.cards));
+  });
+  document.querySelectorAll('[data-q-slot]').forEach(b => {
+    b.disabled = !scn.card || state.cards !== 1;
+    b.setAttribute('aria-pressed', String(!b.disabled && b.dataset.qSlot === state.slot));
+  });
+}
+
+// ---------------------------------------------------------------------------
+// Controls, camera, theme
+function applyToggles() {
+  stageEl.classList.toggle('hide-tags', !state.labels);
+  stageEl.classList.toggle('hide-dims', !state.dims);
+  if (dimsG) dimsG.visible = state.dims;
+  if (airG) airG.visible = state.air;
+  if (glassMesh) glassMesh.visible = state.glass;
+  airMat.size = state.xray ? 21 : 18;
+}
+
+// X-ray: hardware turns to faint glass with outlined edges, so the airflow shows inside the parts.
+// The PETG ducts and the side panel keep their own look.
+const XRAY_OPACITY = 0.14;
+const edgeMat = new THREE.LineBasicMaterial({ color: 0x15181c, transparent: true, opacity: 0.3, depthWrite: false });
+const edgeCache = new WeakMap();
+const NO_XRAY = new Set([MAT.glass, MAT.petg, MAT.petgBad, MAT.petgSolid]);
+const NO_EDGES = new Set(['PlaneGeometry', 'CircleGeometry', 'TubeGeometry', 'TorusGeometry']);
+function ghost(mat, on) {
+  if (NO_XRAY.has(mat) || (mat.userData.xray || false) === on) return;
+  const b = mat.userData.base ||= { transparent: mat.transparent, opacity: mat.opacity, depthWrite: mat.depthWrite, alphaTest: mat.alphaTest };
+  mat.transparent = on || b.transparent;
+  mat.opacity = on ? b.opacity * XRAY_OPACITY : b.opacity;
+  mat.depthWrite = on ? false : b.depthWrite;
+  mat.alphaTest = on ? b.alphaTest * XRAY_OPACITY : b.alphaTest;
+  mat.userData.xray = on;
+  mat.needsUpdate = true;
+}
+function applyXray(group) {
+  const on = state.xray;
+  edgeMat.visible = on;
+  group.traverse(o => {
+    if (!o.isMesh) return;
+    for (const m of [].concat(o.material)) ghost(m, on);
+    if (!on || o.userData.edges !== undefined) return;
+    if (NO_XRAY.has(o.material) || NO_EDGES.has(o.geometry.type)) { o.userData.edges = null; return; }
+    let eg = edgeCache.get(o.geometry);
+    if (!eg) {
+      eg = new THREE.EdgesGeometry(o.geometry, 30);
+      edgeCache.set(o.geometry, eg);
+      if (shared.has(o.geometry)) shared.add(eg);
+    }
+    const ls = new THREE.LineSegments(eg, edgeMat);
+    o.add(ls);
+    o.userData.edges = ls;
+  });
+}
+
+const CAMS = {
+  iso: { p: [1010, 660, 1010], t: [215, 235, 80] },
+  side: { p: [215, 245, 1500], t: [215, 245, 80] },
+  front: { p: [1540, 250, 80], t: [215, 245, 80] },
+  top: { p: [215, 1600, 340], t: [215, 240, 80] },
+  duct: { p: [540, 440, 860], t: [318, 176, 85] },
+};
+let tween = null;
+function goCam(name, instant) {
+  const cam = CAMS[name];
+  const aspect = camera.aspect || 1;
+  const f = aspect < 1 ? Math.min(2, 0.9 / Math.max(aspect, 0.45)) : 1;
+  const target = v(...cam.t);
+  const pos = v(...cam.p).sub(target).multiplyScalar(f).add(target);
+  document.querySelectorAll('[data-cam]').forEach(b => b.setAttribute('aria-pressed', String(b.dataset.cam === name)));
+  if (instant || reduceMotion) { camera.position.copy(pos); controls.target.copy(target); controls.update(); tween = null; return; }
+  tween = { p0: camera.position.clone(), t0: controls.target.clone(), p1: pos, t1: target, k: 0 };
+}
+controls.addEventListener('start', () => {
+  tween = null;
+  document.querySelectorAll('[data-cam]').forEach(b => b.setAttribute('aria-pressed', 'false'));
+});
+
+function syncTheme() {
+  const cs = getComputedStyle(document.documentElement);
+  scene.background = new THREE.Color(cs.getPropertyValue('--stage').trim() || '#d3d9de');
+  MAT.dimLine.color.set(cs.getPropertyValue('--ink').trim() || '#15181c');
+  edgeMat.color.set(cs.getPropertyValue('--ink').trim() || '#15181c');
+}
+matchMedia('(prefers-color-scheme: dark)').addEventListener('change', syncTheme);
+new MutationObserver(syncTheme).observe(document.documentElement, { attributes: true, attributeFilter: ['data-theme', 'class', 'style'] });
+
+function resize() {
+  const w = stageEl.clientWidth, h = stageEl.clientHeight;
+  if (!w || !h) return;
+  renderer.setSize(w, h, false);
+  labelRenderer.setSize(w, h);
+  camera.aspect = w / h;
+  camera.updateProjectionMatrix();
+}
+new ResizeObserver(resize).observe(stageEl);
+
+// Wire up the panel and the dock
+function choose(key, val) {
+  if (state[key] === val) return;
+  state[key] = val;
+  save();
+  buildDynamic();
+}
+for (const [name, key, num] of [['scn', 'scn'], ['cards', 'cards', true], ['slot', 'slot']]) {
+  document.querySelectorAll(`input[name="${name}"]`).forEach(r => {
+    r.addEventListener('change', () => { if (r.checked) choose(key, num ? +r.value : r.value); });
+  });
+}
+document.querySelectorAll('[data-q-scn]').forEach(b => b.addEventListener('click', () => choose('scn', b.dataset.qScn)));
+document.querySelectorAll('[data-q-cards]').forEach(b => b.addEventListener('click', () => choose('cards', +b.dataset.qCards)));
+document.querySelectorAll('[data-q-slot]').forEach(b => b.addEventListener('click', () => choose('slot', b.dataset.qSlot)));
+
+const TOGGLES = { labels: 'tg-labels', air: 'tg-air', xray: 'tg-xray', dims: 'tg-dims', glass: 'tg-glass' };
+function setToggle(key, val) {
+  state[key] = val;
+  $(TOGGLES[key]).checked = val;
+  if (key === 'xray') {
+    applyXray(root);
+    if (val && !state.air) { state.air = true; $(TOGGLES.air).checked = true; }
+  }
+  save();
+  applyToggles();
+}
+for (const [key, id] of Object.entries(TOGGLES)) {
+  const el = $(id);
+  el.checked = state[key];
+  el.addEventListener('change', () => setToggle(key, el.checked));
+}
+document.querySelectorAll('[data-cam]').forEach(b => b.addEventListener('click', () => goCam(b.dataset.cam)));
+
+// Full screen. Uses the browser's full screen when the page may, and otherwise fills the frame it's in.
+const appEl = document.querySelector('.app');
+const fullBtn = $('btn-full');
+let viaApi = false;
+function setDrawer(open) {
+  appEl.classList.toggle('drawer', open);
+  $('btn-drawer').setAttribute('aria-expanded', String(open));
+}
+function setFull(on) {
+  appEl.classList.toggle('full', on);
+  if (!on) setDrawer(false);
+  fullBtn.setAttribute('aria-pressed', String(on));
+  fullBtn.querySelector('span').textContent = on ? 'Exit full screen' : 'Full screen';
+  $('full-icon').setAttribute('d', on ? 'M6 2v4H2M14 6h-4V2M10 14v-4h4M2 10h4v4' : 'M2 6V2h4M10 2h4v4M14 10v4h-4M6 14H2v-4');
+  // Re-frame the current camera preset for the new shape, unless the view was moved by hand.
+  setTimeout(() => {
+    resize();
+    const active = document.querySelector('[data-cam][aria-pressed="true"]');
+    if (active) goCam(active.dataset.cam);
+  }, 80);
+}
+async function toggleFull() {
+  if (!appEl.classList.contains('full')) {
+    setFull(true);
+    const req = appEl.requestFullscreen || appEl.webkitRequestFullscreen;
+    if (req) { try { await req.call(appEl); viaApi = !!(document.fullscreenElement || document.webkitFullscreenElement); } catch (e) { viaApi = false; } }
+  } else {
+    const exit = document.exitFullscreen || document.webkitExitFullscreen;
+    if ((document.fullscreenElement || document.webkitFullscreenElement) && exit) { try { await exit.call(document); } catch (e) { /* already out */ } }
+    viaApi = false;
+    setFull(false);
+  }
+}
+for (const ev of ['fullscreenchange', 'webkitfullscreenchange']) {
+  document.addEventListener(ev, () => {
+    if (viaApi && !(document.fullscreenElement || document.webkitFullscreenElement)) { viaApi = false; setFull(false); }
+  });
+}
+fullBtn.addEventListener('click', toggleFull);
+$('btn-drawer').addEventListener('click', () => setDrawer(!appEl.classList.contains('drawer')));
+$('drawer-close').addEventListener('click', () => setDrawer(false));
+document.addEventListener('keydown', e => {
+  if (e.ctrlKey || e.metaKey || e.altKey || e.repeat) return;
+  const k = e.key.toLowerCase();
+  if (k === 'f') { e.preventDefault(); toggleFull(); }
+  else if (k === 'x') setToggle('xray', !state.xray);
+  else if (e.key === 'Escape' && appEl.classList.contains('full')) {
+    if (appEl.classList.contains('drawer')) setDrawer(false);
+    else if (!viaApi) toggleFull();
+  }
+});
+
+// ---------------------------------------------------------------------------
+buildStatic();
+syncTheme();
+resize();
+buildDynamic();
+applyXray(root);
+goCam('side', true);
+
+const clock = new THREE.Clock();
+function frame() {
+  const dt = Math.min(clock.getDelta(), 0.05);
+  if (tween) {
+    tween.k = Math.min(1, tween.k + dt / 0.7);
+    const e = 1 - Math.pow(1 - tween.k, 3);
+    camera.position.lerpVectors(tween.p0, tween.p1, e);
+    controls.target.lerpVectors(tween.t0, tween.t1, e);
+    if (tween.k >= 1) tween = null;
+  }
+  controls.update();
+  if (!reduceMotion) {
+    for (const f of fans) f.userData.rotor.rotation.z += dt * 14;
+    if (state.air) for (const s of streams) s.update(dt);
+  }
+  renderer.render(scene, camera);
+  labelRenderer.render(scene, camera);
+  requestAnimationFrame(frame);
+}
+requestAnimationFrame(frame);
+noticeEl.hidden = true;
+window.__mockupReady = true;
+</script>
