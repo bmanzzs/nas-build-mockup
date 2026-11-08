@@ -24,6 +24,7 @@
   --ok: #23794b;
   --warn: #8f5d0e;
   --bad: #b3352d;
+  --collar: #1d7f77;
   --display: "Archivo", "Arial Narrow", "Helvetica Neue", Arial, sans-serif;
   --body: "Archivo", system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
   --mono: "IBM Plex Mono", ui-monospace, "Cascadia Mono", Menlo, Consolas, monospace;
@@ -31,13 +32,13 @@
 @media (prefers-color-scheme: dark) {
   :root:not([data-theme="light"]) {
     --bg: #101317; --stage: #181d23; --panel: #15191e; --ink: #e6e9ed; --muted: #98a2ad; --line: #29303a;
-    --accent: #f08d3a; --air: #6db3ef; --hot: #ff7a45; --ok: #5cc48c; --warn: #e3b14f; --bad: #f2776d;
+    --accent: #f08d3a; --air: #6db3ef; --hot: #ff7a45; --ok: #5cc48c; --warn: #e3b14f; --bad: #f2776d; --collar: #4cc9bd;
     color-scheme: dark;
   }
 }
 :root[data-theme="dark"] {
   --bg: #101317; --stage: #181d23; --panel: #15191e; --ink: #e6e9ed; --muted: #98a2ad; --line: #29303a;
-  --accent: #f08d3a; --air: #6db3ef; --hot: #ff7a45; --ok: #5cc48c; --warn: #e3b14f; --bad: #f2776d;
+  --accent: #f08d3a; --air: #6db3ef; --hot: #ff7a45; --ok: #5cc48c; --warn: #e3b14f; --bad: #f2776d; --collar: #4cc9bd;
   color-scheme: dark;
 }
 *, *::before, *::after { box-sizing: border-box; }
@@ -84,7 +85,11 @@ body {
 .tag.petg { color: var(--accent); border-color: var(--accent); }
 .tag.bad { color: var(--bad); border-color: var(--bad); }
 .tag.dim { margin-top: 0; color: var(--panel); background: var(--ink); border-color: var(--ink); }
-.stage.hide-tags .tag:not(.dim) { display: none !important; }
+.tag.collar { color: var(--collar); border-color: var(--collar); }
+.tag.screw { color: var(--ink); border-color: #c9a33f; background: color-mix(in srgb, #e8c35a 22%, var(--panel)); }
+.stage.hide-tags .tag:not(.dim):not(.screw) { display: none !important; }
+/* Screw callouts show in the closeup views, or everywhere with Labels on. */
+.stage.hide-tags:not(.closeup) .tag.screw { display: none !important; }
 .stage.hide-dims .tag.dim { display: none !important; }
 
 /* Panel */
@@ -110,6 +115,7 @@ fieldset { margin: 0; padding: 0; border: 0; min-width: 0; }
 .seg label:has(input:focus-visible) { outline: 2px solid var(--accent); outline-offset: -2px; }
 fieldset:disabled .seg { opacity: .45; }
 fieldset:disabled .seg label, fieldset:disabled .seg input { cursor: not-allowed; }
+h3 { margin: 18px 0 8px; font: 600 12px/1.2 var(--mono); letter-spacing: .04em; text-transform: uppercase; color: var(--muted); }
 .slot-note { margin: 8px 0 0; font-size: 13px; color: var(--muted); }
 .readout { border-top: 1px solid var(--line); padding-top: 16px; }
 .status { display: inline-flex; align-items: center; gap: 8px; padding: 6px 11px; font: 600 12px/1 var(--mono); border: 1px solid currentColor; border-radius: 999px; }
@@ -164,6 +170,8 @@ ol.list li::marker { font: 600 12px var(--mono); color: var(--muted); }
         <button type="button" data-cam="front" aria-pressed="false">Front</button>
         <button type="button" data-cam="top" aria-pressed="false">Top</button>
         <button type="button" data-cam="duct" aria-pressed="false">Duct</button>
+        <button type="button" data-cam="joint" aria-pressed="false" title="Closeup of the collar joint and its screws">Collar</button>
+        <button type="button" data-cam="stack" aria-pressed="false" title="Closeup of the fan stack bolts and the foot">Fan stack</button>
       </div>
       <div class="hud-right">
         <div class="chipbar" role="group" aria-label="Show in the model">
@@ -172,6 +180,7 @@ ol.list li::marker { font: 600 12px var(--mono); color: var(--muted); }
           <label><input type="checkbox" id="tg-xray" checked> X-ray</label>
           <label><input type="checkbox" id="tg-dims"> Dimensions</label>
           <label><input type="checkbox" id="tg-glass"> Side panel</label>
+          <label title="Pull the duct body out the way it goes in (E)"><input type="checkbox" id="tg-explode"> Exploded</label>
         </div>
         <div class="chipbar">
           <button type="button" id="btn-full" aria-pressed="false" title="Full screen (F)"><svg width="14" height="14" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.7" aria-hidden="true"><path id="full-icon" d="M2 6V2h4M10 2h4v4M14 10v4h-4M6 14H2v-4"/></svg><span>Full screen</span></button>
@@ -197,7 +206,7 @@ ol.list li::marker { font: 600 12px var(--mono); color: var(--muted); }
         <span class="status info" id="dock-status">Loading</span>
         <div class="chipbar"><button type="button" id="btn-drawer" aria-expanded="false">Details</button></div>
       </div>
-      <div class="hint">drag to orbit · scroll to zoom · right-drag to pan · F full screen · X x-ray</div>
+      <div class="hint">drag to orbit · scroll to zoom · right-drag to pan · F full screen · X x-ray · E exploded</div>
     </div>
     <div class="notice" id="notice">Loading the 3D model…</div>
   </section>
@@ -261,6 +270,14 @@ ol.list li::marker { font: 600 12px var(--mono); color: var(--muted); }
     </section>
 
     <section>
+      <h2>Mounting</h2>
+      <p class="slot-note">Every screw goes in on the bench or straight in from the open side panel. Nothing needs reaching behind the duct, and the front panel stays on.</p>
+      <ol class="list" id="mount"></ol>
+      <h3>Hardware</h3>
+      <ul class="list" id="hardware"></ul>
+    </section>
+
+    <section>
       <h2>Measure next</h2>
       <ol class="list">
         <li>Top of bay 4 to the bottom of the radiator fans, to confirm the cage clears.<span class="model">model: 30 mm</span></li>
@@ -317,6 +334,9 @@ const D = {
   card: { len: 267, z0: 16, z1: 121, below: 36, above: 4 },
   // Fan box of the 2 + 2 ducts: front end, fan thickness, and the straightener gap between the two fans.
   fanBoxX1: 385, fanT: 25, vaneGap: 20,
+  // Joint between the card collar and the duct body, its flange border, and how far "Exploded" pulls the body out.
+  joinX: 272, flange: 8, explodeZ: 200,
+  thumbY: c => [c.y0 + 10, c.y1 - 10],
 };
 const slotY = pos => D.boardTop - (D.slot1FromTop + D.slotPitch * (pos - 1));
 const SLOTS = {
@@ -332,7 +352,7 @@ const DRIVES = ['WD Purple 4TB', 'WD Purple 4TB', 'WD Purple 4TB', 'SkyHawk 4TB'
 
 const reduceMotion = matchMedia('(prefers-reduced-motion: reduce)').matches;
 const narrow = matchMedia('(max-width: 560px)').matches;
-const state = { scn: 'top2', cards: 1, slot: 'PCIEX16_1', labels: false, air: true, xray: true, dims: false, glass: false };
+const state = { scn: 'top2', cards: 1, slot: 'PCIEX16_1', labels: false, air: true, xray: true, dims: false, glass: false, explode: false };
 // Bumped with the defaults, so saved settings from an older version don't hide them.
 const STORE = 'nas-mockup-v3';
 try {
@@ -493,6 +513,10 @@ const MAT = {
   line: new THREE.LineBasicMaterial({ color: 0x3b4149 }),
   petgLine: new THREE.LineBasicMaterial({ color: 0xb85a14 }),
   petgSolid: new THREE.MeshPhysicalMaterial({ color: 0xe0782a, roughness: 0.4, side: THREE.DoubleSide }),
+  collar: new THREE.MeshPhysicalMaterial({ color: 0x2aa198, roughness: 0.3, clearcoat: 0.6, transparent: true, opacity: 0.6, side: THREE.DoubleSide, depthWrite: false }),
+  collarLine: new THREE.LineBasicMaterial({ color: 0x1b6f69 }),
+  screw: std(0xe8c35a, 0.9, 0.3),
+  brass: std(0xb08d3c, 0.9, 0.35),
   badLine: new THREE.LineBasicMaterial({ color: 0xa8302a }),
   dimLine: new THREE.LineBasicMaterial({ color: 0x15181c }),
 };
@@ -831,6 +855,7 @@ function designDuct(kind, bays, slots) {
   if (cards.length === 2) kind = 'C';
   const card = { y0: Math.min(...cards.map(c => c.y0)), y1: Math.max(...cards.map(c => c.y1)), z0: D.card.z0, z1: D.card.z1 };
   const collar = { y0: card.y0 - 1.5, y1: card.y1 + 1.5, z0: card.z0 - 1.5, z1: card.z1 + 1.5 };
+  const collars = cards.map(c => ({ y0: c.y0 - 1.5, y1: c.y1 + 1.5, z0: c.z0 - 1.5, z1: c.z1 + 1.5 }));
   const score = g => {
     const ov = Math.min(g[1], card.y1) - Math.max(g[0], card.y0);
     return ov > 0 ? ov : -Math.min(Math.abs(g[0] - card.y1), Math.abs(card.y0 - g[1]));
@@ -874,7 +899,7 @@ function designDuct(kind, bays, slots) {
   const fitsBed = [...bbox].sort((a, b) => b - a).every((d, i) => d <= [250, 220, 220][i]);
   // A narrowing funnel costs little pressure, so steep walls only matter for printing (see the panel note).
   const status = overlap < 0.5 ? 'bad' : 'ok';
-  return { kind, cards, slots, card, collar, band, overlap, overlaps, feeders, inlet, stations, mids, vanes, maxAngle, minSec, bbox, fitsBed, status };
+  return { kind, cards, slots, card, collar, collars, band, overlap, overlaps, feeders, inlet, stations, mids, vanes, maxAngle, minSec, bbox, fitsBed, status };
 }
 
 function ringPts(s, n = 7, r = 5) {
@@ -1056,7 +1081,7 @@ function buildAir(design, scn) {
 
 // ---------------------------------------------------------------------------
 // Everything that changes with the layout and slot
-let dynG = null, dimsG = null, airG = null, streams = [], design = null;
+let dynG = null, dimsG = null, airG = null, ductG = null, streams = [], design = null;
 
 function dimLine(x0, x1, y, z, text) {
   const g = new THREE.Group();
@@ -1133,26 +1158,92 @@ function buildCard(g, slot, bad, dual) {
   g.add(tag(`Tesla V100 32 GB · ${slot}`, tx, c.y1 + 4, c.z1, bad ? 'bad' : ''));
 }
 
+// Fasteners, all along one axis so they read at a glance: M3 caps into the card end (X),
+// M3 thumbscrews from the open side (Z), M4 bolts through the fan stack (X).
+const capGeo = keep(new THREE.CylinderGeometry(2.75, 2.75, 3, 20).rotateZ(Math.PI / 2));
+const thumbGeo = keep(new THREE.CylinderGeometry(6, 6, 5, 24).rotateX(Math.PI / 2));
+const m3Geo = keep(new THREE.CylinderGeometry(1.5, 1.5, 10, 12).rotateX(Math.PI / 2));
+const boltHeadGeo = keep(new THREE.CylinderGeometry(3.5, 3.5, 4, 6).rotateZ(Math.PI / 2));
+const insertGeo = keep(new THREE.CylinderGeometry(2.9, 2.9, 6, 16).rotateZ(Math.PI / 2));
+function mesh(geo, mat, x, y, z) { const m = new THREE.Mesh(geo, mat); m.position.set(x, y, z); return m; }
+
+// Card collar: its own small print, screwed to the card end on the bench before the card goes in.
+// An inner lip butts against the card end; the front flange meets the duct body's flange.
+function buildCollar(g, c, edges, first) {
+  const L = D.card.len, J = D.joinX, F = D.flange;
+  const k = { y0: c.y0 + 1.5, y1: c.y1 - 1.5, z0: c.z0 + 1.5, z1: c.z1 - 1.5 };
+  g.add(loft([{ x: 258, ...c }, { x: J - 2.5, ...c }], MAT.collar, MAT.collarLine));
+  g.add(plateYZ(L, 2.5, c.z0, c.z1, c.y0, c.y1, [{ z0: k.z0 + 4, z1: k.z1 - 3, y0: k.y0 + 3, y1: k.y1 - 1 }], MAT.collar));
+  g.add(plateYZ(J - 2.5, 2.5, c.z0 - F, c.z1 + 7, c.y0 - F, c.y1 + F, [{ z0: c.z0, z1: c.z1, y0: c.y0, y1: c.y1 }], MAT.collar));
+  // The bottom collar carries a ledge the duct flange sits on while the thumbscrews go in.
+  if (edges.bottom) g.add(box(J, J + 2.5, c.y0 - F - 3, c.y0 - F, c.z0 - F, c.z1 + 7, MAT.collar));
+  // 3 × M3 into the card's own threaded holes (positions estimated), driven through the open collar.
+  const yc = (k.y0 + k.y1) / 2, zc = (k.z0 + k.z1) / 2;
+  for (const [y, z] of [[yc, k.z0 + 1.5], [yc, k.z1 - 0.5], [k.y0 + 0.5, zc]]) g.add(mesh(capGeo, MAT.screw, L + 4, y, z));
+  // Bosses on the side-panel face take heat-set inserts for the thumbscrews.
+  for (const y of D.thumbY(c)) g.add(box(261, J - 2.5, y - 5, y + 5, c.z1, c.z1 + 7, MAT.collar));
+  if (first) {
+    g.add(tag('Card collar · print 1', 258, c.y0 - F - 6, c.z1 + 8, 'collar'));
+    g.add(tag('3 × M3 into the card end · on the bench', L + 4, k.y0 - 14, zc, 'screw'));
+  }
+}
+
 function buildDuct(g, d) {
   const bad = d.status === 'bad';
   const mat = bad ? MAT.petgBad : MAT.petg;
-  g.add(loft(d.stations, mat, bad ? MAT.badLine : MAT.petgLine));
+  const J = D.joinX, F = D.flange;
+  const order = [...d.collars].sort((a, b) => a.y0 - b.y0);
+  order.forEach((c, i) => buildCollar(g, c, { bottom: i === 0 }, i === order.length - 1));
+
+  // Duct body: everything from the joint forward. It drops in from the open side and locks to the collars.
+  ductG = new THREE.Group();
+  ductG.position.z = state.explode ? D.explodeZ : 0;
+  g.add(ductG);
+  const b = ductG;
+  b.add(loft(d.stations.slice(1), mat, bad ? MAT.badLine : MAT.petgLine));
+  const env = { y0: order[0].y0, y1: order.at(-1).y1, z0: order[0].z0, z1: order[0].z1 };
+  b.add(plateYZ(J, 2.5, env.z0 - F, env.z1 + 10, env.y0 - F, env.y1 + F, d.collars.map(c => ({ z0: c.z0, z1: c.z1, y0: c.y0, y1: c.y1 })), mat));
+  // Ears reach back over the collar bosses; an M3 thumbscrew goes straight in from the side through each.
+  for (const c of d.collars) {
+    for (const y of D.thumbY(c)) {
+      b.add(box(261, J + 2.5, y - 6, y + 6, c.z1 + 7, c.z1 + 10, mat));
+      b.add(mesh(thumbGeo, MAT.screw, 266, y, c.z1 + 12.5), mesh(m3Geo, MAT.screw, 266, y, c.z1 + 5));
+    }
+  }
+  const top = order.at(-1);
+  b.add(tag(`${2 * d.collars.length} × M3 thumbscrew · from the side`, 266, top.y1 + F + 8, top.z1 + 16, 'screw'));
+
   const inl = d.inlet;
-  g.add(plateYZ(396, 2, inl.z0 - 7, inl.z1 + 7, inl.y0 - 7, inl.y1 + 7, [{ z0: inl.z0, z1: inl.z1, y0: inl.y0, y1: inl.y1 }], MAT.foam));
-  for (const m of d.mids) g.add(makeFan('arctic', '-x', m.x, m.y, D.fanZ));
-  if (d.vanes) g.add(makeStraightener(d.vanes.x, d.vanes.y, D.fanZ, MAT.petgSolid));
+  b.add(plateYZ(396, 2, inl.z0 - 7, inl.z1 + 7, inl.y0 - 7, inl.y1 + 7, [{ z0: inl.z0, z1: inl.z1, y0: inl.y0, y1: inl.y1 }], MAT.foam));
+  for (const m of d.mids) b.add(makeFan('arctic', '-x', m.x, m.y, D.fanZ));
+  if (d.vanes) {
+    b.add(makeStraightener(d.vanes.x, d.vanes.y, D.fanZ, MAT.petgSolid));
+    // 4 × M4 clamp plenum, fan, straightener and fan into heat-set inserts in the funnel flange.
+    const [down, up] = d.mids.map(m => m.x), y0 = d.vanes.y, x0 = down - 14.5;
+    b.add(plateYZ(x0 - 2.5, 2.5, D.fanZ - 61, D.fanZ + 61, y0 - 61, y0 + 61, [{ z: D.fanZ, y: y0, r: 58 }], mat));
+    for (const dy of [-52.5, 52.5]) for (const dz of [-52.5, 52.5]) {
+      const rod = box(x0 - 2.5, up + 12.5, y0 + dy - 2, y0 + dy + 2, D.fanZ + dz - 2, D.fanZ + dz + 2, MAT.screw);
+      b.add(rod, mesh(boltHeadGeo, MAT.screw, up + 14.5, y0 + dy, D.fanZ + dz), mesh(insertGeo, MAT.brass, x0 - 4, y0 + dy, D.fanZ + dz));
+    }
+    b.add(tag('4 × M4 × 80 through the fan stack · on the bench', up + 16, y0 + 70, D.fanZ + 52, 'screw'));
+  }
+  // A foot carries the weight onto the PSU shroud, so nothing needs screwing at the front.
+  const under = secAt(d.stations, 350);
+  const footTop = under.y0;
+  if (footTop - D.shroudTop > 3) b.add(box(340, 360, D.shroudTop + 2, footTop, D.fanZ - 25, D.fanZ + 25, mat));
+  b.add(box(338, 362, D.shroudTop, D.shroudTop + 2, D.fanZ - 27, D.fanZ + 27, MAT.foam));
+  b.add(tag('Foot rests on the PSU shroud', 362, D.shroudTop + 6, D.fanZ + 34, 'screw'));
+
   if (d.cards.length === 2) {
-    // Twin collar: a web blanks the gap between the card ends, and a splitter vane halves the airflow.
-    const [lo, hi] = [...d.cards].sort((a, b) => a.y0 - b.y0);
-    const L = D.card.len, c = d.stations[0], ys = (lo.y1 + hi.y0) / 2;
-    g.add(box(L, L + 2, lo.y1, hi.y0, c.z0, c.z1, mat));
-    const a = secAt(d.stations, L + 2), b = secAt(d.stations, 318);
-    g.add(plateXZ(ys - 1, 2, [[L + 2, a.z0 + 1], [318, b.z0 + 1], [318, b.z1 - 1], [L + 2, a.z1 - 1]], mat));
+    // The body flange blanks the gap between the two collars, and a splitter vane halves the airflow.
+    const ys = (order[0].y1 + order[1].y0) / 2;
+    const a = secAt(d.stations, J + 2.5), e = secAt(d.stations, 318);
+    b.add(plateXZ(ys - 1, 2, [[J + 2.5, a.z0 + 1], [318, e.z0 + 1], [318, e.z1 - 1], [J + 2.5, a.z1 - 1]], mat));
   }
   const topY = Math.max(...d.stations.map(s => s.y1));
   const name = d.cards.length === 2 ? 'PETG dual duct' : 'PETG duct';
   const label = bad ? `${name} · blocked` : d.mids.length ? `${name} + 2 × P12 Max + straightener` : name;
-  g.add(tag(label, 330, topY + 4, 128, bad ? 'bad' : 'petg'));
+  b.add(tag(label, 330, topY + 4, 128, bad ? 'bad' : 'petg'));
 }
 
 function clearDynamic() {
@@ -1214,7 +1305,7 @@ function setList(el, items) {
 // Parts and setup shared by the 2 + 2 ducts (B and C).
 const FAN_TRAIN = to => [
   `2 × Arctic P12 Max in the fan box, ${D.vaneGap} mm apart, both blowing toward the ${to}.`,
-  `Straightener, PETG: a ${D.vaneGap} mm spacer between the two fans with ${VANES} fixed vanes angled against the first fan’s spin. Use a vane count that differs from the fans’ blade count, and clamp the stack with 4 long M4 bolts.`,
+  `Straightener, PETG: a ${D.vaneGap} mm spacer between the two fans with ${VANES} fixed vanes angled against the first fan’s spin. Use a vane count that differs from the fans’ blade count.`,
   'Replace the two stock front fans that feed the duct with P12 Max, or run them at full speed. A slow fan in the chain holds the others back.',
   'Run the duct fans at a fixed high speed. The board’s fan headers follow the CPU temperature, not the card’s.',
   'Foam gasket where the duct meets the front fan frame, and tape or gasket every seam. Leaks cost more pressure than anything else.',
@@ -1235,6 +1326,8 @@ function updatePanel() {
     note.textContent = `The cages sit ${D.bayX0} mm from the rear bracket. The V100 is ${D.card.len} mm long, so it would fit, but it would leave no room for a duct.`;
     rows = [['Rear bracket → cages', `${D.bayX0} mm`], ['V100 length', `${D.card.len} mm`], ['Empty front bays', 'Bays 3 and 4']];
     setList($('parts'), ['No duct in this view. Pick a plan above to see one.']);
+    setList($('mount'), ['Pick a plan above to see how its duct goes in.']);
+    setList($('hardware'), []);
   } else {
     const d = design, c = d.cards[0], two = n === 2;
     const blocker = scn.bays.map(i => D.bays[i]).find(b => d.cards.some(k => Math.min(b.y1, k.y1) - Math.max(b.y0, k.y0) > 20));
@@ -1268,20 +1361,34 @@ function updatePanel() {
       ['Prints on the Ender', `${d.fitsBed ? 'Yes' : 'No'} · ${d.bbox.join(' × ')} mm`],
     ];
     setList($('parts'), d.kind === 'A' ? [
-      'Low duct, PETG, one print: a collar over the card end and a flat channel under the bay 2 cage.',
+      'Low duct, PETG, two prints: a collar that screws to the card end, and a flat channel under the bay 2 cage.',
       'Swap the bottom front fan for an Arctic P12 Max (PWM, about 4.3 mmH₂O at full speed).',
       'Foam gasket where the duct meets the front fan frame.',
       'A window in the collar for the EPS power cable.',
     ] : d.kind === 'B' ? [
-      'Duct, PETG, two prints: the plenum and fan box, then the funnel and collar.',
+      'Duct, PETG, four prints: the card collar, the funnel with its fan flange, the straightener, and the plenum.',
       ...FAN_TRAIN('card'),
       'A window in the collar for the EPS power cable.',
     ] : [
-      'Dual duct, PETG, two prints: the plenum and fan box, then the funnel with its splitter vane and the twin collar.',
+      'Dual duct, PETG: a collar for each card, the funnel with its splitter vane and fan flange, the straightener, and the plenum.',
       ...FAN_TRAIN('cards'),
-      'A web across the gap between the card ends, so air can’t slip past them.',
-      'Two windows in the collar for the EPS power cables.',
+      'The duct flange blanks the gap between the two collars, so air can’t slip past the card ends.',
+      'A window in each collar for the EPS power cables.',
       'Power for the second card: another 030-0571-000 style adapter on its own pair of PCIe 8-pin leads. Don’t feed both cards from the split EPS cable.',
+    ]);
+    const thumbs = 2 * n, each = two ? 'each card’s' : 'the card’s';
+    setList($('mount'), [
+      `On the bench, screw ${two ? 'a collar onto each card end' : 'the collar onto the card end'} with 3 × M3 into ${each} own threaded holes. The screwdriver goes straight in through the open collar.`,
+      ...(d.vanes ? ['On the bench, stack the plenum, a P12 Max, the straightener, the second P12 Max and the funnel. Four M4 bolts go in from the plenum side, through everything, into heat-set inserts in the funnel flange.'] : []),
+      `Install ${two ? 'the cards' : 'the card'} like any GPU. With the collar on, ${two ? 'each is' : 'it’s'} about ${D.joinX} mm long, so it clears the front fans easily.`,
+      'Lower the duct body in from the open side. Its flange lands on the collar ledge, the foot rests on the PSU shroud, and the foam at the front meets the front fans.',
+      `Turn ${thumbs} M3 thumbscrews in from the side, through the duct’s ears into the collar bosses. That’s the only fastening inside the case. To take it out, undo them and lift the duct back out sideways.`,
+    ]);
+    setList($('hardware'), [
+      `${3 * n} × M3 × 8 socket caps for the card end${two ? 's' : ''}. Check the length once the card is here.`,
+      `${thumbs} × M3 × 12 thumbscrews and ${thumbs} × M3 heat-set inserts.`,
+      ...(d.vanes ? ['4 × M4 × 80 bolts and 4 × M4 heat-set inserts for the fan stack.'] : []),
+      '3 mm foam tape for the joint and the front gasket, and a rubber pad under the foot.',
     ]);
   }
   $('metrics').replaceChildren(...rows.flatMap(([k, val]) => {
@@ -1304,6 +1411,7 @@ function syncControls() {
     b.disabled = !scn.card;
     b.setAttribute('aria-pressed', String(scn.card && +b.dataset.qCards === state.cards));
   });
+  document.querySelectorAll('[data-cam]').forEach(b => { if (CLOSEUPS.has(b.dataset.cam)) b.disabled = !design; });
   document.querySelectorAll('[data-q-slot]').forEach(b => {
     b.disabled = !scn.card || state.cards !== 1;
     b.setAttribute('aria-pressed', String(!b.disabled && b.dataset.qSlot === state.slot));
@@ -1316,7 +1424,7 @@ function applyToggles() {
   stageEl.classList.toggle('hide-tags', !state.labels);
   stageEl.classList.toggle('hide-dims', !state.dims);
   if (dimsG) dimsG.visible = state.dims;
-  if (airG) airG.visible = state.air;
+  if (airG) airG.visible = state.air && !state.explode;
   if (glassMesh) glassMesh.visible = state.glass;
   airMat.size = state.xray ? 21 : 18;
 }
@@ -1326,7 +1434,7 @@ function applyToggles() {
 const XRAY_OPACITY = 0.14;
 const edgeMat = new THREE.LineBasicMaterial({ color: 0x15181c, transparent: true, opacity: 0.3, depthWrite: false });
 const edgeCache = new WeakMap();
-const NO_XRAY = new Set([MAT.glass, MAT.petg, MAT.petgBad, MAT.petgSolid]);
+const NO_XRAY = new Set([MAT.glass, MAT.petg, MAT.petgBad, MAT.petgSolid, MAT.collar, MAT.screw, MAT.brass]);
 const NO_EDGES = new Set(['PlaneGeometry', 'CircleGeometry', 'TubeGeometry', 'TorusGeometry']);
 function ghost(mat, on) {
   if (NO_XRAY.has(mat) || (mat.userData.xray || false) === on) return;
@@ -1364,10 +1472,22 @@ const CAMS = {
   front: { p: [1540, 250, 80], t: [215, 245, 80] },
   top: { p: [215, 1600, 340], t: [215, 240, 80] },
   duct: { p: [540, 440, 860], t: [318, 176, 85] },
+  // Closeups follow the current duct: the collar joint from behind on the side-panel side, and the fan stack from the front.
+  joint: () => {
+    const cs = design.collars, y = (cs[0].y0 + cs.at(-1).y1) / 2, t = [D.joinX - 4, y, cs[0].z1];
+    return { t, p: [t[0] - 120, t[1] + 130, t[2] + 330 + (cs.length - 1) * 110] };
+  },
+  stack: () => {
+    const y = design.vanes ? design.vanes.y : (design.inlet.y0 + design.inlet.y1) / 2, t = [352, y - 20, D.fanZ + 30];
+    return { t, p: [t[0] + 330, t[1] + 190, t[2] + 500] };
+  },
 };
+const CLOSEUPS = new Set(['joint', 'stack']);
 let tween = null;
 function goCam(name, instant) {
-  const cam = CAMS[name];
+  if (CLOSEUPS.has(name) && !design) name = 'duct';
+  const cam = typeof CAMS[name] === 'function' ? CAMS[name]() : CAMS[name];
+  stageEl.classList.toggle('closeup', CLOSEUPS.has(name));
   const aspect = camera.aspect || 1;
   const f = aspect < 1 ? Math.min(2, 0.9 / Math.max(aspect, 0.45)) : 1;
   const target = v(...cam.t);
@@ -1406,6 +1526,9 @@ function choose(key, val) {
   state[key] = val;
   save();
   buildDynamic();
+  // Keep a closeup on the duct when the layout changes under it.
+  const active = document.querySelector('[data-cam][aria-pressed="true"]');
+  if (active && CLOSEUPS.has(active.dataset.cam)) goCam(active.dataset.cam);
 }
 for (const [name, key, num] of [['scn', 'scn'], ['cards', 'cards', true], ['slot', 'slot']]) {
   document.querySelectorAll(`input[name="${name}"]`).forEach(r => {
@@ -1416,7 +1539,7 @@ document.querySelectorAll('[data-q-scn]').forEach(b => b.addEventListener('click
 document.querySelectorAll('[data-q-cards]').forEach(b => b.addEventListener('click', () => choose('cards', +b.dataset.qCards)));
 document.querySelectorAll('[data-q-slot]').forEach(b => b.addEventListener('click', () => choose('slot', b.dataset.qSlot)));
 
-const TOGGLES = { labels: 'tg-labels', air: 'tg-air', xray: 'tg-xray', dims: 'tg-dims', glass: 'tg-glass' };
+const TOGGLES = { labels: 'tg-labels', air: 'tg-air', xray: 'tg-xray', dims: 'tg-dims', glass: 'tg-glass', explode: 'tg-explode' };
 function setToggle(key, val) {
   state[key] = val;
   $(TOGGLES[key]).checked = val;
@@ -1480,6 +1603,7 @@ document.addEventListener('keydown', e => {
   const k = e.key.toLowerCase();
   if (k === 'f') { e.preventDefault(); toggleFull(); }
   else if (k === 'x') setToggle('xray', !state.xray);
+  else if (k === 'e') setToggle('explode', !state.explode);
   else if (e.key === 'Escape' && appEl.classList.contains('full')) {
     if (appEl.classList.contains('drawer')) setDrawer(false);
     else if (!viaApi) toggleFull();
@@ -1503,6 +1627,10 @@ function frame() {
     camera.position.lerpVectors(tween.p0, tween.p1, e);
     controls.target.lerpVectors(tween.t0, tween.t1, e);
     if (tween.k >= 1) tween = null;
+  }
+  if (ductG) {
+    const z = state.explode ? D.explodeZ : 0;
+    ductG.position.z = reduceMotion ? z : ductG.position.z + (z - ductG.position.z) * Math.min(1, dt * 6);
   }
   controls.update();
   if (!reduceMotion) {

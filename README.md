@@ -9,8 +9,9 @@ An interactive 3D mockup of my NAS build: a DARKROCK Classico Storage Master cas
 - Three layouts: the drive cages as built today (bays 1–2), the plan (bays 3–4), and a fallback (bays 2–3).
 - One V100 in either x16 slot, or two cards in both slots with a dual duct.
 - The duct: two front intake fans feed two Arctic P12 Max fans in series, spaced 20 mm apart with a printed straightener between them, then a funnel down to the card end.
+- How it mounts: a small collar screws to the card end on the bench, and the duct body drops in from the open side and locks on with thumbscrews. The Collar and Fan stack views zoom in on every screw, and Exploded pulls the body out the way it goes in.
 - An airflow simulation through the whole case, with an X-ray mode that makes the hardware see-through.
-- Full-screen mode (F), X-ray toggle (X), and dimension lines.
+- Full-screen mode (F), X-ray toggle (X), exploded view (E), and dimension lines.
 
 Part sizes come from spec sheets. Positions inside the case are estimates from build photos (roughly ±15 mm) until they're tape-measured.
 
