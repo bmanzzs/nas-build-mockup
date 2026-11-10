@@ -211,7 +211,7 @@ ul.parts .note { grid-column: 1 / -1; color: var(--muted); font-size: 13px; }
       <button type="button" class="drawer-close" id="drawer-close" aria-label="Close details"><svg width="14" height="14" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path d="M3 3l10 10M13 3L3 13"/></svg></button>
       <p class="eyebrow">NAS-T-BOX · DARKROCK Classico Storage Master</p>
       <h1>Build mockup</h1>
-      <p class="lede">Your parts at spec-sheet size, as the case stands now: the AIO flipped, one drive cage left in bay 4, and a Tesla V100 in the top x16 slot, fed by a printed tunnel from the middle front fan. A second V100 can follow in the slot below, fed by the same tunnel.</p>
+      <p class="lede">Your parts at spec-sheet size, as the case stands now: the AIO flipped, one drive cage left in bay 4, and a Tesla V100 in the top x16 slot, fed by a printed tunnel centered between the two x16 slots. A second V100 can follow in the slot below, fed by the same tunnel.</p>
     </header>
 
     <fieldset id="cards-set">
@@ -233,10 +233,11 @@ ul.parts .note { grid-column: 1 / -1; color: var(--muted); font-size: 13px; }
       <ul class="list">
         <li>Only the bay 4 cage is left, holding two drives right under the radiator fans; the dashed outline is where the bay 3 cage was. Bays 1 to 3 are open, so the tunnel has a clear run back to both x16 slots.</li>
         <li>The V100 sits in PCIEX16_1 at PCIe 3.0 x16. Its end is 131 mm behind the front steel, and that’s the room the tunnel has.</li>
-        <li>One tunnel, front to back: the middle stock DARKROCK fan outside the steel, slid down ¼ in, the Lian Li on the inside of the steel, straightener A, the NZXT, then funnel B down to collar C on the card end. The bottom stock fan comes out.</li>
+        <li>One tunnel, front to back: the middle stock DARKROCK fan outside the steel, the Lian Li on the inside of the steel, straightener A, the NZXT, then twin funnel B to collar C on the card end. The bottom stock fan comes out.</li>
+        <li>The tunnel is centered between the two x16 slots, so card 1 sits about 30 mm above the fan’s center and card 2 about 30 mm below. Until card 2 arrives, cap D plugs its socket so all the air goes to card 1.</li>
+        <li>That center is about 60 mm below the middle fan holes. The model assumes the fans line up there; a front adapter on the case’s own screw holes will hold them, so nothing gets drilled.</li>
         <li>Three fans push in series. The straightener takes the swirl out between the Lian Li and the NZXT, so the NZXT adds closer to its full pressure.</li>
-        <li>The funnel’s steep top wall costs little pressure, because the air speeds up as the funnel narrows.</li>
-        <li>For the second card, twin funnel B2 replaces B: a splitter sends the top half of the fan to card 1 and the bottom half down to card 2, whose end sits below the fan. Nothing reaches the PSU shroud, and the fans, straightener and collars stay the same.</li>
+        <li>With both cards in, each half of the fan blows almost straight into its own card, and nothing reaches the PSU shroud.</li>
         <li>The AIO tubes now leave the pump upward, over the RAM, so nothing hangs across PCIEX16_1.</li>
         <li>The FENVI 2.5 GbE card stays in PCIEX1_1, just above the V100. Its heatsink hangs a few millimeters over the card’s backplate. It fits, but it gets little air, so watch its temperature.</li>
         <li>The Wi-Fi card is in PCIEX16_3, the bottom slot. A second V100 in PCIEX16_2 covers the x1 slot below it and leaves the Wi-Fi card about 5 mm under its shroud. With two V100s, PCIEX1_1 and PCIEX16_3 are the best spots for the two small cards.</li>
@@ -252,9 +253,9 @@ ul.parts .note { grid-column: 1 / -1; color: var(--muted); font-size: 13px; }
       <h2>Measure next</h2>
       <ol class="list">
         <li>When the card arrives: slip the three test frames over its intake end. The smallest one that goes on sizes collar C. Note where the power plug sits.<span class="model">frames: 98.5 × 37 / 100.5 × 39 / 112 × 40.5 mm</span></li>
-        <li>PSU shroud top to the center of the middle front fan once it’s slid down, and to the PCIEX16_1 slot. Together they show how far the card sits below the fan.<span class="model">model: 137 / 130 mm</span></li>
+        <li>PSU shroud top to the PCIEX16_1 and PCIEX16_2 slots. Halfway between the two cards is where the tunnel’s center goes.<span class="model">model: 130 / 69 mm · tunnel center 83 mm</span></li>
         <li>Rear slot bracket to the inside of the front steel, at the middle fan.<span class="model">model: 398 mm</span></li>
-        <li>For the second card: PSU shroud top to the bottom edge of the slid-down middle fan. Twin funnel B2’s lower half needs about 50 mm of that room.<span class="model">model: 77 mm</span></li>
+        <li>For the front adapter: the screw holes of the middle and bottom front fans, and how far their centers sit above the PSU shroud.<span class="model">model: 143 / 23 mm</span></li>
       </ol>
     </section>
 
@@ -763,66 +764,62 @@ function buildStatic() {
   // Front intakes (stock DARKROCK 3-pin) and the rear exhaust
   S.add(makeFan('darkrock', '-x', 414.5, D.frontFanY[0], D.fanZ));
   S.add(makeFan('darkrock', '-x', 414.5, TUNNEL.fanY, D.fanZ));
-  // The bottom stock fan comes out: a dashed outline where it was.
-  const gone = new THREE.LineSegments(new THREE.EdgesGeometry(new THREE.BoxGeometry(25, 120, 120)), MAT.dash);
-  gone.position.set(414.5, D.frontFanY[2], D.fanZ);
-  gone.computeLineDistances();
-  S.add(gone);
   S.add(makeFan('darkrock', '-x', 12.5, 363, 117));
 
   S.add(tag('Pure Loop 2 · 360', 228, 492, 85));
   S.add(tag('Rear exhaust', 12, 432, 120));
   S.add(tag('EVGA 850 G5', 79, 70, 178));
   S.add(tag('ROG Strix Z390-F', 196, 395, 10));
-  S.add(tag('Bottom fan · removed', 445, D.frontFanY[2], 150, 'later'));
+  S.add(tag('Front adapter · later', 460, TUNNEL.fanY - 66, 150, 'later'));
   S.add(tag('Wi-Fi · PCIEX16_3', 0, slotY(7) - 10, 82));
   S.add(tag('FENVI 2.5 GbE · PCIEX1_1', 64, slotY(1) + 6, 66));
 }
 
 // ---------------------------------------------------------------------------
-// The cards and their one tunnel. The tunnel is a straight stack behind the middle front fan hole: the stock
-// fan outside the steel, fan 1 on the inside of the steel, printed straightener A, fan 2, then the funnel to the
-// card-end socket(s), each closing around a collar C on a card end. The middle stock fan slides down ¼ in
-// in its slots and the bottom stock fan comes out, so one tunnel can serve both x16 slots.
+// The cards and their one tunnel. The tunnel is a straight stack centered between the two x16 slots: the stock
+// fan outside the steel, fan 1 on the inside of the steel, printed straightener A, fan 2, then twin funnel B with a
+// socket for each card end, each closing around a collar C. Until the second card is in, cap D plugs its socket.
+// The case's fan holes don't line up with that center; a front adapter (to design) will hold the fans there.
 // Tunnel parts are built in the tunnel's own frame: the group sits on the fan axis at the inside face of
 // the front steel, x = -u runs back toward the card, and y, z are offsets from the fan axis.
 const TU = { fan1: 0, str0: 25, strTab1: 29, strLug0: 40, str1: 45, fan2: 45, fan2T: 26, fl0: 71, fl1: 77, round1: 83, loft1: 107, sock1: 128 };
 const CORNERS = [[52.5, 52.5], [-52.5, 52.5], [-52.5, -52.5], [52.5, -52.5]];   // (z, y) fan screw holes
 const LUGS = [[66, 35], [-66, 35], [-66, -35], [66, -35]];                       // (z, y) straightener lugs, tray and glass sides only
 const CAGES = [3];                                                               // only the bay 4 cage is left
-const SLIDE = 6.35;                                                              // ¼ in down the front fan slots
-const TUNNEL = { fanY: D.frontFanY[1] - SLIDE, fans: ['lianli', 'nzxt'] };
-const CARDS = [
-  { n: 1, slot: 'PCIEX16_1', later: false },
-  { n: 2, slot: 'PCIEX16_2', later: true },
-];
 function cardRect(slot) {
   const sy = slotY(SLOTS[slot].pos);
   return { sy, y0: sy - D.card.below, y1: sy + D.card.above, z0: D.card.z0, z1: D.card.z1 };
 }
+const CARDS = [
+  { n: 1, slot: 'PCIEX16_1', later: false },
+  { n: 2, slot: 'PCIEX16_2', later: true },
+];
+// Fan axis halfway between the bottom of card 2 and the top of card 1, so the two ends sit evenly above and below it.
+const TUNNEL = { fanY: (cardRect('PCIEX16_2').y0 + cardRect('PCIEX16_1').y1) / 2, fans: ['lianli', 'nzxt'] };
 const smooth = t => t * t * (3 - 2 * t);
 // Where the tunnel's parts land: each card's offset from the fan axis, the funnel walls, the gap up to the bay 4
-// cage and down to the PSU shroud. One card: funnel B, the whole fan to card 1. Two cards: twin funnel B2,
-// the top half of the fan to card 1 and the bottom half to card 2.
+// cage and down to the PSU shroud. Funnel B is the same print either way: it always has both sockets.
 function planTunnel(nCards) {
-  const cards = CARDS.slice(0, nCards).map(k => {
+  const all = CARDS.map(k => {
     const c = cardRect(k.slot), cy = (c.y0 + c.y1) / 2, cz = (c.z0 + c.z1) / 2;
     return { ...k, c, cy, cz, dy: cy - TUNNEL.fanY, dz: cz - D.fanZ };
   });
-  const c = cards[0].c;
+  const cards = all.slice(0, nCards);
+  const c = all[0].c;
   const s = { zTop: c.z1 + 0.3 - D.fanZ, zLid: c.z1 + 2.3 - D.fanZ, zTray: c.z0 - 5.8 - D.fanZ, rb: 25.8 };
-  const twin = cards.length === 2;
-  const ducts = twin ? [{ y0: 0, y1: 60 }, { y0: -60, y1: 0 }] : [{ y0: -60, y1: 60 }];
-  ducts.forEach((d, i) => { d.dy = cards[i].dy; d.drop = (d.y0 + d.y1) / 2 - d.dy; });
+  // The loft runs from the round section to the envelope around both sockets.
+  const yHi = Math.max(...all.map(k => k.dy + s.rb)), yLo = Math.min(...all.map(k => k.dy - s.rb));
+  const env = { yc: (yHi + yLo) / 2, rb: (yHi - yLo) / 2 };
   const run = TU.loft1 - TU.round1;
-  const walls = ducts.flatMap(d => [d.y1 - (d.dy + s.rb), (d.dy - s.rb) - d.y0]).concat([60 - s.zLid, s.zTray + 60]);
+  const walls = [60 - yHi, yLo + 60, 60 - s.zLid, s.zTray + 60];
   const maxWall = Math.max(...walls.map(d => Math.atan(Math.abs(d) / run) * 180 / Math.PI));
-  const fanY = TUNNEL.fanY, top = fanY + 60;
-  const yLo = Math.min(-60, ...cards.map(k => k.dy - s.rb)), yHi = Math.max(60, ...cards.map(k => k.dy + s.rb));
-  const low = fanY + yLo;
+  // Air: one card takes the whole fan; two cards take a half each.
+  const ducts = nCards === 2 ? [{ y0: 0, y1: 60 }, { y0: -60, y1: 0 }] : [{ y0: -60, y1: 60 }];
+  const fanY = TUNNEL.fanY, top = fanY + Math.max(60, yHi), low = fanY + Math.min(-60, yLo);
   const cageGap = Math.min(...CAGES.map(i => D.bays[i].y0).filter(y => y >= top - 1)) - top;
-  const print = `${Math.ceil(Math.max(72.5, s.zLid) - Math.min(-72.5, s.zTray))} × ${Math.ceil(yHi - yLo)} × ${TU.sock1 - TU.str1}`;
-  return { ...TUNNEL, cards, s, twin, ducts, run, maxWall, top, low, cageGap, shroudGap: low - D.shroudTop, print };
+  const print = `${Math.ceil(Math.max(72.5, s.zLid) - Math.min(-72.5, s.zTray))} × ${Math.ceil(Math.max(60, yHi) - Math.min(-60, yLo))} × ${TU.sock1 - TU.str1}`;
+  return { ...TUNNEL, all, cards, s, env, ducts, run, maxWall, top, low, cageGap, shroudGap: low - D.shroudTop, print,
+    move: D.frontFanY[1] - fanY };
 }
 
 // Geometry helpers for the tunnel frame
@@ -913,9 +910,8 @@ function buildSocket(T, dy, s, mat) {
   T.add(box(-TU.sock1, -(TU.loft1 + 2), dy + rb - 3.5, dy + rb - 2, zTray + 2, zTop, MAT.foam));
   T.add(box(-TU.sock1, -(TU.loft1 + 2), dy - rb + 2, dy - rb + 3.5, zTray + 2, zTop, MAT.foam));
 }
-// Funnel B (one card) or B2 (two): a square flange on fan 2 with arms back to the straightener lugs, a short
-// round section, then the loft to the card-end socket. B2 splits the round section in half with a flat wall and
-// lofts each half to its own socket: the top half of the fan to card 1, the bottom half to card 2.
+// Twin funnel B: a square flange on fan 2 with arms back to the straightener lugs, a short round section, then a
+// loft to the envelope around both card-end sockets, with a web closing the gap between them.
 function buildFunnel(T, p, mat) {
   T.add(new THREE.Mesh(FUN.flange, mat));
   for (const [z, y] of LUGS) {
@@ -924,21 +920,15 @@ function buildFunnel(T, p, mat) {
   }
   for (const [z, y] of CORNERS) T.add(mesh(FUN.peg, mat, -(TU.fl0 - 1.5), y, z));
   T.add(new THREE.Mesh(FUN.round, mat));
-  const { zLid, zTray, rb } = p.s;
+  const { zLid, zTray, zTop, rb } = p.s, { yc, rb: re } = p.env;
   const rz = (zLid + zTray) / 2, ra = (zLid - zTray) / 2;
-  const toSocket = dy => th => [rz + ra * spow(Math.cos(th), 0.2), dy + rb * spow(Math.sin(th), 0.2)];
-  const circle = th => [60 * Math.cos(th), 60 * Math.sin(th)];
-  const flat = y => th => [60 * spow(Math.cos(th), 0.2), y];
-  const from = p.twin
-    ? [th => (th <= Math.PI ? circle(th) : flat(1)(th)), th => (th <= Math.PI ? flat(-1)(th) : circle(th))]
-    : [circle];
-  p.cards.forEach((k, i) => {
-    const skin = new THREE.Mesh(loftGeo(TU.round1, TU.loft1, from[i], toSocket(k.dy)), mat);
-    skin.renderOrder = 2;
-    T.add(skin);
-    buildSocket(T, k.dy, p.s, mat);
-  });
-  if (p.twin) T.add(box(-TU.round1, -TU.fl1, -1, 1, -58, 58, mat));
+  const skin = new THREE.Mesh(loftGeo(TU.round1, TU.loft1, th => [60 * Math.cos(th), 60 * Math.sin(th)],
+    th => [rz + ra * spow(Math.cos(th), 0.2), yc + re * spow(Math.sin(th), 0.2)]), mat);
+  skin.renderOrder = 2;
+  T.add(skin);
+  for (const k of p.all) buildSocket(T, k.dy, p.s, mat);
+  const [a, b] = p.all.map(k => k.dy).sort((x, y) => x - y);
+  T.add(box(-(TU.loft1 + 2), -TU.loft1, a + rb, b - rb, zTray, zTop, mat));
 }
 function buildTunnel(g, p) {
   const T = new THREE.Group();
@@ -953,7 +943,7 @@ function buildTunnel(g, p) {
   T.add(tag('Fan 1 · Lian Li', -12.5, 104, 0, 'have'));
   T.add(tag('A · Straightener v2 · printed', -35, 83, 0, 'have'));
   T.add(tag('Fan 2 · NZXT Aer P', -58, 62, 0, 'have'));
-  T.add(tag(p.twin ? 'B2 · Twin funnel · later' : 'B · Funnel · to print', -(TU.loft1 - 6), 22, 0, p.twin ? 'later' : 'petg'));
+  T.add(tag('B · Twin funnel · to print', -(TU.sock1 - 10), -72, 0, 'petg'));
 }
 
 // Collar C slips over the card end. Its lips butt against the end, and its lid closes the socket's open side.
@@ -967,7 +957,7 @@ function buildCollar(g, p) {
   g.add(box(L, L + 2.5, c.y0, c.y0 + 3, c.z0, c.z1, m));
   g.add(box(L, L + 2.5, c.y0, c.y1, c.z0, c.z0 + 3, m));
   g.add(box(L + 17, L + 25, cy - 25.8, cy + 25.8, c.z1 + 0.3, c.z1 + 3.5, MAT.foam));
-  if (!p.later) g.add(tag('C · Card collar · to print', L + 4, c.y0 - 4, c.z1, 'collar'));
+  if (!p.later) g.add(tag('C · Card collar · to print', L + 4, c.y0 + 8, c.z1, 'collar'));
 }
 
 // ---------------------------------------------------------------------------
@@ -1053,13 +1043,13 @@ function buildAir(p) {
       { x: F - TU.round1, y, z: D.fanZ, a, b: 46 },
       { x: F - TU.loft1, y: k.cy, z: k.cz + 4, a: 15, b: 44 },
       { x: D.card.len, y: k.cy, z: k.cz, a: 13, b: 40 }, { x: 0, y: k.cy, z: k.cz, a: 13, b: 40 }, { x: -70, y: k.cy, z: k.cz, a: 28, b: 56 },
-    ], { count: p.twin ? 260 : 320, speed: 150, color: gpuColor });
+    ], { count: p.cards.length === 2 ? 260 : 320, speed: 150, color: gpuColor });
   });
 
   // What the tunnel doesn't take: through the gap between the drives in the cage, or straight across the board.
-  // The top stock fan pushes; the bottom hole has no fan any more, so less air comes in there.
+  // The top stock fan pushes; the parts of the middle and bottom holes the tunnel doesn't cover only breathe.
   const cages = CAGES.map(i => D.bays[i]);
-  for (const [fy, k] of [[D.frontFanY[0], 1], [p.fanY, 1], [D.frontFanY[2], 0.4]]) {
+  for (const [fy, k] of [[D.frontFanY[0], 1], [D.frontFanY[1], 0.4], [D.frontFanY[2], 0.4]]) {
     let spans = cut([[Math.max(fy - 60, D.shroudTop), fy + 60]], p.low, p.top);
     for (const cg of cages) {
       for (const [a, b] of spans.map(([a, b]) => [Math.max(a, cg.y0), Math.min(b, cg.y1)]).filter(([a, b]) => b - a > 20)) {
@@ -1224,13 +1214,19 @@ function buildDynamic() {
   buildTubes(dynG);
   for (const k of plan.cards) { buildCard(dynG, k); buildCollar(dynG, k); }
   buildTunnel(dynG, plan);
+  // Cap D plugs the socket of a card that isn't in yet, and closes its open glass side.
+  for (const k of plan.all.slice(plan.cards.length)) {
+    const y = plan.fanY + k.dy, r = plan.s.rb - 3.5, x0 = D.frontFrameX - TU.sock1 - 3, x1 = D.frontFrameX - TU.loft1 - 2;
+    dynG.add(box(x0, x1, y - r, y + r, D.fanZ + plan.s.zTray + 2, D.fanZ + plan.s.zTop, MAT.collar));
+    dynG.add(box(x0, x1 + 2, y - plan.s.rb, y + plan.s.rb, D.fanZ + plan.s.zTop, D.fanZ + plan.s.zLid, MAT.collar));
+    dynG.add(tag('D · Socket cap · to print', D.card.len + 4, y - 6, D.card.z1, 'collar'));
+  }
 
   const p = plan, [k1, k2] = p.cards, F = D.frontFrameX;
   dimsG.add(dimLine(D.card.len, F, D.shroudTop - 12, 177, `${F - D.card.len} mm · card end → front steel`));
-  dimsG.add(dimLineV(D.card.len - 160, k1.cy, p.fanY, 177, `${Math.round(-k1.dy)} mm · fan axis → card 1`, 0.5));
-  if (k2) dimsG.add(dimLineV(D.card.len - 60, k2.cy, p.fanY, 177, `${Math.round(-k2.dy)} mm · fan axis → card 2`, 0.15));
-  dimsG.add(dimLineV(F + 30, p.top, D.bays[CAGES[0]].y0, 177, `${Math.round(p.cageGap)} mm · to bay 4 cage`, 0.5));
-  dimsG.add(dimLineV(k2 ? F - TU.sock1 + 8 : F - 78, D.shroudTop, p.low, 177, `${Math.round(p.shroudGap)} mm · ${k2 ? 'funnel' : 'tunnel'} → PSU shroud`, 0.5));
+  dimsG.add(dimLineV(D.card.len - 37, k1.cy, p.fanY, 177, `${Math.round(Math.abs(k1.dy))} mm · axis → card 1`, 0.5));
+  if (k2) dimsG.add(dimLineV(D.card.len - 117, k2.cy, p.fanY, 177, `${Math.round(Math.abs(k2.dy))} mm · axis → card 2`, 0.3));
+  dimsG.add(dimLineV(F - 78, D.shroudTop, p.low, 177, `${Math.round(p.shroudGap)} mm · tunnel → PSU shroud`, 0.5));
   dimsG.add(dimLineV(300, D.bays[3].y1, D.radFanY0, 4, `bay 4 → radiator fans · ${D.radFanY0 - D.bays[3].y1} mm here, nearly touching in your photo`, 0.5));
 
   streams = buildAir(plan);
@@ -1259,26 +1255,27 @@ function setParts(el, items) {
   }));
 }
 function updatePanel() {
-  const two = state.cards === 2, p = plan, [k1, k2] = p.cards;
+  const two = state.cards === 2, p = plan, [k1, k2] = p.all;
+  const off = k => `${Math.round(Math.abs(k.dy))} mm ${k.dy > 0 ? 'up' : 'down'} · ${Math.round(-k.dz)} mm toward the tray`;
   const st = $('status'), note = $('status-note');
   if (!two) {
-    st.className = 'status ok'; st.textContent = 'Fits · nearly straight';
-    note.textContent = `One tunnel on the middle front fan, slid down ¼ in, with the bottom fan taken out. The card center sits ${Math.round(-k1.dy)} mm below the fan’s center and ${Math.round(-k1.dz)} mm closer to the tray, and funnel B takes up that offset in its last ${p.run} mm. When the second card comes, only the funnel changes.`;
+    st.className = 'status ok'; st.textContent = 'Fits · cap on the lower socket';
+    note.textContent = `The tunnel is centered between the two x16 slots, ${Math.round(p.shroudGap)} mm above the PSU shroud and ${Math.round(p.cageGap)} mm under the bay 4 cage. The card sits ${Math.round(k1.dy)} mm above the fan’s center. Twin funnel B has a socket for each card; cap D plugs the lower one for now, so the whole fan feeds this card. The front fan has to sit about ${Math.round(p.move)} mm lower than its holes; the front adapter comes later.`;
   } else {
-    st.className = 'status warn'; st.textContent = 'Fits · two cards share the air';
-    note.textContent = `Twin funnel B2 replaces B. A splitter sends the top half of the fan to card 1 and the bottom half to card 2, whose center sits ${Math.round(-k2.dy)} mm below the fan’s center, below the fan’s bottom edge. Each half bends down about ${Math.round(Math.max(...p.ducts.map(d => d.drop)))} mm in the last ${p.run} mm and stays ${Math.round(p.shroudGap)} mm above the PSU shroud. Each card gets roughly 70–85% of the air a tunnel of its own would give, card 2 a little less because of the bend.`;
+    st.className = 'status ok'; st.textContent = 'Fits · straight shot to both';
+    note.textContent = `Cap D comes out and a second collar goes on. The cards sit ${Math.round(k1.dy)} mm above and ${Math.round(-k2.dy)} mm below the fan’s center, so each half of the fan blows almost straight into its own card. The fans now feed two cards, so each gets roughly 70–85% of the air a tunnel of its own would give.`;
   }
   const rows = [
     ['Card end → front steel', `${D.frontFrameX - D.card.len} mm`],
     ['Tunnel, steel → socket end', `${TU.sock1} mm`],
     ['Fans in series', '3 · stock + Lian Li + NZXT'],
-    ['Front fans', 'middle slid down ¼ in · bottom out'],
-    ['Card 1 center vs fan axis', `${Math.round(-k1.dy)} mm down · ${Math.round(-k1.dz)} mm toward the tray`],
-    ...(two ? [['Card 2 center vs fan axis', `${Math.round(-k2.dy)} mm down · ${Math.round(-k2.dz)} mm toward the tray`]] : []),
+    ['Front fan', `${Math.round(p.move)} mm below its holes · adapter later`],
+    ['Card 1 center vs fan axis', off(k1)],
+    ...(two ? [['Card 2 center vs fan axis', off(k2)]] : []),
     ['Steepest funnel wall', `${Math.round(p.maxWall)}°`],
     ['Tunnel top → bay 4 cage', `${Math.round(p.cageGap)} mm`],
-    [two ? 'Funnel B2 → PSU shroud' : 'Tunnel → PSU shroud', `${Math.round(p.shroudGap)} mm`],
-    [two ? 'Funnel B2 print size' : 'Funnel B print size', `${p.print} mm · fits the bed`],
+    ['Tunnel → PSU shroud', `${Math.round(p.shroudGap)} mm`],
+    ['Funnel B print size', `${p.print} mm · fits the bed`],
     ...(two ? [
       ['Air per card (rough)', '70–85% of a tunnel of its own'],
       ['PCIe link', 'x8 + x8 (PCIe 3.0)'],
@@ -1294,17 +1291,16 @@ function updatePanel() {
     return [dt, dd];
   }));
   setParts($('parts'), [
-    ['Stock DARKROCK fan', 'have', 'The middle one, slid down ¼ in. It stays in front of the steel, behind the front cover, and pushes first. The bottom one comes out.'],
-    ['Fan 1 · Lian Li 120 (white)', 'have', 'On the inside of the front steel, held by the stock fan’s screws through the slots.'],
+    ['Stock DARKROCK fan', 'have', `The middle one moves down about ${Math.round(p.move)} mm onto the front adapter and still pushes first. The bottom one comes out.`],
+    ['Fan 1 · Lian Li 120 (white)', 'have', 'On the inside of the front steel, held by the stock fan’s screws through the adapter.'],
     ['A · Straightener v2', 'printed', '120 × 120 × 20 mm, nine straight vanes. The square body covers both fan faces out to their flat sides, and its lugs point at the tray and the glass.'],
     ['Fan 2 · NZXT Aer P 120', 'have', '26 mm deep, the strongest of your spares, so it sits by the card.'],
-    ['B · Funnel', two ? 'later' : 'todo', two
-      ? 'Comes out when B2 goes in.'
-      : `Square flange on fan 2 with arms back to the straightener lugs, a short round section, then a ${p.run} mm loft down to card 1’s socket. PETG.`],
+    ['B · Twin funnel', 'todo', `Square flange on fan 2 with arms back to the straightener lugs, a short round section, then a ${p.run} mm loft to two card-end sockets, one per x16 slot. One print for both cards, about ${p.print} mm. PETG.`],
     ['C · Card collar', 'todo', 'Slips over the card end; its lid closes the socket’s open side. Sized from the test frames once the card is here. PETG.'],
+    ['D · Socket cap', two ? 'later' : 'todo', two ? 'Comes out when card 2 goes in.' : 'Plugs the lower socket until card 2 is in, so all the air goes to card 1. A small print.'],
     ['EPS 8-pin power', 'have', 'The 030-0571-000 style adapter. The plug comes out past the collar lid on the glass side.'],
+    ['Front adapter', 'later', `Holds the stock fan and fan 1 about ${Math.round(p.move)} mm below the middle fan holes, on the case’s own screw holes, so nothing gets drilled. To design.`],
     ...(two ? [
-      ['B2 · Twin funnel', 'later', `Replaces B when card 2 arrives: same flange and arms, with a splitter, the top half of the fan to card 1 and the bottom half to card 2. About ${p.print} mm. Printing it now would leave half the fan blowing into a dead end.`],
       ['Second collar C', 'later', 'The same collar on card 2’s end. Its EPS cable runs back between the two sockets.'],
       ['Power for card 2', 'later', 'Another 030-0571-000 style adapter on its own pair of PCIe 8-pin leads. Don’t feed both cards from the split EPS cable.'],
       ['Stronger fans, if needed', 'later', 'If the cards run hot with both in, swap two Arctic P12 Max in for the Lian Li and the NZXT. Same tunnel, same prints.'],
@@ -1372,8 +1368,8 @@ function applyXray(group) {
 const CAMS = {
   // The tunnel from the glass side, a little in front: fan stack, funnel and card end in one view.
   tunnel: () => state.cards === 2
-    ? { t: [295, 196, 90], p: [455, 340, 930] }
-    : { t: [295, 232, 90], p: [445, 350, 790] },
+    ? { t: [295, 190, 90], p: [455, 330, 930] }
+    : { t: [295, 200, 90], p: [450, 335, 850] },
   iso: { p: [1010, 660, 1010], t: [215, 235, 80] },
   side: { p: [215, 245, 1500], t: [215, 245, 80] },
   front: { p: [1540, 250, 80], t: [215, 245, 80] },
