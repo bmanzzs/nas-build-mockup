@@ -16,7 +16,7 @@ page = f"""<!doctype html>
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<meta name="description" content="Interactive 3D mockup of a NAS build with a passive Tesla V100 and a printed PETG intake duct.">
+<meta name="description" content="Interactive 3D mockup of a NAS build with a passive Tesla V100 fed by a printed intake tunnel.">
 {head}
 </head>
 <body>
