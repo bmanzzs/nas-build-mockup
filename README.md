@@ -16,7 +16,7 @@ An interactive 3D mockup of my NAS build: a DARKROCK Classico Storage Master cas
   - funnel B down to the card-end socket;
   - collar C on the card end.
 - Tunnel 2 for the second card: the same parts on the bottom front fan, with the funnel mirrored. It runs about 37 mm into the PSU shroud, which the model flags.
-- Things to fix from the latest build photo: the AIO tube loop hangs where card 1 goes.
+- The small cards as installed: a FENVI 2.5 GbE card in PCIEX1_1, just above the V100, and the Wi-Fi card in PCIEX16_3.
 - An airflow simulation through the whole case, with an X-ray mode that makes the hardware see-through.
 - Camera presets (Tunnel, 3/4, Side, Front, Top), dimension lines, full-screen mode (F) and the X-ray toggle (X).
 

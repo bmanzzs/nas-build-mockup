@@ -237,8 +237,9 @@ ul.parts .note { grid-column: 1 / -1; color: var(--muted); font-size: 13px; }
         <li>Three fans push in series. The straightener takes the swirl out between the Lian Li and the NZXT, so the NZXT adds closer to its full pressure.</li>
         <li>The funnel’s steep top wall costs little pressure, because the air speeds up as the funnel narrows.</li>
         <li>The straightener’s lugs point at the tray and the glass, not up or down, so a second tunnel can sit flush underneath.</li>
-        <li>In your photo the AIO tube loop hangs down across PCIEX16_1. The model shows it there; it has to sit above the card before the card goes in.</li>
-        <li>The Wi-Fi card is in PCIEX16_3, the bottom slot. A second V100 in PCIEX16_2 covers the x1 slot below it and leaves the Wi-Fi card about 5 mm under its shroud.</li>
+        <li>The AIO tubes now leave the pump upward, over the RAM, so nothing hangs across PCIEX16_1.</li>
+        <li>The FENVI 2.5 GbE card stays in PCIEX1_1, just above the V100. Its heatsink hangs a few millimeters over the card’s backplate. It fits, but it gets little air, so watch its temperature.</li>
+        <li>The Wi-Fi card is in PCIEX16_3, the bottom slot. A second V100 in PCIEX16_2 covers the x1 slot below it and leaves the Wi-Fi card about 5 mm under its shroud. With two V100s, PCIEX1_1 and PCIEX16_3 are the best spots for the two small cards.</li>
       </ul>
     </section>
 
@@ -253,7 +254,6 @@ ul.parts .note { grid-column: 1 / -1; color: var(--muted); font-size: 13px; }
         <li>When the card arrives: slip the three test frames over its intake end. The smallest one that goes on sizes collar C. Note where the power plug sits.<span class="model">frames: 98.5 × 37 / 100.5 × 39 / 112 × 40.5 mm</span></li>
         <li>PSU shroud top to the center of the middle front fan, and to the PCIEX16_1 slot. Together they show how far the card sits below the fan.<span class="model">model: 143 / 130 mm</span></li>
         <li>Rear slot bracket to the inside of the front steel, at the middle fan.<span class="model">model: 398 mm</span></li>
-        <li>Pump fittings down to where the card’s backplate will be: the room the tube loop has to turn in.<span class="model">model: about 85 mm</span></li>
         <li>For the second card: how far the PSU shroud’s top reaches toward the front, and whether its front part comes off.<span class="model">model: right up to the front steel</span></li>
       </ol>
     </section>
@@ -746,6 +746,12 @@ function buildStatic() {
   S.add(box(0, 98, s7 - 0.8, s7 + 0.8, 14, 80, std(0x1c2433, 0.2, 0.7)));
   S.add(box(30, 62, s7 - 9, s7 - 0.8, 30, 62, MAT.silver));
   S.add(box(-4, -2, s7 - 17, s7 + 3, 12, 122, MAT.silver));
+  // FENVI 2.5 GbE card in PCIEX1_1. Its red heatsink and RJ45 jack hang off the underside, over PCIEX16_1.
+  const s1 = slotY(1);
+  S.add(box(0, 110, s1 - 0.8, s1 + 0.8, 10, 64, std(0x1a1b1e, 0.2, 0.7)));
+  S.add(box(38, 92, s1 - 12.8, s1 - 0.8, 14, 54, std(0xc0262a, 0.6, 0.35)));
+  S.add(box(-2, 18, s1 - 14.3, s1 - 0.8, 16, 34, MAT.silver));
+  S.add(box(-4, -2, s1 - 17, s1 + 3, 12, 122, MAT.silver));
 
   // Radiator: Pure Loop 2 360 on top, fans underneath
   S.add(box(48, 409, 451, 478, 25, 145, MAT.rad));
@@ -763,7 +769,8 @@ function buildStatic() {
   S.add(tag('EVGA 850 G5', 79, 70, 178));
   S.add(tag('ROG Strix Z390-F', 196, 395, 10));
   S.add(tag('Front intakes · stock 3-pin', 425, 58, 150));
-  S.add(tag('Wi-Fi · PCIEX16_3', 60, slotY(7) - 10, 82));
+  S.add(tag('Wi-Fi · PCIEX16_3', 30, slotY(7) - 10, 82));
+  S.add(tag('FENVI 2.5 GbE · PCIEX1_1', 64, slotY(1) + 6, 66));
 }
 
 // ---------------------------------------------------------------------------
@@ -1096,12 +1103,12 @@ function dimLineV(x, y0, y1, z, text, at = 0.5) {
   return g;
 }
 
-// AIO tubes as they hang in the 2026-11-10 photo: down the rear side from the radiator, then a loop under
-// the pump that dips across PCIEX16_1, up into the pump's fittings on its front side.
+// AIO tubes as rerouted (second photo, 2026-11-10): up from the pump's fittings over the RAM, then back along
+// the glass side of the radiator fans to the rear ports. Nothing hangs across the PCIe slots any more.
 function buildTubes(g) {
   const paths = [
-    [[39, 468, 148], [39, 466, 164], [42, 430, 160], [40, 370, 130], [52, 290, 105], [88, 222, 88], [135, 200, 78], [176, 222, 66], [186, 275, 56], [178, 318, 48], [168, 326, 44]],
-    [[39, 452, 148], [39, 450, 160], [52, 420, 152], [56, 360, 124], [66, 300, 100], [96, 246, 84], [132, 228, 74], [160, 244, 64], [168, 285, 54], [164, 314, 46], [158, 322, 44]],
+    [[39, 468, 148], [39, 466, 164], [56, 444, 164], [110, 430, 160], [175, 420, 140], [222, 398, 102], [220, 366, 76], [196, 342, 56], [172, 332, 46]],
+    [[39, 452, 148], [39, 450, 160], [58, 432, 158], [110, 418, 152], [170, 408, 128], [208, 386, 92], [204, 358, 66], [184, 340, 52], [166, 326, 44]],
   ];
   for (const pts of paths) {
     const curve = new THREE.CatmullRomCurve3(pts.map(p => v(...p)));
@@ -1110,8 +1117,7 @@ function buildTubes(g) {
     port.position.set(pts[0][0], pts[0][1], 151);
     g.add(port);
   }
-  g.add(tag('AIO tubes · rear', 52, 400, 160));
-  g.add(tag('Tube loop hangs where card 1 goes', 70, 286, 112, 'bad'));
+  g.add(tag('AIO tubes · up over the RAM', 190, 440, 168));
 }
 
 function buildCage(g, bayIndex, driveOffset) {
@@ -1165,7 +1171,7 @@ function buildCard(g, p) {
     : [[287, ye + 4, 150], [283, 186, 162], [277, 186, 140], [275, 186, 70], [274, 186, 6]];
   const pts = [[283, ye, 107], [287, ye, 110], [289.5, ye, 121], [289.5, ye, 133], ...route];
   g.add(new THREE.Mesh(new THREE.TubeGeometry(new THREE.CatmullRomCurve3(pts.map(q => v(...q))), 80, 4.5, 12), MAT.tube));
-  const tx = state.cards === 1 ? 140 : p.n === 1 ? 165 : 75;
+  const tx = state.cards === 1 ? 80 : p.n === 1 ? 165 : 30;
   g.add(tag(`Tesla V100 32 GB · ${slot}${p.later ? ' · later' : ''}`, tx, c.y1 + 4, c.z1, p.later ? 'later' : ''));
 }
 
@@ -1191,7 +1197,7 @@ function buildDynamic() {
   dynG.add(dimsG, airG);
   plans = TUNNELS.slice(0, state.cards).map(planTunnel);
 
-  const occupied = new Set([7]);
+  const occupied = new Set([1, 7]);
   for (const p of plans) { occupied.add(SLOTS[p.slot].pos); occupied.add(SLOTS[p.slot].pos + 1); }
   for (let n = 1; n <= 7; n++) if (!occupied.has(n)) dynG.add(box(-4, -2, slotY(n) - 17, slotY(n) + 3, 12, 122, MAT.steel));
 
@@ -1243,11 +1249,11 @@ function updatePanel() {
   const two = state.cards === 2, p1 = plans[0], p2 = plans[1];
   const st = $('status'), note = $('status-note');
   if (!two) {
-    st.className = 'status warn'; st.textContent = 'Tunnel fits · move the AIO tubes';
-    note.textContent = `Tunnel 1 runs straight back from the middle front fan to the card end, assuming the fan hole and PCIEX16_1 line up as modeled. The card sits ${Math.round(-p1.dy)} mm below the fan’s center and ${Math.round(-p1.dz)} mm closer to the tray, and the funnel takes up that offset in its last ${TU.loft1 - TU.round1} mm. One thing to fix first: in your photo the AIO tube loop hangs across PCIEX16_1. Pull it up so it turns just below the pump, which leaves about 85 mm above the card.`;
+    st.className = 'status ok'; st.textContent = 'Fits · straight shot';
+    note.textContent = `Tunnel 1 runs straight back from the middle front fan to the card end, assuming the fan hole and PCIEX16_1 line up as modeled. The card sits ${Math.round(-p1.dy)} mm below the fan’s center and ${Math.round(-p1.dz)} mm closer to the tray, and the funnel takes up that offset in its last ${TU.loft1 - TU.round1} mm. The AIO tubes now go up over the RAM, so the slot is clear.`;
   } else {
     st.className = 'status warn'; st.textContent = 'Tunnel 2 · check the shroud';
-    note.textContent = `Tunnel 2 is the same stack on the bottom front fan, feeding the second V100 in PCIEX16_2. Its fans sit ${p2.shroudHit} mm below the top of the PSU shroud, so the shroud would have to stop about ${p2.shroudCut} mm behind the front steel. Check that before buying the second card, and move the AIO tube loop above card 1 either way.`;
+    note.textContent = `Tunnel 2 is the same stack on the bottom front fan, feeding the second V100 in PCIEX16_2. Its fans sit ${p2.shroudHit} mm below the top of the PSU shroud, so the shroud would have to stop about ${p2.shroudCut} mm behind the front steel. Check that before buying the second card.`;
   }
   const rows = [
     ['Card end → front steel', `${D.frontFrameX - D.card.len} mm`],
