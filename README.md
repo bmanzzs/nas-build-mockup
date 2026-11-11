@@ -8,14 +8,14 @@ An interactive 3D mockup of my NAS build: a DARKROCK Classico Storage Master cas
 
 - The case as it stands: the AIO flipped with its tubes at the rear, one drive cage left in bay 4, and bays 1–3 open.
 - One V100 in PCIEX16_1 (now), or a second one in PCIEX16_2 (later).
-- One straight tunnel lined up with the card in PCIEX16_1, with the middle and bottom stock front fans removed:
+- One straight tunnel for both cards, centered between the two x16 slots, with the middle and bottom stock front fans removed:
   - a Lian Li 120 on the inside of the steel, screwed to the straightener;
   - the printed straightener (v2, the square 120 × 120 × 20 mm box style with nine vanes);
   - an NZXT Aer P 120;
-  - funnel B, running straight into a socket on the card end;
-  - collar C on the card end.
-- The tunnel's center sits about 29 mm below the middle front fan holes, so fan 1 breathes through parts of the middle and bottom holes. A front adapter on the case's own screw holes is still to design.
-- The tunnel only feeds card 1. The two-card view shows that card 2 would still need its own air path.
+  - twin funnel B, with a socket for each card end;
+  - collar C on each card end.
+- One card now: cap D plugs the lower socket, so the whole fan feeds card 1. Two cards later: the cap comes out and each half of the fan blows almost straight into its own card.
+- The tunnel's center sits about 60 mm below the middle front fan holes, across the steel between the middle and bottom holes, so fan 1 breathes through both. A front adapter on the case's own screw holes is still to design.
 - The small cards as installed: a FENVI 2.5 GbE card in PCIEX1_1, just above the V100, and the Wi-Fi card in PCIEX16_3.
 - An airflow simulation through the whole case, with an X-ray mode that makes the hardware see-through.
 - Camera presets (Tunnel, 3/4, Side, Front, Top), dimension lines, full-screen mode (F) and the X-ray toggle (X).
