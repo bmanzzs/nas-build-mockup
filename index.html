@@ -232,7 +232,7 @@ ul.parts .note { grid-column: 1 / -1; color: var(--muted); font-size: 13px; }
       <h2>What the model shows</h2>
       <ul class="list">
         <li>Only the bay 4 cage is left, holding two drives right under the radiator fans; the dashed outline is where the bay 3 cage was. Bays 1 to 3 are open, so the tunnel has a clear run back to both x16 slots.</li>
-        <li>The V100 sits in PCIEX16_1 at PCIe 3.0 x16. Its end is 156 mm behind the front steel, measured in the case, and that’s the room the tunnel has.</li>
+        <li>The V100 sits in PCIEX16_1 at PCIe 3.0 x16. Its end is 158 mm behind the front steel, measured in the case, and that’s the room the tunnel has.</li>
         <li>One tunnel, front to back: the printed front adapter on the inside of the steel, the Lian Li, straightener A (the square v2 you printed), the NZXT, then twin funnel B to collar C on the card end. The middle and bottom stock fans are out.</li>
         <li>The tunnel is centered between the two x16 slots, so card 1 sits about 30 mm above the fan’s center and card 2 about 30 mm below. Until card 2 arrives, cap D plugs its socket so all the air goes to card 1. One fan screw holds the cap, so air pressure can’t push it out.</li>
         <li>That center is 58 mm below the middle fan’s holes. The front adapter hangs from the top two of those holes and holds fan 1 there, so nothing got drilled. The front steel is two rails with open space between them, so fan 1 breathes freely.</li>
@@ -254,14 +254,14 @@ ul.parts .note { grid-column: 1 / -1; color: var(--muted); font-size: 13px; }
       <h2>Check at the fit test</h2>
       <ol class="list">
         <li>Does the card slide into the upper socket? The collar has half a millimeter above and below. If the socket sits too high or too low, loosen the adapter’s two screws and slide the stack; its slots give about 4 mm each way.<span class="model">ruler photos, 12 Nov: stack top about 17 mm above the card top · model 11 mm</span></li>
-        <li>The slot left on the glass side between the funnel and the collar’s front edge. Tape over it for now; the next collar closes it.<span class="model">model: 4 mm</span></li>
+        <li>The slot left on the glass side between the funnel and the collar’s front edge. Tape over it.<span class="model">model: 2 mm</span></li>
         <li>The thin spring leaf on the collar’s tray side should press lightly on the socket wall. If the card won’t seat, snip the leaf off.<span class="model">model: 3 mm gap · leaf reaches 5 mm</span></li>
         <li>Cap D slides into the lower socket from the glass side until its tab meets the web, then takes one fan screw.</li>
         <li>First power-on only with the EPS plug in and both tunnel fans running. Watch the card’s temperature with nvidia-smi.</li>
       </ol>
     </section>
 
-    <p class="fine">Part sizes come from spec sheets: V100 267 × 111 mm, ATX board 305 × 244 mm, slot pitch 20.32 mm, EVGA 850 G5 150 × 150 × 86 mm, Pure Loop 2 radiator 397 × 120 × 27 mm. The tunnel parts follow their print files. The card’s place (156 mm behind the front steel, 22 mm toward the tray, 30 mm above the tunnel’s center) comes from ruler photos in the case, good to about ±3 mm. The rest of the case interior is estimated from your build photos and DARKROCK’s side diagram, roughly ±15 mm.</p>
+    <p class="fine">Part sizes come from spec sheets: V100 267 × 111 mm, ATX board 305 × 244 mm, slot pitch 20.32 mm, EVGA 850 G5 150 × 150 × 86 mm, Pure Loop 2 radiator 397 × 120 × 27 mm. The tunnel parts follow their print files. The card’s place (158 mm behind the front steel, 22 mm toward the tray, 30 mm above the tunnel’s center) comes from ruler photos in the case, good to about ±3 mm. The rest of the case interior is estimated from your build photos and DARKROCK’s side diagram, roughly ±15 mm.</p>
   </aside>
 </div>
 
@@ -291,7 +291,7 @@ import { RoomEnvironment } from 'three/addons/environments/RoomEnvironment.js';
 const D = {
   boardTop: 413, boardBottom: 108, boardRear: 6, boardFront: 250,
   shroudTop: 103,
-  frontFrameX: 423,           // card end to the inside of the front steel measured 156 mm (was modeled as 131)
+  frontFrameX: 425.5,         // card end to the inside of the front steel measured 158.5 mm (was modeled as 131)
   slot1FromTop: 164, slotPitch: 20.32,
   // Four dual-drive bay positions, bottom to top. Only bay 4 still has its cage.
   bays: [
@@ -785,9 +785,9 @@ function buildStatic() {
 // Tunnel parts are built in the tunnel's own frame: the group sits on the fan axis at the inside face of
 // the front steel, x = -u runs back toward the card, and y, z are offsets from the fan axis.
 // u, back from the steel: adapter pads 0-3.5 and plate to 6.5, fan 1, straightener, fan 2, funnel flange, loft, sockets.
-// The card's end face is at u 156; collar C reaches from 124 to 164.
+// The card's end face is at u 158.5; collar C reaches from 122 to 166.5.
 const TU = { ad0: 3.5, fan1: 6.5, str0: 31.5, strTab1: 35.5, strLug0: 46.5, str1: 51.5, fan2: 51.5, fan2T: 26, fl0: 77.5, fl1: 82.5, loft1: 120, strip: 127, sock1: 150 };
-const COL = { hw: 51.4, hh: 20.65, fwd: 32, sleeve: 8, pocketZ: 6.6, pocketY: 0.65 };   // collar C around the card's center
+const COL = { hw: 51.4, hh: 20.65, fwd: 36.5, sleeve: 8, pocketZ: 6.6, pocketY: 0.65 };   // collar C around the card's center
 const CORNERS = [[52.5, 52.5], [-52.5, 52.5], [-52.5, -52.5], [52.5, -52.5]];   // (z, y) fan screw holes
 const LUGS = [[66, 35], [-66, 35], [-66, -35], [66, -35]];                       // (z, y) straightener lugs, tray and glass sides only
 const CAGES = [3];                                                               // only the bay 4 cage is left
@@ -973,7 +973,7 @@ function buildTunnel(g, p) {
   T.add(tag('B · Twin funnel v2 · printing', -(TU.sock1 - 22), -74, 0, 'petg'));
 }
 
-// Collar C v2 slips 8 mm over the card end and reaches 32 mm in front of it. The top-glass corner is walled off as a
+// Collar C v2 slips 8 mm over the card end and reaches 36.5 mm in front of it. The top-glass corner is walled off as a
 // pocket for the power plug, outside the airflow. Three ears inside take the end-face screws, and a thin spring
 // leaf on the tray side closes the sideways gap to the socket wall.
 function buildCollar(g, p) {
@@ -987,8 +987,8 @@ function buildCollar(g, p) {
   g.add(box(L, x1, yp - 2, yt, zp - 2, zp, m));              // pocket side
   g.add(box(x1 - 2, x1, yp - 2, yt, zp - 2, zg, m));         // pocket front
   for (const u of [7.7, 26.3, 44.8]) g.add(box(L, L + 1.4, yt - 15.5, yt - 2, zt + 2 + u - 5.9, zt + 2 + u + 5.9, m));
-  const leaf = new THREE.Mesh(new THREE.BoxGeometry(22.6, 2 * COL.hh - 3.6, 0.6), m);
-  leaf.position.set(L + 21, cy, zt - 2.5);
+  const leaf = new THREE.Mesh(new THREE.BoxGeometry(23.5, 2 * COL.hh - 3.6, 0.6), m);
+  leaf.position.set(L + 25, cy, zt - 2.5);
   leaf.rotation.y = -Math.atan2(5, 22);
   g.add(leaf);
   if (!p.later) g.add(tag('C · Card collar v2 · printing', L + 12, yb + 4, zg, 'collar'));
@@ -1317,7 +1317,7 @@ function updatePanel() {
     ['Tunnel top → bay 4 cage', `${Math.round(p.cageGap)} mm`],
     ['Tunnel → PSU shroud', `${Math.round(p.shroudGap)} mm`],
     ['Funnel B print size', `${p.print} mm · fits the bed`],
-    ['Funnel, collar and cap, one plate', '15 h 55 min · about 225 g of PETG'],
+    ['Funnel, collar and cap, one plate', '16 h 08 min · about 225 g of PETG'],
     ...(two ? [
       ['Air per card (rough)', '70–85% of a tunnel of its own'],
       ['PCIe link', 'x8 + x8 (PCIe 3.0)'],
@@ -1341,7 +1341,7 @@ function updatePanel() {
     ['C · Card collar v2', 'printing', 'Slips over the card end and screws to it through three ears. The power plug sits in a walled-off corner, outside the airflow. A thin spring leaf closes the gap on the tray side. PETG.'],
     ['D · Socket cap v2', two ? 'later' : 'printing', two ? 'Comes out when card 2 goes in.' : 'Plugs the lower socket until card 2 is in, so all the air goes to card 1. One fan screw through its tab holds it.'],
     ['EPS 8-pin power', 'have', 'The 030-0571-000 style adapter. The plug goes into the collar’s open corner; its leads come up through the funnel’s open roof and run forward over the tunnel, with the adapter parked on top.'],
-    ['Tape', 'have', 'One strip over the slot left on the glass side between the funnel and the collar’s front edge, about 4 mm wide.'],
+    ['Tape', 'have', 'One strip over the slot left on the glass side between the funnel and the collar’s front edge, about 2 mm wide.'],
     ...(two ? [
       ['Second collar C', 'later', 'The same collar on card 2’s end. Its EPS cable runs back between the two sockets.'],
       ['Power for card 2', 'later', 'Another 030-0571-000 style adapter on its own pair of PCIe 8-pin leads. Don’t feed both cards from the split EPS cable.'],
