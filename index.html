@@ -88,7 +88,18 @@ body {
 .tag.collar { color: var(--collar); border-color: var(--collar); }
 .tag.have { color: var(--ok); border-color: var(--ok); }
 .tag.later { color: var(--muted); border-style: dashed; }
-.stage.hide-tags .tag:not(.dim) { display: none !important; }
+.stage.hide-tags .tag:not(.dim):not(.done) { display: none !important; }
+/* Checklist parts on the model: a ring while they wait, a green tick once ticked. With Labels off only the ticks stay. */
+.tag.item { pointer-events: auto; cursor: pointer; transition: box-shadow .2s; }
+.tag.item::before { content: "\25CB"; margin-right: 5px; font-weight: 700; }
+.tag.item.todo { color: var(--accent); border-color: var(--accent); }
+.tag.item.done { color: var(--ok); border-color: var(--ok); background: color-mix(in srgb, var(--ok) 15%, var(--panel)); }
+.tag.item.done::before { content: "\2713"; }
+.tag.item:hover { box-shadow: 0 0 0 3px color-mix(in srgb, currentColor 30%, transparent); }
+.tag.item.ping { animation: ping 1.4s ease-out 1; }
+@keyframes ping { 0% { box-shadow: 0 0 0 0 color-mix(in srgb, var(--accent) 80%, transparent); } 100% { box-shadow: 0 0 0 14px transparent; } }
+.stage.hide-tags .tag.item.done { width: 22px; height: 22px; margin-top: 0; padding: 0; font-size: 0; display: grid; place-items: center; border-radius: 50%; color: var(--panel); background: var(--ok); }
+.stage.hide-tags .tag.item.done::before { margin: 0; font-size: 13px; line-height: 1; }
 .stage.hide-dims .tag.dim { display: none !important; }
 
 /* Panel */
@@ -138,9 +149,33 @@ ul.parts .note { grid-column: 1 / -1; color: var(--muted); font-size: 13px; }
 .pill.have, .pill.printed { color: var(--ok); }
 .pill.todo, .pill.printing { color: var(--accent); }
 .pill.later { color: var(--muted); border-style: dashed; }
+.pill.need { color: var(--warn); }
 .model { display: block; font: 500 12px/1.5 var(--mono); color: var(--muted); font-variant-numeric: tabular-nums; }
 .fine { margin: 0; padding-top: 14px; border-top: 1px solid var(--line); color: var(--muted); font-size: 12px; }
 .drawer-close { display: none; float: right; margin: -2px -4px 0 12px; width: 34px; height: 34px; place-items: center; color: var(--ink); background: var(--panel); border: 1px solid var(--line); border-radius: 8px; cursor: pointer; }
+
+/* Build checklist */
+.cl-head { display: flex; flex-wrap: wrap; align-items: baseline; justify-content: space-between; gap: 4px 12px; margin-bottom: 10px; }
+.cl-head h2 { margin: 0; }
+.cl-count { font: 600 12px/1.2 var(--mono); color: var(--ok); font-variant-numeric: tabular-nums; }
+.cl-bar { height: 6px; border-radius: 3px; background: var(--line); overflow: hidden; }
+.cl-bar span { display: block; height: 100%; width: 0; border-radius: inherit; background: var(--ok); transition: width .3s ease; }
+.cl-hint { margin: 10px 0 0; color: var(--muted); font-size: 13px; max-width: 60ch; }
+ul.cl { margin: 0; padding: 0; list-style: none; display: grid; gap: 6px; }
+.cl-item { display: grid; grid-template-columns: minmax(0, 1fr) auto; align-items: center; gap: 10px; padding: 8px 8px 8px 12px; border: 1px solid var(--line); border-radius: 8px; background: var(--panel); transition: background-color .2s, border-color .2s; }
+.cl-item label { display: grid; grid-template-columns: auto minmax(0, 1fr); align-items: start; gap: 0 11px; min-width: 0; cursor: pointer; }
+.cl-item input { width: 18px; height: 18px; margin: 1px 0 0; accent-color: var(--ok); cursor: pointer; }
+.cl-item b { font-weight: 650; }
+.cl-sub { display: block; color: var(--muted); font-size: 12.5px; }
+.cl-item.done { border-color: color-mix(in srgb, var(--ok) 50%, var(--line)); background: color-mix(in srgb, var(--ok) 8%, var(--panel)); }
+.cl-item.done .cl-sub { color: var(--ok); }
+.cl-show { font: 600 11px/1 var(--mono); color: var(--ink); background: none; border: 1px solid var(--line); border-radius: 6px; padding: 7px 9px; cursor: pointer; }
+.cl-show:hover { background: color-mix(in srgb, var(--ink) 8%, transparent); }
+.checklist:not(.model-ready) .cl-show { display: none; }
+.cl-item.flash { animation: clflash 1.6s ease-out 1; }
+@keyframes clflash { 0% { box-shadow: 0 0 0 3px var(--accent); } 100% { box-shadow: 0 0 0 3px transparent; } }
+.cl-save { margin: 10px 0 0; font: 500 11px/1.45 var(--mono); color: var(--muted); }
+@media (prefers-reduced-motion: reduce) { .cl-item.flash, .tag.item.ping { animation-duration: 2.4s; animation-timing-function: steps(1, end); } .cl-bar span { transition: none; } }
 
 /* Full screen: the stage fills the window; the panel becomes a drawer and a dock holds the main switches. */
 .app.full { position: fixed; inset: 0; z-index: 20; height: auto; grid-template-columns: minmax(0, 1fr); grid-template-rows: minmax(0, 1fr); gap: 0; background: var(--bg); }
@@ -217,6 +252,20 @@ ul.parts .note { grid-column: 1 / -1; color: var(--muted); font-size: 13px; }
       <dl class="metrics" id="metrics"></dl>
     </section>
 
+    <section class="checklist" id="checklist" aria-labelledby="cl-title">
+      <div class="cl-head">
+        <h2 id="cl-title">Build checklist</h2>
+        <span class="cl-count" id="cl-count"></span>
+      </div>
+      <div class="cl-bar" aria-hidden="true"><span id="cl-bar"></span></div>
+      <p class="cl-hint">Tick a part once it’s printed or in hand and ready to go in. Ticked parts get a green ✓ on their label in the model; Show finds a part in the model, and clicking a label there finds it here.</p>
+      <h3>Printed parts</h3>
+      <ul class="cl" id="cl-print"></ul>
+      <h3>Bought, in hand</h3>
+      <ul class="cl" id="cl-have"></ul>
+      <p class="cl-save" id="cl-save" aria-live="polite">Ticks are saved in this browser.</p>
+    </section>
+
     <section>
       <h2>What the model shows</h2>
       <ul class="list">
@@ -289,6 +338,165 @@ ul.parts .note { grid-column: 1 / -1; color: var(--muted); font-size: 13px; }
       if (n) n.textContent = "The 3D view didn't load. Check your connection and reload the page.";
     }
   }, 15000);
+</script>
+<script>
+// The build checklist. Each part starts ticked or not from what's known (printed or in hand); your own ticks override
+// that. Inside the artifact viewer they're saved with the artifact (its db), so they follow you between devices; on any
+// other copy of the page they stay in this browser. The 3D view reads them through window.__checklist.
+(function () {
+  var ITEMS = [
+    { id: 'adapter', group: 'print', name: 'Adapter v1', ready: true, on: 'Printed · black PETG · fits the case holes', off: 'Not ready yet' },
+    { id: 'rail', group: 'print', name: 'Rail frame v3', ready: true, on: 'Printed 15 Nov · white PLA', off: 'To print · about 2 h 25 min' },
+    { id: 'straightener', group: 'print', name: 'Straightener v4', ready: false, on: 'Printed · ready to fit', off: 'To print · about 6 h 55 min, 66 g' },
+    { id: 'pins', group: 'print', name: 'Snap pins × 4', ready: false, on: 'Printed · ready to fit', off: 'To print · all four in about 24 min' },
+    { id: 'duct', group: 'print', name: 'Duct', ready: false, on: 'Printed · ready to fit', off: 'To print, v8 · once its card-end test fits · about 16 h' },
+    { id: 'fan1', group: 'have', name: 'Fan 1 · Arctic P12 Pro', ready: true, on: 'In hand', off: 'Not here yet' },
+    { id: 'fan2', group: 'have', name: 'Fan 2 · Arctic P12 Pro', ready: true, on: 'In hand', off: 'Not here yet' },
+    { id: 'eps', group: 'have', name: 'EPS 8-pin adapter', ready: true, on: 'In hand · plugs into the card first', off: 'Not here yet' },
+    { id: 'screws', group: 'have', name: 'Card end screws × 3', ready: true, on: 'The card’s own · 2 mm longer M3 if short', off: 'Not here yet' }
+  ];
+  var BY = {};
+  ITEMS.forEach(function (it) { BY[it.id] = it; });
+  var KEY = 'nas-mockup-checklist-v1';
+  var SAVED_DB = 'Ticks are saved with this artifact, on every device you open it on.';
+  var section = document.getElementById('checklist'), saveEl = document.getElementById('cl-save');
+  var reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
+  function clean(o) {
+    var out = {};
+    if (o && typeof o === 'object') for (var k in o) if (BY[k] && typeof o[k] === 'boolean') out[k] = o[k];
+    return out;
+  }
+  var ticks = {};
+  try { ticks = clean(JSON.parse(localStorage.getItem(KEY) || '{}')); } catch (e) { /* storage unavailable */ }
+  function saveLocal() { try { localStorage.setItem(KEY, JSON.stringify(ticks)); } catch (e) { /* ignore */ } }
+  function isDone(id) { return Object.prototype.hasOwnProperty.call(ticks, id) ? ticks[id] : !!(BY[id] && BY[id].ready); }
+  function setSave(t) { saveEl.textContent = t; }
+
+  var rows = {};
+  ITEMS.forEach(function (it) {
+    var li = document.createElement('li');
+    li.className = 'cl-item';
+    li.dataset.id = it.id;
+    var label = document.createElement('label');
+    var box = document.createElement('input');
+    box.type = 'checkbox';
+    var text = document.createElement('span');
+    var b = document.createElement('b'); b.textContent = it.name;
+    var sub = document.createElement('span'); sub.className = 'cl-sub';
+    text.append(b, sub);
+    label.append(box, text);
+    var show = document.createElement('button');
+    show.type = 'button'; show.className = 'cl-show'; show.textContent = 'Show';
+    show.setAttribute('aria-label', 'Show ' + it.name + ' in the model');
+    show.addEventListener('click', function () { document.dispatchEvent(new CustomEvent('checklist:show', { detail: it.id })); });
+    box.addEventListener('change', function () { tick(it.id, box.checked); });
+    li.append(label, show);
+    document.getElementById(it.group === 'print' ? 'cl-print' : 'cl-have').append(li);
+    rows[it.id] = { li: li, box: box, sub: sub };
+  });
+
+  function render() {
+    var n = 0;
+    ITEMS.forEach(function (it) {
+      var d = isDone(it.id), r = rows[it.id];
+      if (d) n++;
+      r.box.checked = d;
+      r.li.classList.toggle('done', d);
+      r.sub.textContent = d ? it.on : it.off;
+    });
+    document.getElementById('cl-count').textContent = n + ' of ' + ITEMS.length + ' ready';
+    document.getElementById('cl-bar').style.width = (100 * n / ITEMS.length) + '%';
+    document.dispatchEvent(new CustomEvent('checklist:change'));
+  }
+
+  // Saving to the artifact: one write at a time, the latest ticks win; snapshots wait while a write is on its way.
+  var ref = null, readOnly = false, busy = false, dirty = false;
+  var wait = function (ms) { return new Promise(function (r) { setTimeout(r, ms); }); };
+  async function pump() {
+    if (busy || !ref || readOnly) return;
+    busy = true;
+    try {
+      while (dirty && ref && !readOnly) {
+        dirty = false;
+        var body = { ticks: Object.assign({}, ticks), updated: new Date().toISOString() };
+        try {
+          try { await ref.set(body); }
+          catch (e) {
+            if (!e || e.code !== 'unavailable') throw e;
+            await wait(600 + Math.random() * 1200);
+            await ref.set(body);
+          }
+          setSave(SAVED_DB);
+        } catch (e) {
+          if (e && (e.code === 'invalid_argument' || e.code === 'not_granted')) {
+            readOnly = true;
+            setSave('You can view this list but not change the saved copy, so your ticks stay in this browser.');
+          } else {
+            dirty = true;
+            setSave('Couldn’t save to the artifact just now; your ticks are kept in this browser and go up with your next tick.');
+            break;
+          }
+        }
+      }
+    } finally { busy = false; }
+  }
+  function tick(id, val) {
+    ticks[id] = val;
+    saveLocal();
+    render();
+    if (ref && !readOnly) { dirty = true; pump(); }
+  }
+
+  if (window.claude && typeof window.claude.use === 'function') {
+    window.claude.use('db').then(function (db) {
+      if (!db) return;
+      ref = db.doc('checklist/ticks');
+      setSave('Loading your saved ticks…');
+      var first = true;
+      var timer = setTimeout(function () { setSave('Can’t reach the saved ticks yet, so this shows this browser’s copy.'); }, 10000);
+      ref.onSnapshot(function (snap) {
+        if (!snap.metadata.fromCache) clearTimeout(timer);
+        if (busy || dirty) return;
+        var body = snap.exists ? snap.data() : null;
+        if (body && body.ticks && typeof body.ticks === 'object') {
+          ticks = clean(body.ticks);
+          saveLocal();
+          render();
+        } else if (!snap.exists && !snap.metadata.fromCache && first && Object.keys(ticks).length) {
+          dirty = true;
+          pump();
+        }
+        if (!snap.metadata.fromCache) { first = false; if (!readOnly && !dirty) setSave(SAVED_DB); }
+      }, function () {
+        clearTimeout(timer);
+        ref = null;
+        setSave('Ticks are saved in this browser.');
+      });
+    }, function () { /* no db here */ });
+  }
+
+  window.__checklist = {
+    items: ITEMS,
+    item: function (id) { return BY[id] || null; },
+    isDone: isDone,
+    modelReady: function () { section.classList.add('model-ready'); },
+    // From a label in the model: bring its row into view and flash it.
+    reveal: function (id) {
+      var r = rows[id];
+      if (!r) return;
+      var app = document.querySelector('.app');
+      if (app.classList.contains('full') && !app.classList.contains('drawer')) document.getElementById('btn-drawer').click();
+      setTimeout(function () {
+        r.li.scrollIntoView({ block: 'nearest', behavior: reduce ? 'auto' : 'smooth' });
+        r.li.classList.remove('flash');
+        void r.li.offsetWidth;
+        r.li.classList.add('flash');
+        r.box.focus({ preventScroll: true });
+      }, app.classList.contains('full') ? 240 : 0);
+    }
+  };
+  render();
+})();
 </script>
 <script type="module">
 import * as THREE from 'three';
@@ -506,6 +714,9 @@ const MAT = {
   pin: new THREE.MeshPhysicalMaterial({ color: 0xdf7a26, roughness: 0.45, clearcoat: 0.2 }),
   petgBlack: new THREE.MeshPhysicalMaterial({ color: 0x26272b, roughness: 0.38, clearcoat: 0.4 }),
   partEdge: new THREE.LineBasicMaterial({ color: 0x5d6670, transparent: true, opacity: 0.6 }),
+  // Ticked parts' printed edges turn green; Show outlines the part in the accent for a moment.
+  doneEdge: new THREE.LineBasicMaterial({ color: 0x23794b, transparent: true, opacity: 0.95 }),
+  find: new THREE.LineBasicMaterial({ color: 0xc8651a, transparent: true, opacity: 1, depthTest: false, depthWrite: false }),
 };
 
 const perfTex = canvasTex(64, 64, (g, w, h) => {
@@ -861,7 +1072,22 @@ const SCREW = {
   head: keep(new THREE.CylinderGeometry(3.6, 3.6, 2.2, 20).rotateZ(Math.PI / 2)),
   shank: keep(new THREE.CylinderGeometry(2, 2, 10.2, 12).rotateZ(Math.PI / 2)),
 };
+// Checklist links: each checklist id to its label and its parts in the model.
+const itemTags = new Map(), itemObjs = new Map();
+const ITEM_OF = name => name.startsWith('adapter') ? 'adapter' : name.startsWith('rail') ? 'rail'
+  : name.startsWith('straightener') ? 'straightener' : name.startsWith('pin') ? 'pins' : name.startsWith('duct') ? 'duct'
+  : name.startsWith('screw') ? 'screws' : name.startsWith('plug') || name.startsWith('eps_cable') ? 'eps' : null;
+function linkItem(id, ...objs) { if (!itemObjs.has(id)) itemObjs.set(id, []); itemObjs.get(id).push(...objs); }
+function itemTag(id, text, x, y, z) {
+  const o = tag(text, x, y, z, 'item');
+  o.element.dataset.item = id;
+  o.element.title = 'Find it in the build checklist';
+  o.element.addEventListener('click', () => window.__checklist?.reveal(id));
+  itemTags.set(id, o.element);
+  return o;
+}
 function buildTunnel(g, p) {
+  itemTags.clear(); itemObjs.clear();
   const T = new THREE.Group();
   T.position.set(D.frontFrameX, p.cy, p.cz);
   g.add(T);
@@ -876,10 +1102,13 @@ function buildTunnel(g, p) {
       if (src.name.startsWith('duct')) m.renderOrder = 2;
       if (!src.name.startsWith('eps_cable')) m.add(new THREE.LineSegments(partEdges(src.geometry), MAT.partEdge));
       (RIDES.some(r => src.name.startsWith(r)) ? S : T).add(m);
+      const id = ITEM_OF(src.name);
+      if (id) linkItem(id, m);
     }
   }
-  T.add(makeFan('arctic', '-x', -V6.fan1, V6.sy, 0));
-  T.add(makeFan('arctic', '-x', -V6.fan2, V6.sy, 0));
+  const fan1 = makeFan('arctic', '-x', -V6.fan1, V6.sy, 0), fan2 = makeFan('arctic', '-x', -V6.fan2, V6.sy, 0);
+  T.add(fan1, fan2);
+  linkItem('fan1', fan1); linkItem('fan2', fan2);
   // The two case screws, from outside through the steel into the adapter's ear slots. The case's holes fall a few mm
   // below the slots' centres in this model, still inside them.
   for (const z of p.holeZ) T.add(mesh(SCREW.head, MAT.darkMetal, 3.1, p.holeY, z), mesh(SCREW.shank, MAT.darkMetal, -3.1, p.holeY, z));
@@ -890,24 +1119,26 @@ function buildTunnel(g, p) {
   }
   // The EPS adapter parked on top of fan 1, where the lead comes over the stack. Its two PCIe leads run back over
   // the duct to the tray cutout.
-  S.add(box(-30, -8, 33, 55, -1, 40, MAT.black));
+  const epsBox = box(-30, -8, 33, 55, -1, 40, MAT.black);
+  S.add(epsBox);
+  linkItem('eps', epsBox);
   pcieLeads = [-4, 4].map(dy => {
     const pts = [[-12, 52 + dy, -1], [-24, 58 + dy, -34], [-66, 64 + dy, -54], [-124, 68 + dy, -61], [-150, 72 + dy, -64], [-154, 72 + dy, -74]];
     const m = new THREE.Mesh(new THREE.TubeGeometry(new THREE.CatmullRomCurve3(pts.map(q => v(...q))), 64, 3.4, 10), MAT.tube);
     T.add(m);
     return m;
   });
-  T.add(tag('Adapter v1 · yours · 6 screws', -5, p.holeY + 22, p.holeZ[0] + 6, 'have'));
-  T.add(tag('Fan 1 · Arctic P12 Pro', -V6.fan1, V6.sy - 70, -30, 'have'));
-  T.add(tag('Straightener v4', -43, V6.sy - 84, -30, 'petg'));
-  T.add(tag('Fan 2 · Arctic P12 Pro', -V6.fan2, V6.sy - 98, -30, 'have'));
-  T.add(tag('Rail frame v3 · dovetail', -80.5, V6.sy + 84, -30, 'petg'));
-  T.add(tag('4 snap pins · click into fan 1', -43.5, V6.sy + 66, -58, 'petg'));
-  S.add(tag('Duct v6 · one piece, fitted to the card', -122, -64, 36, 'petg'));
+  T.add(itemTag('adapter', 'Adapter v1 · yours · 6 screws', -5, p.holeY + 22, p.holeZ[0] + 6));
+  T.add(itemTag('fan1', 'Fan 1 · Arctic P12 Pro', -V6.fan1, V6.sy - 70, -30));
+  T.add(itemTag('straightener', 'Straightener v4', -43, V6.sy - 84, -30));
+  T.add(itemTag('fan2', 'Fan 2 · Arctic P12 Pro', -V6.fan2, V6.sy - 98, -30));
+  T.add(itemTag('rail', 'Rail frame v3 · dovetail', -80.5, V6.sy + 84, -30));
+  T.add(itemTag('pins', '4 snap pins · click into fan 1', -43.5, V6.sy + 66, -58));
+  S.add(itemTag('duct', 'Duct v6 · one piece, fitted to the card', -122, -64, 36));
   S.add(tag('Soft lip · seals all round', -(V6.rear - 3), -24, 52, 'petg'));
-  S.add(tag('3 screws into the card’s end strip', -152, 24, -30, 'have'));
+  S.add(itemTag('screws', '3 screws into the card’s end strip', -152, 24, -30));
   S.add(tag('EPS lead · trough, then up and over', -112, 40, 30));
-  S.add(tag('EPS adapter · parked on top', -19, 70, 20, 'have'));
+  S.add(itemTag('eps', 'EPS adapter · parked on top', -19, 70, 20));
   return S;
 }
 
@@ -1169,8 +1400,50 @@ function buildDynamic() {
   applyXray(dynG);
   applyToggles();
   applySlide();
+  applyChecks();
   updatePanel();
 }
+// The checklist on the model: ticked parts get a green tick on their label and green printed edges.
+function applyChecks() {
+  const CL = window.__checklist;
+  if (!CL) return;
+  for (const [id, el] of itemTags) { const d = CL.isDone(id); el.classList.toggle('done', d); el.classList.toggle('todo', !d); }
+  for (const [id, objs] of itemObjs) {
+    const d = CL.isDone(id);
+    for (const o of objs) for (const c of o.children) if (c.isLineSegments && (c.material === MAT.partEdge || c.material === MAT.doneEdge)) c.material = d ? MAT.doneEdge : MAT.partEdge;
+  }
+}
+// Show: fly to a checklist part from the tunnel view's side and outline it for a moment.
+let finder = null;
+const partBox = (objs, out) => { out.makeEmpty(); for (const o of objs) out.expandByObject(o); return out.expandByScalar(3); };
+function showPart(id) {
+  const objs = itemObjs.get(id);
+  if (!objs || !objs.length) return;
+  const b = partBox(objs, new THREE.Box3());
+  const c = b.getCenter(new THREE.Vector3()), size = b.getSize(new THREE.Vector3()).length();
+  const aspect = camera.aspect || 1, f = aspect < 1 ? Math.min(2, 0.9 / Math.max(aspect, 0.45)) : 1;
+  const pos = v(140, 85, 476).normalize().multiplyScalar(Math.min(640, Math.max(300, size * 2.3)) * f).add(c);
+  document.querySelectorAll('[data-cam]').forEach(btn => btn.setAttribute('aria-pressed', 'false'));
+  if (reduceMotion) { camera.position.copy(pos); controls.target.copy(c); controls.update(); tween = null; }
+  else tween = { p0: camera.position.clone(), t0: controls.target.clone(), p1: pos, t1: c, k: 0 };
+  if (finder) { scene.remove(finder.helper); finder.helper.geometry.dispose(); }
+  const helper = new THREE.Box3Helper(b.clone(), MAT.find);
+  helper.material.dispose();
+  helper.material = MAT.find;
+  helper.renderOrder = 10;
+  scene.add(helper);
+  finder = { objs, helper, t: 0 };
+  const el = itemTags.get(id);
+  if (el) { el.classList.remove('ping'); void el.offsetWidth; el.classList.add('ping'); }
+}
+function stepFinder(dt) {
+  if (!finder) return;
+  finder.t += dt;
+  partBox(finder.objs, finder.helper.box);
+  MAT.find.opacity = reduceMotion ? 1 : 0.55 + 0.45 * Math.cos(finder.t * 7);
+  if (finder.t > 2.6) { scene.remove(finder.helper); finder.helper.geometry.dispose(); finder = null; }
+}
+
 // Slide-in view: the card, the duct on its end and the lead lift toward the glass, the way they go in.
 let slideK = 0;
 function applySlide() {
@@ -1194,9 +1467,12 @@ const PRINT = { duct: ' About 15 h 57 min and 178 g, with supports from the bed.
   test: ' About 1 h 27 min and 14 g, with supports from the bed.' };
 const PRINT_ROWS = [['Print first, the card-end test', 'about 1 h 27 min · 14 g'],
   ['Print, the new parts', 'about 25 h 41 min · 274 g of PLA']];
-const PILL = { have: 'have it', printed: 'printed', printing: 'printing', todo: 'to print', later: 'later' };
+const PILL = { have: 'have it', printed: 'printed', printing: 'printing', todo: 'to print', later: 'later', need: 'not yet' };
 function setParts(el, items) {
-  el.replaceChildren(...items.map(([name, kind, note]) => {
+  const CL = window.__checklist;
+  el.replaceChildren(...items.map(([name, kind, note, id]) => {
+    const it = id && CL ? CL.item(id) : null;
+    if (it) kind = CL.isDone(id) ? (it.group === 'print' ? 'printed' : 'have') : (it.group === 'print' ? 'todo' : 'need');
     const li = document.createElement('li');
     const b = document.createElement('b'); b.textContent = name;
     const pill = document.createElement('span'); pill.className = `pill ${kind}`; pill.textContent = PILL[kind];
@@ -1239,16 +1515,16 @@ function updatePanel() {
     return [dt, dd];
   }));
   setParts($('parts'), [
-    ['Adapter v1', 'have', 'The one you printed, black PETG. It hangs inside the front steel on two fan screws through the middle fan’s top holes; its 13 mm slots let it slide ±4 mm up or down. Four fan screws hold fan 1 to it from the plate’s front, their heads in the 3.5 mm gap its pads leave.'],
-    ['Fan 1 · Arctic P12 Pro', 'have', 'Black, 120 × 120 × 25 mm, the high-pressure model. Screwed to the adapter at the front; the pins click into its open corners at the back.'],
-    ['Straightener v4', 'todo', `v2’s nine vanes and open hub, no lugs or screw pockets. The pins run through its corners in 4.6 mm holes and clamp it between the fans, where v2 leaked. A brim helps keep its corners down while it prints.${PRINT.straightener}`],
-    ['Fan 2 · Arctic P12 Pro', 'have', 'The same fan, pushing in series with fan 1; the straightener takes the swirl out between them.'],
-    ['Rail frame v3', 'todo', `On fan 2’s back. Dovetail rails top and bottom hold the duct’s flange tight against it; open at both ends. 4.4 mm pin holes, with counterbores so the heads sit below the flange. New in v3: a 2 mm chamfer along its back face’s glass edge, so the flange can’t catch it as the card goes in.${PRINT.rail}`],
-    ['Snap pins × 4', 'todo', `The snap test’s pin 1 (0.30 mm barb), 60 mm long. In from the rail frame through fan 2 and the straightener until the arrowheads click into fan 1’s open corners. Print one first and try it.${PRINT.pins}`],
+    ['Adapter v1', 'have', 'The one you printed, black PETG. It hangs inside the front steel on two fan screws through the middle fan’s top holes; its 13 mm slots let it slide ±4 mm up or down. Four fan screws hold fan 1 to it from the plate’s front, their heads in the 3.5 mm gap its pads leave.', 'adapter'],
+    ['Fan 1 · Arctic P12 Pro', 'have', 'Black, 120 × 120 × 25 mm, the high-pressure model. Screwed to the adapter at the front; the pins click into its open corners at the back.', 'fan1'],
+    ['Straightener v4', 'todo', `v2’s nine vanes and open hub, no lugs or screw pockets. The pins run through its corners in 4.6 mm holes and clamp it between the fans, where v2 leaked. A brim helps keep its corners down while it prints.${PRINT.straightener}`, 'straightener'],
+    ['Fan 2 · Arctic P12 Pro', 'have', 'The same fan, pushing in series with fan 1; the straightener takes the swirl out between them.', 'fan2'],
+    ['Rail frame v3', 'todo', `On fan 2’s back. Dovetail rails top and bottom hold the duct’s flange tight against it; open at both ends. 4.4 mm pin holes, with counterbores so the heads sit below the flange. New in v3: a 2 mm chamfer along its back face’s glass edge, so the flange can’t catch it as the card goes in.${PRINT.rail}`, 'rail'],
+    ['Snap pins × 4', 'todo', `The snap test’s pin 1 (0.30 mm barb), 60 mm long. In from the rail frame through fan 2 and the straightener until the arrowheads click into fan 1’s open corners. Print one first and try it.${PRINT.pins}`, 'pins'],
     ['Card-end test piece', 'todo', `The duct’s last 12 mm: the sleeve, the lip, the screw plate and the trough’s end. Print it first and try it on the card before the long duct print.${PRINT.test}`],
-    ['Duct v6', 'todo', `One piece from the flange to the card end: no collar, no cap, no tape. A dovetail flange on the fans’ axis, a straight-walled loft that climbs 27.5 mm to the card, and an 8 mm sleeve shaped to the card’s end, with a 0.6 mm lip that seals all round. Inside the sleeve, a 2 mm plate sits on the card’s end strip and takes its three end screws. The EPS plug sits in an open-top trough whose end meets the card. Prints sleeve-down, so the lip is its first three layers.${PRINT.duct}`],
-    ['Card end screws × 3', 'have', 'The card’s own screws, in holes A, B and C on its end strip. The plate adds 2 mm under each head; if they come up short, use ones 2 mm longer (probably M3).'],
-    ['EPS 8-pin power', 'have', 'The 030-0571-000 style adapter. Plug it into the card before the duct goes on; the lead runs up the trough and over the stack, with the adapter parked on top.'],
+    ['Duct v6', 'todo', `One piece from the flange to the card end: no collar, no cap, no tape. A dovetail flange on the fans’ axis, a straight-walled loft that climbs 27.5 mm to the card, and an 8 mm sleeve shaped to the card’s end, with a 0.6 mm lip that seals all round. Inside the sleeve, a 2 mm plate sits on the card’s end strip and takes its three end screws. The EPS plug sits in an open-top trough whose end meets the card. Prints sleeve-down, so the lip is its first three layers.${PRINT.duct}`, 'duct'],
+    ['Card end screws × 3', 'have', 'The card’s own screws, in holes A, B and C on its end strip. The plate adds 2 mm under each head; if they come up short, use ones 2 mm longer (probably M3).', 'screws'],
+    ['EPS 8-pin power', 'have', 'The 030-0571-000 style adapter. Plug it into the card before the duct goes on; the lead runs up the trough and over the stack, with the adapter parked on top.', 'eps'],
     ['Thin foam strip', 'later', 'Only if the test piece shows a gap the lip can’t close, at a bottom corner say: a strip of thin foam tape inside the sleeve closes it.'],
   ]);
   const ds = $('dock-status');
@@ -1333,6 +1609,8 @@ function syncTheme() {
   scene.background = new THREE.Color(cs.getPropertyValue('--stage').trim() || '#d3d9de');
   MAT.dimLine.color.set(cs.getPropertyValue('--ink').trim() || '#15181c');
   edgeMat.color.set(cs.getPropertyValue('--ink').trim() || '#15181c');
+  MAT.doneEdge.color.set(cs.getPropertyValue('--ok').trim() || '#23794b');
+  MAT.find.color.set(cs.getPropertyValue('--accent').trim() || '#c8651a');
 }
 matchMedia('(prefers-color-scheme: dark)').addEventListener('change', syncTheme);
 new MutationObserver(syncTheme).observe(document.documentElement, { attributes: true, attributeFilter: ['data-theme', 'class', 'style'] });
@@ -1438,6 +1716,7 @@ function frame() {
     if (tween.k >= 1) tween = null;
   }
   controls.update();
+  stepFinder(dt);
   const goal = state.fit ? 1 : 0;
   if (slideK !== goal) {
     slideK = reduceMotion ? goal : Math.min(1, Math.max(0, slideK + (goal > slideK ? dt : -dt) / 0.9));
@@ -1454,6 +1733,16 @@ function frame() {
 requestAnimationFrame(frame);
 noticeEl.hidden = true;
 window.__mockupReady = true;
+// The checklist: ticks redraw the model's marks and the parts list; Show finds a part (on a phone, the stage first).
+document.addEventListener('checklist:change', () => { applyChecks(); updatePanel(); });
+document.addEventListener('checklist:show', e => {
+  if (appEl.classList.contains('drawer') && innerWidth < 720) setDrawer(false);
+  if (!appEl.classList.contains('full') && matchMedia('(max-width: 900px)').matches) stageEl.scrollIntoView({ block: 'start', behavior: reduceMotion ? 'auto' : 'smooth' });
+  showPart(e.detail);
+});
+window.__checklist?.modelReady();
+applyChecks();
+updatePanel();
 </script>
 </body>
 </html>
