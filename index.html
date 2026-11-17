@@ -139,9 +139,10 @@ h3 { margin: 18px 0 8px; font: 600 12px/1.2 var(--mono); letter-spacing: .04em; 
 .status.bad { color: var(--bad); }
 .status.info { color: var(--muted); }
 .status-note { margin: 10px 0 0; max-width: 60ch; }
-dl.metrics { margin: 14px 0 0; display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 7px 14px; }
+dl.metrics { margin: 14px 0 0; display: grid; grid-template-columns: minmax(7.5em, 0.9fr) minmax(0, 1.1fr); gap: 7px 14px; }
+@media (max-width: 420px) { dl.metrics { grid-template-columns: minmax(0, 1fr); gap: 1px 0; } dl.metrics dd { text-align: left; margin-bottom: 7px; } }
 dl.metrics dt { color: var(--muted); min-width: 0; }
-dl.metrics dd { margin: 0; text-align: right; font: 500 12.5px/1.5 var(--mono); font-variant-numeric: tabular-nums; }
+dl.metrics dd { margin: 0; min-width: 0; overflow-wrap: anywhere; text-align: right; font: 500 12.5px/1.5 var(--mono); font-variant-numeric: tabular-nums; }
 ul.list, ol.list { margin: 0; padding-left: 18px; display: grid; gap: 7px; }
 ul.list li::marker { color: var(--accent); }
 ol.list li::marker { font: 600 12px var(--mono); color: var(--muted); }
