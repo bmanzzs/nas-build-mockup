@@ -225,6 +225,104 @@ ul.cl { margin: 0; padding: 0; list-style: none; display: grid; gap: 6px; }
   .tag { margin-top: -20px; padding: 2px 4px; font-size: 9.5px; }
   .tag.dim { margin-top: 0; }
 }
+/* ---- A closer look: the featured part on its turntable, the PC a ghost behind it */
+.stage::after { content: ""; position: absolute; inset: 0; z-index: 1; pointer-events: none; opacity: 0; transition: opacity .7s ease;
+  background: radial-gradient(85% 80% at 64% 46%, transparent 42%, color-mix(in srgb, var(--ink) 17%, transparent) 100%); }
+.stage.feat-sheet::after { background: radial-gradient(110% 62% at 50% 30%, transparent 40%, color-mix(in srgb, var(--ink) 17%, transparent) 100%); }
+.stage.featuring::after { opacity: 1; }
+.stage.featuring.feat-leaving::after { opacity: 0; }
+.stage .labels, .stage .hud, .stage .foot { transition: opacity .35s ease, transform .45s cubic-bezier(.2, .8, .2, 1); }
+.stage.featuring .labels { opacity: 0; }
+.stage.featuring .labels .tag { pointer-events: none !important; }
+.stage.featuring .hud, .stage.featuring .foot, .stage.featuring .hud > * { opacity: 0; pointer-events: none; }
+.stage.featuring .hud { transform: translateY(-10px); }
+.stage.featuring .foot { transform: translateY(10px); }
+#feat-snap { z-index: 1; pointer-events: none; }
+.tag.feat { pointer-events: auto; cursor: pointer; transition: box-shadow .2s, border-color .2s; }
+.tag.feat:hover { border-color: var(--accent); box-shadow: 0 0 0 3px color-mix(in srgb, var(--accent) 24%, transparent); }
+
+.feat-card { position: absolute; z-index: 4; left: 12px; top: 12px; max-height: calc(100% - 24px); width: min(344px, 46%); display: flex; flex-direction: column; overflow: hidden;
+  color: var(--ink); background: color-mix(in srgb, var(--panel) 80%, transparent); -webkit-backdrop-filter: blur(16px) saturate(1.3); backdrop-filter: blur(16px) saturate(1.3);
+  border: 1px solid color-mix(in srgb, var(--line) 85%, transparent); border-radius: 14px;
+  box-shadow: 0 22px 54px -18px rgb(0 0 0 / .42), inset 0 1px 0 color-mix(in srgb, #fff 30%, transparent);
+  visibility: hidden; opacity: 0; transform: translateX(-22px) scale(.985); transform-origin: left center;
+  transition: opacity .3s ease, transform .45s cubic-bezier(.4, 0, .2, 1), visibility 0s linear .45s; }
+.feat-card.open { visibility: visible; opacity: 1; transform: none; transition: opacity .35s ease, transform .6s cubic-bezier(.16, .84, .24, 1); }
+.feat-card::before { content: ""; position: absolute; left: 0; top: 0; right: 0; height: 3px; background: linear-gradient(90deg, var(--accent), color-mix(in srgb, var(--accent) 0%, transparent) 75%); }
+.feat-nav { display: flex; align-items: center; gap: 6px; padding: 12px 10px 10px; border-bottom: 1px solid color-mix(in srgb, var(--line) 75%, transparent); }
+.feat-back, .feat-arrow, .feat-btn { font: 600 12.5px/1 var(--body); color: var(--ink); background: color-mix(in srgb, var(--panel) 65%, transparent); border: 1px solid var(--line); cursor: pointer;
+  transition: background .15s, border-color .15s, color .15s, transform .15s; }
+.feat-back:hover, .feat-arrow:hover, .feat-btn:hover { background: color-mix(in srgb, var(--ink) 9%, var(--panel)); }
+.feat-back:active, .feat-arrow:active, .feat-btn:active { transform: scale(.96); }
+.feat-back { display: inline-flex; align-items: center; gap: 6px; padding: 8px 12px 8px 8px; border-radius: 9px; }
+.feat-back svg { transition: transform .2s; }
+.feat-back:hover svg { transform: translateX(-2px); }
+.feat-count { margin-left: auto; padding: 0 4px; font: 500 11px/1 var(--mono); font-variant-numeric: tabular-nums; color: var(--muted); }
+.feat-arrow { display: inline-grid; place-items: center; width: 34px; height: 34px; padding: 0; border-radius: 50%; }
+.feat-body { flex: 1 1 auto; min-height: 0; overflow-y: auto; overscroll-behavior: contain; padding: 18px 18px 8px; display: grid; align-content: start; gap: 10px; }
+.feat-kind { margin: 0; font: 600 11px/1.3 var(--mono); letter-spacing: .09em; text-transform: uppercase; color: var(--accent); }
+.feat-name { margin: 0; font: 760 33px/0.98 var(--display); font-stretch: 72%; letter-spacing: -.01em; text-transform: none; text-wrap: balance; }
+.feat-meta { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; }
+.feat-blurb { margin: 2px 0 0; max-width: 60ch; font-size: 14px; line-height: 1.55; color: color-mix(in srgb, var(--ink) 84%, var(--muted)); }
+dl.feat-facts { margin: 4px 0 6px; display: grid; grid-template-columns: auto minmax(0, 1fr); border-top: 1px solid var(--line); }
+dl.feat-facts dt, dl.feat-facts dd { padding: 7px 0; border-bottom: 1px solid color-mix(in srgb, var(--line) 70%, transparent); }
+dl.feat-facts dt { padding-right: 14px; font-size: 12.5px; color: var(--muted); }
+dl.feat-facts dd { margin: 0; min-width: 0; overflow-wrap: anywhere; text-align: right; font: 500 12.5px/1.45 var(--mono); font-variant-numeric: tabular-nums; }
+.feat-foot { display: flex; flex-wrap: wrap; gap: 6px; padding: 10px 12px 8px; border-top: 1px solid color-mix(in srgb, var(--line) 75%, transparent); }
+.feat-btn { display: inline-flex; align-items: center; gap: 6px; padding: 8px 10px; border-radius: 8px; }
+.feat-btn[aria-pressed="false"] { border-color: var(--accent); color: var(--accent); }
+.feat-btn[hidden] { display: none; }
+.feat-hint { margin: 0; padding: 0 14px 12px; font: 500 10.5px/1.45 var(--mono); color: var(--muted); }
+/* The card's contents rise in one after another, and swap with a quick fade when you go to the next part. */
+.feat-card.open .feat-body > * { animation: featRise .6s cubic-bezier(.16, .84, .24, 1) both; }
+.feat-card.open .feat-body > :nth-child(1) { animation-delay: .08s; }
+.feat-card.open .feat-body > :nth-child(2) { animation-delay: .13s; }
+.feat-card.open .feat-body > :nth-child(3) { animation-delay: .18s; }
+.feat-card.open .feat-body > :nth-child(4) { animation-delay: .23s; }
+.feat-card.open .feat-body > :nth-child(5) { animation-delay: .28s; }
+.feat-card.open .feat-body.swap > * { animation: none; opacity: 0; transform: translateY(-6px); transition: opacity .16s ease, transform .16s ease; }
+@keyframes featRise { from { opacity: 0; transform: translateY(12px); } }
+
+.feat-x { position: absolute; z-index: 4; top: 12px; right: 12px; width: 44px; height: 44px; padding: 0; display: grid; place-items: center; cursor: pointer;
+  color: var(--ink); background: color-mix(in srgb, var(--panel) 78%, transparent); -webkit-backdrop-filter: blur(10px); backdrop-filter: blur(10px);
+  border: 1px solid var(--line); border-radius: 50%; box-shadow: 0 8px 22px -8px rgb(0 0 0 / .4);
+  visibility: hidden; opacity: 0; transform: scale(.6) rotate(-90deg);
+  transition: opacity .25s ease, transform .45s cubic-bezier(.34, 1.4, .5, 1), visibility 0s linear .45s, color .15s, border-color .15s; }
+.stage.featuring:not(.feat-leaving) .feat-x { visibility: visible; opacity: 1; transform: none; transition: opacity .3s ease .2s, transform .55s cubic-bezier(.34, 1.4, .5, 1) .2s, color .15s, border-color .15s; }
+.stage.featuring:not(.feat-leaving) .feat-x:hover { color: var(--accent); border-color: var(--accent); transform: rotate(90deg); transition-delay: 0s; }
+.feat-back:focus-visible, .feat-arrow:focus-visible, .feat-btn:focus-visible, .feat-x:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+
+.feat-tip { position: absolute; z-index: 5; left: 0; top: 0; pointer-events: none; padding: 6px 9px 7px; border-radius: 7px; white-space: nowrap;
+  font: 650 12px/1.25 var(--body); color: var(--panel); background: color-mix(in srgb, var(--ink) 92%, transparent); box-shadow: 0 8px 20px -8px rgb(0 0 0 / .45); }
+.feat-tip small { display: block; margin-top: 2px; font: 500 10.5px/1.2 var(--mono); opacity: .72; }
+.feat-coach { position: absolute; z-index: 2; left: 50%; bottom: 58px; pointer-events: none; padding: 9px 15px 9px 32px; border-radius: 999px; white-space: nowrap;
+  font: 600 12.5px/1 var(--body); color: var(--panel); background: color-mix(in srgb, var(--ink) 88%, transparent); box-shadow: 0 10px 26px -10px rgb(0 0 0 / .5);
+  opacity: 0; transform: translate(-50%, 12px); transition: opacity .4s ease, transform .5s cubic-bezier(.16, .84, .24, 1); }
+.feat-coach.show { opacity: 1; transform: translate(-50%, 0); }
+.feat-coach::before, .feat-coach::after { content: ""; position: absolute; left: 14px; top: 50%; width: 8px; height: 8px; margin-top: -4px; border-radius: 50%; background: var(--accent); }
+.feat-coach::after { animation: featPing 1.6s ease-out infinite; }
+@keyframes featPing { from { transform: scale(1); opacity: .8; } to { transform: scale(3.2); opacity: 0; } }
+
+/* A narrow stage: the card becomes a sheet along the bottom and the part sits above it. */
+.stage.feat-sheet .feat-card { left: 8px; right: 8px; top: auto; bottom: 8px; width: auto; max-height: min(54%, 360px); border-radius: 16px; transform: translateY(26px); transform-origin: center bottom; }
+.stage.feat-sheet .feat-card.open { transform: none; }
+.stage.feat-sheet .feat-card::after { content: ""; position: absolute; top: 6px; left: 50%; width: 34px; height: 4px; margin-left: -17px; border-radius: 2px; background: color-mix(in srgb, var(--ink) 22%, transparent); }
+.stage.feat-sheet .feat-nav { padding: 16px 8px 8px; }
+.stage.feat-sheet .feat-body { padding: 12px 14px 6px; gap: 8px; }
+.stage.feat-sheet .feat-name { font-size: 27px; }
+.stage.feat-sheet .feat-blurb { font-size: 13.5px; }
+.stage.feat-sheet .feat-foot { padding: 8px 10px 10px; flex-wrap: nowrap; }
+.stage.feat-sheet #feat-spin span, .stage.feat-sheet #feat-center span { display: none; }   /* icons only, so the row fits */
+.stage.feat-sheet #feat-spin, .stage.feat-sheet #feat-center { padding: 8px 11px; }
+.stage.feat-sheet #feat-find { margin-left: auto; }
+.stage.feat-sheet .feat-hint { display: none; }
+.stage.feat-sheet .feat-x { top: 10px; right: 10px; }
+@media (max-width: 380px) { .feat-back span { display: none; } .feat-back { padding: 8px; } }
+@media (prefers-reduced-motion: reduce) {
+  .feat-card, .feat-card.open, .feat-x, .stage.featuring:not(.feat-leaving) .feat-x, .feat-coach { transition-duration: .01s; transition-delay: 0s; }
+  .feat-card.open .feat-body > * { animation: none; }
+  .feat-coach::after { animation: none; }
+}
 </style>
 
 <div class="app">
@@ -262,9 +360,34 @@ ul.cl { margin: 0; padding: 0; list-style: none; display: grid; gap: 6px; }
         <span class="status info" id="dock-status">Loading</span>
         <div class="chipbar"><button type="button" id="btn-drawer" aria-expanded="false">Details</button></div>
       </div>
-      <div class="hint">drag to orbit · scroll to zoom · right-drag to pan · F full screen · X x-ray</div>
+      <div class="hint">click a part for a closer look · drag to orbit · scroll to zoom · right-drag to pan · F full screen · X x-ray</div>
     </div>
     <div class="notice" id="notice">Loading the 3D model…</div>
+    <canvas id="feat-snap" hidden aria-hidden="true"></canvas>
+    <div class="feat-tip" id="feat-tip" hidden></div>
+    <div class="feat-coach" id="feat-coach" hidden></div>
+    <button type="button" class="feat-x" id="feat-x" aria-label="Back to the whole build" title="Back to the build (Esc)"><svg width="18" height="18" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" aria-hidden="true"><path d="M3.5 3.5l9 9M12.5 3.5l-9 9"/></svg></button>
+    <aside class="feat-card" id="feat-card" aria-label="A closer look at one part">
+      <div class="feat-nav">
+        <button type="button" class="feat-back" id="feat-back" title="Back to the build (Esc)"><svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M13 8H3.5M7.5 4L3.5 8l4 4"/></svg><span>Back to the build</span></button>
+        <span class="feat-count" id="feat-count" aria-live="polite"></span>
+        <button type="button" class="feat-arrow" id="feat-prev" aria-label="Previous part" title="Previous part (←)"><svg width="14" height="14" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M10 3L5 8l5 5"/></svg></button>
+        <button type="button" class="feat-arrow" id="feat-next" aria-label="Next part" title="Next part (→)"><svg width="14" height="14" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 3l5 5-5 5"/></svg></button>
+      </div>
+      <div class="feat-body" id="feat-body" aria-live="polite">
+        <p class="feat-kind" id="feat-kind"></p>
+        <h2 class="feat-name" id="feat-name"></h2>
+        <div class="feat-meta"><span class="pill" id="feat-pill"></span></div>
+        <p class="feat-blurb" id="feat-blurb"></p>
+        <dl class="feat-facts" id="feat-facts"></dl>
+      </div>
+      <div class="feat-foot">
+        <button type="button" class="feat-btn" id="feat-spin" aria-pressed="true" title="Turntable (Space)"><svg width="14" height="14" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path id="feat-spin-icon" d="M5 3.5v9M11 3.5v9"/></svg><span>Pause</span></button>
+        <button type="button" class="feat-btn" id="feat-center" title="Frame the part again" aria-label="Re-center the part"><svg width="14" height="14" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" aria-hidden="true"><circle cx="8" cy="8" r="4.5"/><path d="M8 1v3M8 12v3M1 8h3M12 8h3"/></svg><span>Re-center</span></button>
+        <button type="button" class="feat-btn" id="feat-find" title="Find it in the build checklist"><svg width="14" height="14" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2.5 8.5l3 3 8-8"/></svg><span>In the checklist</span></button>
+      </div>
+      <p class="feat-hint" id="feat-hint"></p>
+    </aside>
   </section>
 
   <aside class="panel">
@@ -1831,35 +1954,40 @@ function buildCard(g, p) {
   g.add(rbox(-4, -2, slotY(pos + 1) - 17, slotY(pos) + 3, 10, 124, MAT_BRACKET, 0.3));
   g.add(rbox(-14, -2, slotY(pos) + 1.4, slotY(pos) + 3, 10, 30, MAT.silver, 0.3));
   // The EPS 8-pin plug on the end face and its lead come with the tunnel model: the plug sits in the duct's trough.
-  if (!p.id) g.add(tag(`Tesla V100 32 GB · ${slot}`, 80, c.y1 + 4, c.z1));   // card 2's is a checklist label
+  if (!p.id) g.add(featTag('card1', tag(`Tesla V100 32 GB · ${slot}`, 80, c.y1 + 4, c.z1)));   // card 2's is a checklist label
 }
 
 function buildStatic() {
   const S = staticG;
-  buildCase(S);
-  buildBoard(S);
-  buildCooler(S);
-  buildSmallCards(S);
+  // Each part you can take a closer look at is built in a group of its own, and copied out before the case bakes.
+  const sub = build => { const g = new THREE.Group(); S.add(g); build(g); return g; };
+  const caseG = sub(buildCase);
+  const psuG = splitGroup(S, caseG, b => b.min.x > 2 && b.max.x < 158 && b.min.y > 4 && b.max.y < 94 && b.min.z > 12 && b.max.z < 166);
+  const boardG = sub(buildBoard), coolerG = sub(buildCooler), wifiG = sub(buildSmallCards);
+  const mid = (slotY(1) + slotY(7)) / 2, ctr = new THREE.Vector3();
+  const nicG = splitGroup(S, wifiG, b => b.getCenter(ctr).y > mid);
   buildFrontCables(S);
   buildBack(S);
   // The top front intake (stock DARKROCK 3-pin; the middle and bottom ones come out) and the rear exhaust
-  S.add(makeFan('darkrock', '-x', D.frontFrameX + 16.5, D.frontFanY[0], D.frontZ));
-  S.add(makeFan('darkrock', '-x', 12.5, 363, 117));
+  const frontFan = makeFan('darkrock', '-x', D.frontFrameX + 16.5, D.frontFanY[0], D.frontZ);
+  const rearFan = makeFan('darkrock', '-x', 12.5, 363, 117);
+  S.add(frontFan, rearFan);
+  for (const [id, g] of [['psu', psuG], ['board', boardG], ['cooler', coolerG], ['nic', nicG], ['wifi', wifiG], ['frontfan', frontFan], ['rearfan', rearFan]]) featSource(id, g);
   bake(S);
   shadowsOn(S);
 
-  S.add(tag('Pure Loop 2 · 360', 228, 492, 85));
-  S.add(tag('Rear exhaust', 12, 432, 120));
-  S.add(tag('EVGA 850 G5', 79, 70, 178));
-  S.add(tag('ROG Strix Z390-F', 196, 395, 10));
-  S.add(tag('Wi-Fi · PCIEX16_3', 0, slotY(7) - 10, 82));
-  S.add(tag('FENVI 2.5 GbE · PCIEX1_1', 64, slotY(1) + 6, 66));
-  S.add(tag('AIO tubes · loop over the card', 96, 262, 100));
+  S.add(featTag('cooler', tag('Pure Loop 2 · 360', 228, 492, 85)));
+  S.add(featTag('rearfan', tag('Rear exhaust', 12, 432, 120)));
+  S.add(featTag('psu', tag('EVGA 850 G5', 79, 70, 178)));
+  S.add(featTag('board', tag('ROG Strix Z390-F', 196, 395, 10)));
+  S.add(featTag('wifi', tag('Wi-Fi · PCIEX16_3', 0, slotY(7) - 10, 82)));
+  S.add(featTag('nic', tag('FENVI 2.5 GbE · PCIEX1_1', 64, slotY(1) + 6, 66)));
+  S.add(featTag('cooler', tag('AIO tubes · loop over the card', 96, 262, 100)));
   // The cable side's labels show only from behind.
   S.add(tag('be quiet! fan hub · 5 fans', 170, 270, -24, 'back'));
-  S.add(tag('Pump backplate', D.pump.x, D.pump.y + 46, -10, 'back'));
+  S.add(featTag('cooler', tag('Pump backplate', D.pump.x, D.pump.y + 46, -10, 'back')));
   S.add(tag('2.5″ plate', 60, 252, -10, 'back'));
-  S.add(tag('EVGA 850 G5 · modular side', 79, 70, -14, 'back'));
+  S.add(featTag('psu', tag('EVGA 850 G5 · modular side', 79, 70, -14, 'back')));
   S.add(tag('Bays 3 and 4 · SATA leads', 370, 404, -8, 'back'));
 }
 
@@ -1935,8 +2063,8 @@ function linkItem(id, ...objs) { if (!itemObjs.has(id)) itemObjs.set(id, []); it
 function itemTag(id, text, x, y, z) {
   const o = tag(text, x, y, z, 'item');
   o.element.dataset.item = id;
-  o.element.title = 'Find it in the build checklist';
-  o.element.addEventListener('click', () => window.__checklist?.reveal(id));
+  o.element.title = 'Take a closer look';
+  o.element.addEventListener('click', () => (featHas(id) ? featOpen(id) : window.__checklist?.reveal(id)));
   itemTags.set(id, o.element);
   return o;
 }
@@ -2192,6 +2320,7 @@ function clearDynamic() {
 }
 
 function buildDynamic() {
+  if (feat.on) featClose('stay');
   clearDynamic();
   dynG = new THREE.Group();
   dimsG = new THREE.Group();
@@ -2209,13 +2338,19 @@ function buildDynamic() {
     coverG.add(rbox(-4, -2, slotY(n) - 17, slotY(n) + 3, 12, 122, perf('hex', 110, 20), 0.3));
     coverG.add(rbox(-14, -2, slotY(n) + 1.4, slotY(n) + 3, 12, 30, MAT.steel, 0.3));
   }
-  const cageG = new THREE.Group();
-  CAGES.forEach((b, i) => buildCage(cageG, b, i * 2));
+  const cageGs = CAGES.map((b, i) => {
+    const g = new THREE.Group(), id = `cage${b + 1}`;
+    buildCage(g, b, i * 2);
+    featTags(g, id);
+    featLive[id] = g;
+    return g;
+  });
   const cardG = new THREE.Group();
   buildCard(cardG, k);
+  featLive.card1 = cardG;
   const card2G = new THREE.Group();
   if (state.two) buildCard(card2G, { ...CARD2, c: p.c2, id: 'card2' });
-  for (const g of [coverG, cageG, cardG, card2G]) { bake(g); dynG.add(g); }
+  for (const g of [coverG, ...cageGs, cardG, card2G]) { bake(g); dynG.add(g); }
   slideGroups = [cardG, card2G, buildTunnel(dynG, p)];
   if (state.two) {
     card2G.add(itemTag('card2', 'V100 #2 · PCIEX16_2 · due 19–21 Nov', 80, p.c2.y1 + 4, p.c2.z1));
@@ -2427,7 +2562,7 @@ function applyToggles() {
 // X-ray: the hardware turns to a faint ghost that's brightest where its surfaces turn away from you (so outlines and
 // curves read), keeping a hint of each part's own colour and its perforations; the airflow shows through it.
 // The tunnel prints, the side panels, the RGB and the stack's Arctic fans keep their own look.
-const XR = { ink: { value: new THREE.Color(0x15181c) } };
+const XR = { ink: { value: new THREE.Color(0x15181c) }, g: { value: 1 } };
 const GHOST_VS = `
 varying vec3 vN; varying vec3 vV;
 #ifdef USE_AMAP
@@ -2443,7 +2578,7 @@ void main() {
   gl_Position = projectionMatrix * mv;
 }`;
 const GHOST_FS = `
-uniform vec3 uTint; uniform vec3 uInk; uniform float uK;
+uniform vec3 uTint; uniform vec3 uInk; uniform float uK; uniform float uG;
 varying vec3 vN; varying vec3 vV;
 #ifdef USE_AMAP
 uniform sampler2D uAMap; varying vec2 vUv;
@@ -2453,7 +2588,7 @@ void main() {
   if (texture2D(uAMap, vUv).g < 0.5) discard;
 #endif
   float f = 1.0 - abs(dot(normalize(vN), normalize(vV)));
-  float a = (0.018 + 0.3 * f * f) * uK;
+  float a = (0.018 + 0.3 * f * f) * uK * uG;
   gl_FragColor = vec4(mix(uInk, uTint, 0.38), a);
   #include <tonemapping_fragment>
   #include <colorspace_fragment>
@@ -2468,7 +2603,7 @@ function ghostOf(mat) {
   g = new THREE.ShaderMaterial({
     uniforms: {
       uTint: { value: tint.clone().lerp(new THREE.Color(0x9aa4ae), 0.35) }, uInk: XR.ink,
-      uK: { value: mat.opacity < 1 ? 0.6 : 1 },
+      uK: { value: mat.opacity < 1 ? 0.6 : 1 }, uG: XR.g,
       ...(amap ? { uAMap: { value: amap }, uAMat: { value: amap.matrix } } : {}),
     },
     defines: amap ? { USE_AMAP: '' } : {},
@@ -2558,6 +2693,7 @@ new ResizeObserver(resize).observe(stageEl);
 // Wire up the panel and the dock
 const TOGGLES = { labels: 'tg-labels', air: 'tg-air', xray: 'tg-xray', dims: 'tg-dims', glass: 'tg-glass', fit: 'tg-fit', rgb: 'tg-rgb', two: 'tg-two', ticks: 'tg-ticks' };
 function setToggle(key, val) {
+  if (feat.on && (key === 'xray' || key === 'fit')) featClose('stay');
   state[key] = val;
   $(TOGGLES[key]).checked = val;
   if (key === 'xray') {
@@ -2575,7 +2711,7 @@ for (const [key, id] of Object.entries(TOGGLES)) {
   el.checked = state[key];
   el.addEventListener('change', () => setToggle(key, el.checked));
 }
-document.querySelectorAll('[data-cam]').forEach(b => b.addEventListener('click', () => goCam(b.dataset.cam)));
+document.querySelectorAll('[data-cam]').forEach(b => b.addEventListener('click', () => { if (feat.on) featClose('stay'); goCam(b.dataset.cam); }));
 // The switch bar folds down to its Switches button, so it covers less of the model (folded at first on a phone).
 const foldBtn = $('btn-fold');
 function applyFold() {
@@ -2607,6 +2743,7 @@ function setFull(on) {
     resize();
     const active = document.querySelector('[data-cam][aria-pressed="true"]');
     if (active) goCam(active.dataset.cam);
+    else if (feat.on) featRecenter();
   }, 80);
 }
 async function toggleFull() {
@@ -2633,6 +2770,7 @@ document.addEventListener('keydown', e => {
   if (e.ctrlKey || e.metaKey || e.altKey || e.repeat) return;
   const k = e.key.toLowerCase();
   if (k === 'f') { e.preventDefault(); toggleFull(); }
+  else if (feat.on) { if (e.key === 'Escape') { e.preventDefault(); featClose(); } }
   else if (k === 'x') setToggle('xray', !state.xray);
   else if (e.key === 'Escape' && appEl.classList.contains('full')) {
     if (appEl.classList.contains('drawer')) setDrawer(false);
@@ -2641,6 +2779,690 @@ document.addEventListener('keydown', e => {
 });
 
 // ---------------------------------------------------------------------------
+// ---------------------------------------------------------------------------
+// Featured part. Tap a part (or its label, or Show in the checklist) and it lifts out of the case in an arc onto a
+// turntable in front of the glass, while the rest of the PC dissolves into a ghost behind it. Drag to turn it, scroll to
+// zoom, the arrows (or a swipe on the card, or a tap on another ghost part) to browse; Back, the round X, Esc or a tap on
+// empty space sends it home and the PC solidifies again.
+const FEAT_ORDER = ['card1', 'card2', 'duct2', 'duct', 'fan1', 'straightener', 'fan2', 'rail', 'pins', 'adapter', 'screws', 'eps', 'eps2',
+  'board', 'cooler', 'psu', 'nic', 'wifi', 'cage3', 'cage4', 'frontfan', 'rearfan'];
+const Q90 = Math.PI / 2;
+const FEAT_CAT = {
+  card1: { name: 'Tesla V100 32 GB', kind: () => `GPU · card 1 · PCIEX16_1`, yaw: 0.35,
+    blurb: 'NVIDIA’s Volta datacenter card: 5,120 CUDA cores and 640 tensor cores on 32 GB of HBM2. It has no fan of its own, so the printed tunnel pushes air straight into its fins.',
+    facts: () => [['Memory', '32 GB HBM2 · 900 GB/s'], ['Power', '250 W · EPS 8-pin'], ['Link', state.two ? 'PCIe 3.0 x8 (x8/x8)' : 'PCIe 3.0 x16'], ['Size', '267 × 111 mm · two slots']] },
+  card2: { name: 'V100 #2 · HPE 32 GB', kind: 'GPU · card 2 · PCIEX16_2', item: 'card2', yaw: 0.35,
+    blurb: 'The same HPE Tesla V100 32 GB, three slots below card 1. With both in, the box has 64 GB of HBM2. Ordered 17 Nov, arriving 19–21 Nov.',
+    facts: () => [['Link', 'PCIe 3.0 x8'], ['Power', '250 W · its own EPS adapter'], ['Spacing', '60.96 mm below card 1'], ['Memory', '32 GB · 64 GB with card 1']] },
+  duct2: { name: 'Twin duct v11', kind: 'Printed part · PLA', item: 'duct2', yaw: 0.55,
+    blurb: 'Duct v10 grown to both cards. One block holds two of v9’s fitted sleeves 60.96 mm apart, and a web splits the fans’ air between the cards. Card 2’s power lead leaves through a window in the glass side.',
+    facts: () => [['Print', 'about 21 h 39 min · 245 g'], ['Steepest wall', '8°'], ['Air split', 'web from 64.5 mm out'], ['Screws', '3 into each card']] },
+  duct: { name: 'Duct v10', kind: 'Printed part · PLA', item: 'duct', yaw: 0.55,
+    blurb: 'One piece from the fans to the card: a dovetail flange that slides into the rail frame, straight walls that climb 27.5 mm, and a sleeve fitted to the card’s end and screwed to it. Two fills steer the air down into the fins.',
+    facts: () => [['Print', '16 h 07 min · 179 g'], ['Climb', '27.5 mm · walls 42° max'], ['Sleeve', 'v9’s fit · 3 screws'], ['Printed', '16–17 Nov']] },
+  fan1: { name: 'Fan 1 · Arctic P12 Pro', kind: 'Fan · 120 mm · high pressure', item: 'fan1', yaw: Q90,
+    blurb: 'The front fan of the pair, screwed to your adapter. At the back, the four snap pins click into its open corners and hold the stack together.',
+    facts: () => [['Size', '120 × 120 × 25 mm'], ['Works with', 'fan 2, in series'], ['Held by', '4 screws · 4 snap pins']] },
+  fan2: { name: 'Fan 2 · Arctic P12 Pro', kind: 'Fan · 120 mm · high pressure', item: 'fan2', yaw: Q90,
+    blurb: 'Pushes in series with fan 1. The straightener between them takes out fan 1’s swirl, so the two add pressure instead of fighting each other.',
+    facts: () => [['Size', '120 × 120 × 25 mm'], ['Sits', 'straightener → fan 2 → rail frame']] },
+  straightener: { name: 'Straightener v4', kind: 'Printed part · PLA', item: 'straightener', yaw: Q90,
+    blurb: 'Nine fixed vanes and an open hub between the two fans. They turn fan 1’s swirl back into straight flow before fan 2. The pins clamp it at its corners, where v2 leaked.',
+    facts: () => [['Print', '6 h 55 min · 66 g'], ['Vanes', '9 · open hub'], ['Printed', '16 Nov · came out perfect']] },
+  rail: { name: 'Rail frame v3', kind: 'Printed part · PLA', item: 'rail', yaw: Q90,
+    blurb: 'Sits on fan 2’s back. Dovetail rails top and bottom take the duct’s flange, which slides in from the glass side as the card goes into its slot.',
+    facts: () => [['Print', '2 h 25 min · 26 g'], ['Dovetail', '0.3 mm clearance'], ['Printed', '15 Nov']] },
+  pins: { name: 'Snap pins × 4', kind: 'Printed part · PLA', item: 'pins', yaw: 0.45,
+    blurb: '60 mm pins from the rail frame through fan 2 and the straightener. Their arrowheads click into fan 1’s open corners and clamp the whole stack together.',
+    facts: () => [['Barb', '0.30 mm'], ['Holes', '4.4 mm · 4.6 through the straightener'], ['Print', 'about 6 min each']] },
+  adapter: { name: 'Adapter v1', kind: 'Printed part · black PETG', item: 'adapter', yaw: Q90,
+    blurb: 'Hangs the fan stack inside the front steel on two case screws through the middle fan’s top holes. Its 13 mm slots let the stack slide 4 mm up or down to meet the duct.',
+    facts: () => [['Screws', '2 into the case · 4 into fan 1'], ['Pads', '1.5 mm off the steel'], ['Status', 'printed · fits the case holes']] },
+  screws: { name: () => state.two ? 'Card end screws × 6' : 'Card end screws × 3', kind: 'Hardware · the cards’ own', item: 'screws', yaw: 0.2,
+    blurb: () => `${state.two ? 'Each card’s own three end screws go' : 'The card’s own three end screws go'} through the duct’s plate into the end strip and hold the sleeve on. The plate adds 2 mm, so use screws 2 mm longer if they come up short.`,
+    facts: () => [['Size', 'probably M3'], ['Slots', '5.6 mm · ±1 mm play']] },
+  eps: { name: () => state.two ? 'EPS adapter · card 1' : 'EPS 8-pin adapter', kind: 'Power · 030-0571-000 style', item: 'eps', yaw: 0.35,
+    blurb: 'The V100 takes CPU-style EPS 8-pin power, not PCIe. This adapter joins two PCIe 8-pin leads from the PSU into one EPS plug, and parks on top of the fan stack.',
+    facts: () => [['In', '2 × PCIe 8-pin'], ['Out', 'EPS 8-pin · 250 W card'], ['Plug in', 'before the duct goes on']] },
+  eps2: { name: 'EPS adapter · card 2', kind: 'Power · for card 2', item: 'eps2', yaw: 0.35,
+    blurb: 'Card 2 needs its own adapter on its own two PCIe leads. Its lead leaves the twin duct through the glass-side window; the model parks the adapter just above the PSU shroud.',
+    facts: () => [['In', '2 × PCIe 8-pin, separate leads'], ['Route', 'out the duct’s glass side']] },
+  board: { name: 'ROG Strix Z390-F', kind: 'Motherboard · ATX', yaw: 0.25,
+    blurb: 'The ASUS Z390 board under the i9-9900K. The CPU’s 16 PCIe lanes feed the top two x16 slots: x16 with one card, x8/x8 with two. The ROG eye on the I/O cover lights up.',
+    facts: () => [['Size', '305 × 244 mm'], ['Chipset', 'Intel Z390'], ['x16 slots', 'positions 2, 5 and 7']] },
+  cooler: { name: 'Pure Loop 2 · 360', kind: 'be quiet! · liquid CPU cooler', yaw: 0.3,
+    blurb: 'An all-in-one cooler: the pump sits on the CPU, braided tubes loop down over the card, and the 360 mm radiator up top has three fans pulling warm case air out.',
+    facts: () => [['Radiator', '397 × 120 × 27 mm'], ['Fans', '3 × be quiet!, exhaust up'], ['Tubes', 'braided · clear of the card']] },
+  psu: { name: 'EVGA SuperNOVA 850 G5', kind: 'Power supply · 80 Plus Gold', yaw: 0.35,
+    blurb: () => `850 W, fully modular, fan down under the shroud and breathing through the floor vent. ${state.two ? 'With both V100s at full load the whole box would draw roughly 650–750 W, still inside its rating.' : 'With the V100 at full load the whole box would draw roughly 400–500 W.'}`,
+    facts: () => [['Size', '150 × 150 × 86 mm'], ['Full load (est.)', state.two ? 'about 650–750 W' : 'about 400–500 W'], ['Cables', 'fully modular']] },
+  nic: { name: 'FENVI 2.5 GbE', kind: 'Network card · PCIEX1_1', yaw: 0.35,
+    blurb: '2.5 Gb Ethernet for the NAS, in the x1 slot just above the V100. Its red heatsink faces down toward the card’s backplate.',
+    facts: () => [['Speed', '2.5 Gb/s'], ['Slot', 'PCIEX1_1']] },
+  wifi: { name: 'Wi-Fi card', kind: 'Wi-Fi 6 · AX3000 · PCIEX16_3', yaw: 0.35,
+    blurb: () => `The Wi-Fi card in the bottom slot, PCIEX16_3, with its two antenna connectors on the bracket.${state.two ? ' It sits right under card 2.' : ''}`,
+    facts: () => [['Standard', 'Wi-Fi 6 (AX3000)'], ['Slot', 'PCIEX16_3']] },
+  cage3: { name: 'Drive cage · bay 3', kind: 'Storage · 2 × 3.5″', yaw: 0.35,
+    blurb: 'A steel cage with two WD Purple 4 TB drives on sleds. Its open end faces the glass and the drives’ connectors face the tray. Bays 1 and 2 below it stay open for the tunnel.',
+    facts: () => [['Drives', '2 × WD Purple 4 TB'], ['Bay', '3 of 4']] },
+  cage4: { name: 'Drive cage · bay 4', kind: 'Storage · 2 × 3.5″', yaw: 0.35,
+    blurb: 'The top cage, right under the radiator fans: a WD Purple and a Seagate SkyHawk, 4 TB each. With bay 3, that’s 16 TB raw.',
+    facts: () => [['Drives', 'WD Purple + SkyHawk · 4 TB each'], ['Bay', '4 of 4']] },
+  frontfan: { name: 'Front intake fan', kind: 'Fan · DARKROCK stock · 120 mm', yaw: Q90,
+    blurb: 'The top front fan, kept from the stock three. It feeds the drive cages; the middle and bottom ones came out to make room for the tunnel.',
+    facts: () => [['Connector', '3-pin'], ['Feeds', 'bays 3 and 4']] },
+  rearfan: { name: 'Rear exhaust fan', kind: 'Fan · DARKROCK stock · 120 mm', yaw: Q90,
+    blurb: 'Pulls warm air from the CPU, RAM and VRM out through the back grille, level with the CPU.',
+    facts: () => [['Position', 'rear, level with the CPU']] },
+};
+const fv = x => (typeof x === 'function' ? x() : x);
+const FEAT_SRC = new Map();      // static parts: an unbaked copy of each (the case bakes them together), for picking and show
+const featLive = {};             // dynamic parts outside the checklist: card 1 and the two cages
+const pickG = new THREE.Group(); // holds the static copies; never drawn
+const SHOW = { x: 228, y: 246 };
+const FEAT_DIR = new THREE.Vector3(0.22, 0.36, 1).normalize();
+
+// A copy of a part's tree that shares its geometry and its real materials (not an X-ray or featured ghost).
+function cloneTree(o, map) {
+  if (o.isCSS2DObject || o.isPoints || o.isSprite || (o.isLine && !o.isLineSegments)) return null;
+  let c;
+  if (o.isMesh) { c = new THREE.Mesh(o.geometry, o.userData.mat0 || o.userData.matF || o.material); c.renderOrder = o.renderOrder; }
+  else if (o.isLineSegments) c = new THREE.LineSegments(o.geometry, o.material);
+  else c = new THREE.Group();
+  c.position.copy(o.position); c.quaternion.copy(o.quaternion); c.scale.copy(o.scale);
+  c.visible = o.userData.visF ?? o.visible;
+  map.set(o, c);
+  for (const ch of o.children) { const k = cloneTree(ch, map); if (k) c.add(k); }
+  if (o.userData.rotor && map.has(o.userData.rotor)) c.userData.rotor = map.get(o.userData.rotor);
+  return c;
+}
+function featSource(id, g) {
+  g.updateWorldMatrix(true, true);
+  const c = cloneTree(g, new Map());
+  g.matrixWorld.decompose(c.position, c.quaternion, c.scale);
+  FEAT_SRC.set(id, c);
+  pickG.add(c);
+  pickG.updateMatrixWorld(true);
+}
+function splitGroup(S, g, test) {
+  const out = new THREE.Group(), b = new THREE.Box3();
+  S.add(out);
+  for (const ch of [...g.children]) { if (ch.isCSS2DObject) continue; b.setFromObject(ch); if (!b.isEmpty() && test(b)) out.add(ch); }
+  return out;
+}
+function featTag(id, o) {
+  const el = o.element;
+  el.classList.add('feat');
+  el.title = 'Take a closer look';
+  el.addEventListener('click', () => featOpen(id));
+  return o;
+}
+function featTags(g, id) { g.traverse(o => { if (o.isCSS2DObject) featTag(id, o); }); }
+const featObjs = id => FEAT_SRC.has(id) ? [FEAT_SRC.get(id)] : featLive[id] ? [featLive[id]] : (itemObjs.get(id) || []);
+const featHas = id => !!FEAT_CAT[id] && featObjs(id).length > 0;
+const featList = () => FEAT_ORDER.filter(featHas);
+
+// Glow: an accent rim drawn over a part, for hover and for the featured part's empty home.
+const RIM_FS = `
+uniform vec3 uC; uniform float uA;
+varying vec3 vN; varying vec3 vV;
+void main() {
+  float f = 1.0 - abs(dot(normalize(vN), normalize(vV)));
+  gl_FragColor = vec4(uC * (0.75 + 0.9 * f), (0.07 + 0.95 * pow(f, 2.2)) * uA);
+  #include <tonemapping_fragment>
+  #include <colorspace_fragment>
+}`;
+const rimMat = a => new THREE.ShaderMaterial({ uniforms: { uC: { value: new THREE.Color(0xff8a3c) }, uA: { value: a } }, vertexShader: GHOST_VS, fragmentShader: RIM_FS,
+  transparent: true, depthWrite: false, blending: THREE.AdditiveBlending, polygonOffset: true, polygonOffsetFactor: -1, polygonOffsetUnits: -4 });
+const hoverMat = rimMat(0.85), homeMat = rimMat(0.4), flashMat = rimMat(0);
+// Where something covers the part, a fainter outline still shows through.
+const hoverBehind = rimMat(0.3);
+hoverBehind.depthFunc = THREE.GreaterDepth;
+function shownUp(o, top) { for (let p = o; p; p = p.parent) { if (!(p.userData.visF ?? p.visible)) return false; if (p === top) return true; } return true; }
+function glowGroup(id, mat, behind = null) {
+  const g = new THREE.Group();
+  for (const r of featObjs(id)) {
+    r.updateWorldMatrix(true, true);
+    r.traverse(o => {
+      if (!o.isMesh || !shownUp(o, r)) return;
+      for (const mt of behind ? [mat, behind] : [mat]) {
+        const m = new THREE.Mesh(o.geometry, mt);
+        m.matrixAutoUpdate = false; m.matrix.copy(o.matrixWorld); m.matrixWorldNeedsUpdate = true; m.renderOrder = 6;
+        g.add(m);
+      }
+    });
+  }
+  return g;
+}
+
+// The turntable: a dark glass disc with a glowing rim, a tick ring that turns with the part, a soft contact shadow, a
+// halo on the floor and a faint beam. Built at unit radius; R scales it. Drawn tiny from the start so it's compiled.
+function radialTex(stops) {
+  return texOf(canvas(128, 128, g => {
+    const r = g.createRadialGradient(64, 64, 0, 64, 64, 64);
+    for (const [k, c] of stops) r.addColorStop(k, c);
+    g.fillStyle = r; g.fillRect(0, 0, 128, 128);
+  }));
+}
+const TT = (() => {
+  const root = new THREE.Group(), disc = new THREE.Group(), spin = new THREE.Group();
+  root.add(disc); disc.add(spin);
+  const base = new THREE.Mesh(new THREE.CylinderGeometry(1, 1.03, 5, 96).translate(0, -2.5, 0),
+    new THREE.MeshPhysicalMaterial({ color: 0x0b0d10, metalness: 0.55, roughness: 0.28, clearcoat: 0.9, clearcoatRoughness: 0.16, transparent: true }));
+  const glow = new THREE.Color(0xff8a3c);
+  const rimM = new THREE.MeshBasicMaterial({ color: 0xffffff, toneMapped: false, transparent: true, depthWrite: false });
+  const rim = new THREE.Mesh(new THREE.CylinderGeometry(1.032, 1.032, 1.1, 128, 1, true).translate(0, -1.1, 0), rimM);
+  const lineM = new THREE.MeshBasicMaterial({ color: 0xffffff, toneMapped: false, transparent: true, depthWrite: false, side: THREE.DoubleSide });
+  const inlay = new THREE.Mesh(new THREE.RingGeometry(0.952, 0.962, 128).rotateX(-Q90).translate(0, 0.05, 0), lineM);
+  const tickG = [];
+  for (let i = 0; i < 120; i++) {
+    const long = i % 10 === 0, len = long ? 0.07 : 0.032;
+    tickG.push(new THREE.PlaneGeometry(long ? 0.011 : 0.0055, len).rotateX(-Q90).translate(0, 0.06, -(0.905 - len / 2)).rotateY(i / 120 * Math.PI * 2));
+  }
+  const tickM = lineM.clone();
+  const ticks = new THREE.Mesh(mergeGeometries(tickG), tickM);
+  spin.add(ticks);
+  const shadowM = new THREE.MeshBasicMaterial({ color: 0x000000, map: radialTex([[0, 'rgba(255,255,255,0.75)'], [0.55, 'rgba(255,255,255,0.35)'], [1, 'rgba(255,255,255,0)']]), transparent: true, depthWrite: false });
+  const shadow = new THREE.Mesh(new THREE.CircleGeometry(1, 64).rotateX(-Q90).translate(0, 0.09, 0), shadowM);
+  const haloM = new THREE.MeshBasicMaterial({ color: 0xffffff, map: radialTex([[0, 'rgba(255,255,255,0)'], [0.3, 'rgba(255,255,255,0)'], [0.34, 'rgba(255,255,255,0.55)'], [0.5, 'rgba(255,255,255,0.18)'], [1, 'rgba(255,255,255,0)']]),
+    transparent: true, depthWrite: false, blending: THREE.AdditiveBlending, toneMapped: false });
+  const halo = new THREE.Mesh(new THREE.PlaneGeometry(3, 3).rotateX(-Q90).translate(0, -5.4, 0), haloM);
+  disc.add(base, rim, inlay, shadow, halo);
+  const beamM = new THREE.MeshBasicMaterial({ color: 0xffffff, transparent: true, depthWrite: false, side: THREE.DoubleSide, blending: THREE.AdditiveBlending, toneMapped: false,
+    map: texOf(canvas(4, 128, g => { const l = g.createLinearGradient(0, 0, 0, 128); l.addColorStop(0, 'rgba(255,255,255,0)'); l.addColorStop(1, 'rgba(255,255,255,1)'); g.fillStyle = l; g.fillRect(0, 0, 4, 128); })) });
+  const beam = new THREE.Mesh(new THREE.CylinderGeometry(0.9, 0.97, 1, 96, 1, true).translate(0, 0.5, 0), beamM);
+  root.add(beam);
+  // Warm-ups for the glow shaders, so the first hover doesn't stutter
+  for (const m of [hoverMat, homeMat, hoverBehind]) root.add(new THREE.Mesh(new THREE.PlaneGeometry(0.01, 0.01), m));
+  for (const m of [beam, halo]) m.raycast = () => {};
+  root.traverse(o => { o.castShadow = false; o.receiveShadow = false; o.userData.noAO = true; });
+  base.userData.noAO = false;
+  const tt = { root, disc, spin, shadow, R: 40, h: 60, k: 0, x: SHOW.x, y: 0, z: 300, glow };
+  tt.color = c => {
+    glow.set(c);
+    rimM.color.copy(glow).multiplyScalar(11); lineM.color.copy(glow).multiplyScalar(2.2); tickM.color.copy(glow).multiplyScalar(1.6);
+    haloM.color.copy(glow); beamM.color.copy(glow);
+    for (const m of [hoverMat, homeMat, flashMat, hoverBehind]) m.uniforms.uC.value.copy(glow);
+  };
+  tt.apply = () => {
+    const k = tt.k;
+    root.visible = true;
+    root.position.set(tt.x, tt.y, tt.z);
+    root.scale.setScalar(Math.max(0.001, 0.6 + 0.4 * k) * (k < 0.001 ? 0.001 : 1));
+    disc.scale.set(tt.R, 1, tt.R);
+    beam.scale.set(tt.R, tt.h + 50, tt.R);
+    base.material.opacity = k; rimM.opacity = k; lineM.opacity = 0.9 * k; tickM.opacity = 0.55 * k;
+    shadowM.opacity = 0.7 * k; haloM.opacity = 0.9 * k; beamM.opacity = 0.075 * k;
+  };
+  tt.color(0xff8a3c);
+  tt.apply();
+  return tt;
+})();
+scene.add(TT.root);
+
+// State, and a small tween runner (each step: eased e, raw k)
+const feat = { on: false, id: null, busy: false, leaving: false, cur: null, anims: [], camA: null, save: null, userSpin: !reduceMotion,
+  hold: false, holdT: 0, hover: null, hoverG: null, homeG: null, vo: { x: 0, y: 0 }, voOn: false, snapT: 0, coachT: 0 };
+const ease = {
+  io: t => (t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2),
+  out: t => 1 - Math.pow(1 - t, 3),
+  back: t => { const c = 1.5; return 1 + (c + 1) * Math.pow(t - 1, 3) + c * Math.pow(t - 1, 2); },
+};
+function anim(dur, fn, done, ez = ease.io, delay = 0) {
+  const a = { t: 0, dur: reduceMotion ? Math.min(dur, 0.12) : dur, fn, done, ez, delay: reduceMotion ? 0 : delay };
+  feat.anims.push(a);
+  return a;
+}
+const cancelAnim = a => { if (a) feat.anims = feat.anims.filter(x => x !== a); };
+const bez = (a, c, b, e, out) => out.set(0, 0, 0).addScaledVector(a, (1 - e) * (1 - e)).addScaledVector(c, 2 * (1 - e) * e).addScaledVector(b, e * e);
+const wrapA = a => Math.atan2(Math.sin(a), Math.cos(a));
+
+// The PC fades to a ghost: every mesh in the model takes the X-ray ghost of its real material; lines, airflow and
+// dimension marks hide. A crossfade from a snapshot of the last frame makes the change a dissolve.
+const snapEl = $('feat-snap'), snapCtx = snapEl.getContext('2d');
+const afterQ = [];
+function runAfterRender() { if (afterQ.length) for (const f of afterQ.splice(0)) f(); }
+function snapshot() {
+  const c = renderer.domElement;
+  if (snapEl.width !== c.width || snapEl.height !== c.height) { snapEl.width = c.width; snapEl.height = c.height; }
+  snapCtx.clearRect(0, 0, c.width, c.height);
+  snapCtx.drawImage(c, 0, 0);
+  snapEl.style.transition = 'none';
+  snapEl.style.opacity = '1';
+  snapEl.hidden = false;
+}
+function fadeSnap(ms) {
+  void snapEl.offsetWidth;
+  requestAnimationFrame(() => { snapEl.style.transition = `opacity ${ms}ms ease`; snapEl.style.opacity = '0'; });
+  clearTimeout(feat.snapT);
+  feat.snapT = setTimeout(() => { snapEl.hidden = true; }, ms + 100);
+}
+function ghostRoot(on) {
+  root.traverse(o => {
+    if (o.isMesh) {
+      if (on) {
+        if (o.userData.matF) return;
+        const real = o.userData.mat0 || o.material;
+        o.userData.matF = o.material;
+        o.material = Array.isArray(real) ? real.map(m => (m.isShaderMaterial ? m : ghostOf(m))) : (real.isShaderMaterial ? real : ghostOf(real));
+      } else if (o.userData.matF) { o.material = o.userData.matF; delete o.userData.matF; }
+    } else if (o.isLine || o.isPoints) {
+      if (on) { if (o.userData.visF === undefined) { o.userData.visF = o.visible; o.visible = false; } }
+      else if (o.userData.visF !== undefined) { o.visible = o.userData.visF; delete o.userData.visF; }
+    }
+  });
+  XR.g.value = on ? 0.85 : 1;
+  sun.castShadow = !on && !state.xray && Q.post;
+  applyPost();
+}
+
+// Picking: the static copies and the live parts; the featured part itself (and its turntable) answer as '__show'.
+const ray = new THREE.Raycaster(), ndc = new THREE.Vector2();
+function pickAt(cx, cy) {
+  const r = renderer.domElement.getBoundingClientRect();
+  ndc.set(((cx - r.left) / r.width) * 2 - 1, -((cy - r.top) / r.height) * 2 + 1);
+  ray.setFromCamera(ndc, camera);
+  const targets = [], idOf = new Map();
+  for (const id of FEAT_ORDER) {
+    if (!FEAT_CAT[id]) continue;
+    for (const o of featObjs(id)) { targets.push(o); idOf.set(o, id); }
+  }
+  if (feat.cur) { targets.push(feat.cur.pivot, TT.root); idOf.set(feat.cur.pivot, '__show'); idOf.set(TT.root, '__show'); }
+  for (const h of ray.intersectObjects(targets, true)) {
+    let id = null, o = h.object, ok = true;
+    for (; o; o = o.parent) {
+      if (!(o.userData.visF ?? o.visible) && !idOf.has(o)) ok = false;
+      if (idOf.has(o)) { id = idOf.get(o); if (!(o.userData.visF ?? o.visible)) ok = false; break; }
+    }
+    if (id && ok) return id;
+  }
+  return null;
+}
+
+// The featured copy: a pivot at the part's centre, so the turntable turns it about its own middle.
+function makePivot(id) {
+  const map = new Map(), inner = new THREE.Group();
+  for (const r of featObjs(id)) {
+    r.updateWorldMatrix(true, true);
+    const c = cloneTree(r, map);
+    if (!c) continue;
+    r.matrixWorld.decompose(c.position, c.quaternion, c.scale);
+    c.visible = true;
+    inner.add(c);
+  }
+  const rotors = [];
+  for (const [o] of map) if (o.userData.rotor && map.has(o.userData.rotor)) rotors.push(map.get(o.userData.rotor));
+  inner.updateMatrixWorld(true);
+  const box = new THREE.Box3().setFromObject(inner);
+  const c = box.getCenter(new THREE.Vector3()), size = box.getSize(new THREE.Vector3());
+  inner.position.copy(c).negate();
+  inner.traverse(o => { if (o.isMesh) { o.castShadow = false; o.receiveShadow = false; } });
+  const pivot = new THREE.Group();
+  pivot.add(inner);
+  pivot.position.copy(c);
+  return { id, pivot, rotors, home: c.clone(), size, rh: Math.hypot(size.x, size.z) / 2, yaw: FEAT_CAT[id].yaw || 0, ang: 0, landed: false };
+}
+function spotOf(P) {
+  const R = Math.max(26, P.rh * 1.12 + 8);
+  const S = new THREE.Vector3(SHOW.x, SHOW.y, 194 + R);
+  return { S, R, base: SHOW.y - P.size.y / 2 - 7 };
+}
+// Where the card leaves room: the free part of the stage, and how far to shift the picture's centre into it.
+// A stage under 720 px wide (a phone, or a narrow window) gets the card as a sheet along the bottom instead.
+function syncSheet() { stageEl.classList.toggle('feat-sheet', stageEl.clientWidth < 720); }
+syncSheet();
+new ResizeObserver(syncSheet).observe(stageEl);
+function featLayout() {
+  const W = stageEl.clientWidth, H = stageEl.clientHeight, card = $('feat-card');
+  if (stageEl.classList.contains('feat-sheet')) {
+    const hh = H - card.offsetTop + 8, top = 56;
+    return { w: W, h: Math.max(120, H - hh - top), ox: 0, oy: -(hh - top) / 2 };
+  }
+  const ww = card.offsetLeft + card.offsetWidth + 8;
+  return { w: Math.max(160, W - ww), h: H, ox: ww / 2, oy: 0 };
+}
+function camFrame(P, spot) {
+  const L = featLayout(), H = renderer.domElement.clientHeight || 1;
+  // Fit the disc's width and, seen from above, its depth plus the part's height into the free part of the stage.
+  const tv = Math.tan(camera.fov * Math.PI / 360);
+  const tanV = Math.max(0.02, tv * L.h / H), tanH = Math.max(0.02, tv * L.w / H);
+  const el = Math.asin(FEAT_DIR.y), hgt = P.size.y + 14;
+  const hw = spot.R * 1.08, hv = (2 * spot.R * Math.sin(el) + hgt * Math.cos(el)) / 2 * 1.12;
+  const dist = Math.max(hw / tanH, hv / tanV) + spot.R * Math.cos(el) * 0.55;
+  const r = Math.hypot(spot.R, hgt / 2);
+  const t = new THREE.Vector3(SHOW.x, (spot.base + SHOW.y + P.size.y / 2) / 2, spot.S.z);
+  return { t, p: t.clone().addScaledVector(FEAT_DIR, dist), dist, r };
+}
+// The camera swings round the moving target (direction slerped, distance eased in log), so it never cuts through the case.
+function camFly(p1, t1, dur, done) {
+  cancelAnim(feat.camA);
+  controls.enabled = false;
+  tween = null;
+  const t0 = controls.target.clone(), d0 = camera.position.clone().sub(t0), L0 = Math.max(1, d0.length());
+  d0.normalize();
+  const d1 = p1.clone().sub(t1), L1 = Math.max(1, d1.length());
+  d1.normalize();
+  const q = new THREE.Quaternion().setFromUnitVectors(d0, d1), qi = new THREE.Quaternion(), dir = new THREE.Vector3();
+  controls.minDistance = Math.min(controls.minDistance, L0, L1 * 0.5);
+  controls.maxDistance = Math.max(controls.maxDistance, L0, L1);
+  feat.camA = anim(dur, e => {
+    qi.identity().slerp(q, e);
+    dir.copy(d0).applyQuaternion(qi);
+    controls.target.lerpVectors(t0, t1, e);
+    camera.position.copy(controls.target).addScaledVector(dir, Math.exp(Math.log(L0) + (Math.log(L1) - Math.log(L0)) * e));
+  }, () => { feat.camA = null; controls.enabled = true; if (done) done(); });
+}
+function flyIn(P, spot, dur, delay = 0) {
+  const a = P.home.clone(), b = spot.S.clone();
+  const c = a.clone().lerp(b, 0.5).add(new THREE.Vector3(0, 40 + a.distanceTo(b) * 0.12, 60));
+  P.landed = false; P.spot = spot; P.bob = 0;
+  anim(dur, e => { bez(a, c, b, e, P.pivot.position); P.pivot.rotation.y = P.yaw * e; }, () => { P.landed = true; P.ang = 0; }, ease.io, delay);
+}
+function flyHome(P, dur, done) {
+  const a = P.pivot.position.clone(), b = P.home.clone(), r0 = wrapA(P.pivot.rotation.y);
+  const c = a.clone().lerp(b, 0.5).add(new THREE.Vector3(0, 40 + a.distanceTo(b) * 0.12, 60));
+  P.landed = false;
+  anim(dur, e => { bez(a, c, b, e, P.pivot.position); P.pivot.rotation.y = r0 * (1 - e); }, done);
+}
+function ttTo(spot, P, dur, delay = 0) {
+  const from = { R: TT.R, y: TT.y, z: TT.z, h: TT.h, k: TT.k };
+  if (TT.k < 0.01) Object.assign(from, { R: spot.R * 0.55, y: spot.base, z: spot.S.z, h: P.size.y });
+  anim(dur, e => {
+    TT.R = from.R + (spot.R - from.R) * e; TT.y = from.y + (spot.base - from.y) * e; TT.z = from.z + (spot.S.z - from.z) * e;
+    TT.h = from.h + (P.size.y - from.h) * e; TT.k = from.k + (1 - from.k) * Math.min(1, e * 1.4);
+    TT.x = SHOW.x;
+    TT.shadow.scale.setScalar(Math.min(0.95, (P.rh + 4) / Math.max(1, TT.R)));
+    TT.apply();
+  }, null, TT.k < 0.01 ? ease.back : ease.io, delay);
+}
+function homeGlow(id) {
+  clearHome();
+  feat.homeG = glowGroup(id, homeMat);
+  scene.add(feat.homeG);
+}
+function clearHome() { if (feat.homeG) { scene.remove(feat.homeG); feat.homeG = null; } }
+// The part that left drops back into its slot with a flash of the rim.
+function flashHome(id) {
+  const g = glowGroup(id, flashMat);
+  scene.add(g);
+  anim(0.6, e => { flashMat.uniforms.uA.value = 1.3 * (1 - e); }, () => scene.remove(g), ease.out);
+}
+
+// The card
+const cardEl = $('feat-card'), bodyEl = $('feat-body');
+function fillCard(id) {
+  const c = FEAT_CAT[id], CL = window.__checklist;
+  $('feat-kind').textContent = fv(c.kind);
+  $('feat-name').textContent = fv(c.name);
+  $('feat-blurb').textContent = fv(c.blurb);
+  $('feat-facts').replaceChildren(...fv(c.facts).flatMap(([k, val]) => {
+    const dt = document.createElement('dt'); dt.textContent = k;
+    const dd = document.createElement('dd'); dd.textContent = val;
+    return [dt, dd];
+  }));
+  const pill = $('feat-pill'), it = c.item && CL ? CL.item(c.item) : null;
+  let kind = 'have';
+  if (it) kind = CL.isDone(c.item) ? (it.group === 'print' ? 'printed' : 'have') : (it.offKind || (it.group === 'print' ? 'todo' : 'need'));
+  pill.className = `pill ${kind}`;
+  pill.textContent = it ? PILL[kind] : 'in the case';
+  $('feat-find').hidden = !it;
+  const L = featList(), i = L.indexOf(id);
+  $('feat-count').textContent = `${i + 1} / ${L.length}`;
+}
+function swapCard(id) {
+  bodyEl.classList.add('swap');
+  setTimeout(() => { fillCard(id); bodyEl.classList.remove('swap'); }, reduceMotion ? 0 : 170);
+}
+function setSpin(on) {
+  feat.userSpin = on;
+  const b = $('feat-spin');
+  b.setAttribute('aria-pressed', String(on));
+  b.querySelector('span').textContent = on ? 'Pause' : 'Spin';
+  b.setAttribute('aria-label', on ? 'Pause the turntable' : 'Spin the turntable');
+  $('feat-spin-icon').setAttribute('d', on ? 'M5 3.5v9M11 3.5v9' : 'M5 3l8 5-8 5z');
+}
+function accentNow() { return getComputedStyle(document.documentElement).getPropertyValue('--accent').trim() || '#e07a2e'; }
+
+function featOpen(id) {
+  if (!featHas(id) || feat.busy) return;
+  if (feat.on) return featSwitch(id);
+  hideCoach(true);
+  feat.on = true; feat.busy = true; feat.leaving = false; feat.id = id;
+  const lit = document.querySelector('[data-cam][aria-pressed="true"]');
+  feat.save = { p: camera.position.clone(), t: controls.target.clone(), min: controls.minDistance, max: controls.maxDistance, cam: lit ? lit.dataset.cam : null };
+  document.querySelectorAll('[data-cam]').forEach(b => b.setAttribute('aria-pressed', 'false'));
+  if (finder) { scene.remove(finder.helper); finder.helper.geometry.dispose(); finder = null; }
+  feat.prevFocus = document.activeElement;
+  setHover(null);
+  TT.color(accentNow());
+  const P = makePivot(id);
+  feat.cur = P;
+  scene.add(P.pivot);
+  fillCard(id);
+  setSpin(feat.userSpin);
+  stageEl.classList.add('featuring');
+  afterQ.push(() => { snapshot(); ghostRoot(true); fadeSnap(reduceMotion ? 120 : 340); });
+  const spot = spotOf(P), f = camFrame(P, spot);
+  flyIn(P, spot, 1.1);
+  ttTo(spot, P, 0.8, 0.4);
+  camFly(f.p, f.t, 1.15, () => {
+    feat.busy = false;
+    controls.minDistance = Math.max(12, f.r * 0.45);
+    controls.maxDistance = Math.max(f.dist * 3, 600);
+    homeGlow(id);
+  });
+  setTimeout(() => { cardEl.classList.add('open'); $('feat-back').focus({ preventScroll: true }); }, reduceMotion ? 0 : 260);
+}
+function featSwitch(id) {
+  if (!featHas(id) || feat.busy || id === feat.id) return;
+  feat.busy = true;
+  setHover(null);
+  clearHome();
+  const old = feat.cur;
+  flyHome(old, 0.8, () => { scene.remove(old.pivot); flashHome(old.id); });
+  const P = makePivot(id);
+  feat.cur = P; feat.id = id;
+  scene.add(P.pivot);
+  swapCard(id);
+  const spot = spotOf(P), f = camFrame(P, spot);
+  flyIn(P, spot, 1.0, 0.12);
+  ttTo(spot, P, 0.9, 0.1);
+  camFly(f.p, f.t, 1.05, () => {
+    feat.busy = false;
+    controls.minDistance = Math.max(12, f.r * 0.45);
+    controls.maxDistance = Math.max(f.dist * 3, 600);
+    homeGlow(id);
+  });
+}
+function featStep(d) {
+  const L = featList(), i = L.indexOf(feat.id);
+  if (L.length > 1) featSwitch(L[(i + d + L.length) % L.length]);
+}
+function featRecenter() {
+  if (!feat.on || feat.busy || !feat.cur) return;
+  const f = camFrame(feat.cur, spotOf(feat.cur));
+  camFly(f.p, f.t, 0.7);
+}
+function featEnd() {
+  const P = feat.cur;
+  ghostRoot(false);
+  if (P) scene.remove(P.pivot);
+  TT.k = 0; TT.apply();
+  stageEl.classList.remove('featuring', 'feat-leaving');
+  controls.minDistance = feat.save.min; controls.maxDistance = feat.save.max;
+  controls.enabled = true;
+  Object.assign(feat, { on: false, busy: false, leaving: false, cur: null, id: null, hold: false });
+  const pf = feat.prevFocus;
+  if (pf && pf !== document.body && document.contains(pf) && !cardEl.contains(pf)) pf.focus({ preventScroll: true });
+}
+// Back: the part flies home, the camera returns, then the PC solidifies. instant: at once, the camera back where it
+// was; 'stay': at once with a dissolve, leaving the camera where it is (for a camera preset that flies on from here).
+function featClose(instant) {
+  if (!feat.on || (feat.busy && !instant)) return;
+  const P = feat.cur;
+  cardEl.classList.remove('open');
+  stageEl.classList.add('feat-leaving');
+  clearHome(); setHover(null);
+  feat.leaving = true;
+  if (instant) {
+    feat.anims = []; feat.camA = null;
+    if (instant !== 'stay') { camera.position.copy(feat.save.p); controls.target.copy(feat.save.t); restoreCamBtn(); }
+    if (instant === 'stay') { snapshot(); fadeSnap(reduceMotion ? 120 : 320); }
+    featEnd();
+    return;
+  }
+  feat.busy = true;
+  flyHome(P, 0.95);
+  const k0 = TT.k;
+  anim(0.5, e => { TT.k = k0 * (1 - e); TT.apply(); }, null, ease.out);
+  camFly(feat.save.p, feat.save.t, 1.0, () => {
+    restoreCamBtn();
+    afterQ.push(() => { snapshot(); featEnd(); fadeSnap(reduceMotion ? 120 : 380); });
+  });
+}
+// The camera preset that was lit before the part came up lights again when the camera is back there.
+function restoreCamBtn() {
+  const name = feat.save && feat.save.cam;
+  document.querySelectorAll('[data-cam]').forEach(b => b.setAttribute('aria-pressed', String(!!name && b.dataset.cam === name)));
+}
+
+// Each frame: the tweens, the turntable, the fans on it, the home glow's pulse, and the picture's shift off the card.
+function stepFeat(dt) {
+  for (let i = 0; i < feat.anims.length; i++) {
+    const a = feat.anims[i];
+    if (a.delay > 0) { a.delay -= dt; continue; }
+    a.t += dt;
+    const k = Math.min(1, a.t / a.dur);
+    a.fn(a.ez(k), k);
+    if (k >= 1) { feat.anims.splice(i--, 1); if (a.done) a.done(); }
+  }
+  const P = feat.cur;
+  if (P) {
+    if (P.landed) {
+      if (feat.userSpin && !feat.hold && !reduceMotion) P.ang += dt * 0.36;
+      P.pivot.rotation.y = P.yaw + P.ang;
+      TT.spin.rotation.y = P.ang;
+      // It floats a little over the disc
+      if (!reduceMotion) { P.bob = Math.min(1, P.bob + dt); P.pivot.position.y = P.spot.S.y + Math.sin(performance.now() / 700) * 1.6 * P.bob; }
+    }
+    if (!reduceMotion) for (const r of P.rotors) r.rotation.z += dt * 9;
+  }
+  if (feat.holdT > 0 && (feat.holdT -= dt) <= 0) feat.hold = false;
+  if (feat.homeG) homeMat.uniforms.uA.value = 0.3 + 0.16 * Math.sin(performance.now() / 380);
+  const L = feat.on && !feat.leaving ? featLayout() : null;
+  const f = reduceMotion ? 1 : 1 - Math.exp(-dt * 6);
+  feat.vo.x += ((L ? L.ox : 0) - feat.vo.x) * f;
+  feat.vo.y += ((L ? L.oy : 0) - feat.vo.y) * f;
+  const W = renderer.domElement.clientWidth, H = renderer.domElement.clientHeight;
+  if (Math.abs(feat.vo.x) + Math.abs(feat.vo.y) > 0.25 && W && H) { camera.setViewOffset(W, H, -feat.vo.x, -feat.vo.y, W, H); feat.voOn = true; }
+  else if (feat.voOn) { feat.vo.x = feat.vo.y = 0; camera.clearViewOffset(); feat.voOn = false; }
+}
+
+// Hover (mouse): a rim glow on the part under the pointer and a tooltip with its name.
+const tipEl = $('feat-tip'), cvs = renderer.domElement;
+let hoverReq = 0, lastMove = null;
+function setHover(id, e) {
+  if (id !== feat.hover) {
+    if (feat.hoverG) { scene.remove(feat.hoverG); feat.hoverG = null; }
+    if (id && id !== '__show' && id !== feat.id) { feat.hoverG = glowGroup(id, hoverMat, hoverBehind); scene.add(feat.hoverG); }
+    feat.hover = id;
+    cvs.style.cursor = id ? 'pointer' : '';
+  }
+  if (!id || !e) { tipEl.hidden = true; return; }
+  const name = id === '__show' ? fv(FEAT_CAT[feat.id].name) : fv(FEAT_CAT[id].name);
+  const what = id === '__show' ? (feat.userSpin ? 'click to pause the turntable' : 'click to spin it') : feat.on ? 'click to bring it up' : 'click to take a closer look';
+  tipEl.replaceChildren(document.createTextNode(name), Object.assign(document.createElement('small'), { textContent: what }));
+  tipEl.hidden = false;
+  const sr = stageEl.getBoundingClientRect();
+  let x = e.clientX - sr.left + 16, y = e.clientY - sr.top + 18;
+  if (x + tipEl.offsetWidth > sr.width - 8) x = e.clientX - sr.left - tipEl.offsetWidth - 12;
+  if (y + tipEl.offsetHeight > sr.height - 8) y = e.clientY - sr.top - tipEl.offsetHeight - 12;
+  tipEl.style.transform = `translate(${Math.round(x)}px, ${Math.round(y)}px)`;
+}
+function doHover() {
+  hoverReq = 0;
+  const e = lastMove;
+  if (!e) return;
+  if (e.buttons || feat.busy) { setHover(null); return; }
+  setHover(pickAt(e.clientX, e.clientY), e);
+}
+cvs.addEventListener('pointermove', e => {
+  if (e.pointerType !== 'mouse') return;
+  lastMove = e;
+  if (!hoverReq) hoverReq = requestAnimationFrame(doHover);
+});
+cvs.addEventListener('pointerleave', () => { lastMove = null; setHover(null); });
+
+// Taps: a press that barely moves. On a part: show it (or switch to it). On the featured part: pause or spin. On empty
+// space while featuring: go back.
+let press = null;
+cvs.addEventListener('pointerdown', e => {
+  press = e.isPrimary ? { x: e.clientX, y: e.clientY, t: performance.now(), id: e.pointerId } : null;
+  if (!feat.on) hideCoach(false);
+});
+cvs.addEventListener('pointercancel', () => { press = null; });
+cvs.addEventListener('pointerup', e => {
+  const p = press;
+  press = null;
+  if (!p || e.pointerId !== p.id || e.button > 0) return;
+  if (Math.hypot(e.clientX - p.x, e.clientY - p.y) > 7 || performance.now() - p.t > 450) return;
+  if (feat.busy) return;
+  const id = pickAt(e.clientX, e.clientY);
+  if (feat.on) {
+    if (id === '__show') setSpin(!feat.userSpin);
+    else if (id) featSwitch(id);
+    else featClose();
+  } else if (id && id !== '__show') featOpen(id);
+});
+controls.addEventListener('start', () => { if (feat.on) { feat.hold = true; feat.holdT = 0; } });
+controls.addEventListener('end', () => { if (feat.on) feat.holdT = 1.6; });
+
+$('feat-back').addEventListener('click', () => featClose());
+$('feat-x').addEventListener('click', () => featClose());
+$('feat-prev').addEventListener('click', () => featStep(-1));
+$('feat-next').addEventListener('click', () => featStep(1));
+$('feat-spin').addEventListener('click', () => setSpin(!feat.userSpin));
+$('feat-center').addEventListener('click', featRecenter);
+$('feat-find').addEventListener('click', () => { const c = FEAT_CAT[feat.id]; if (c && c.item) window.__checklist?.reveal(c.item); });
+// Swipe the card sideways to browse (phones)
+let swipe = null;
+cardEl.addEventListener('pointerdown', e => { swipe = e.pointerType === 'mouse' || e.target.closest('button') ? null : { x: e.clientX, y: e.clientY }; });
+cardEl.addEventListener('pointerup', e => {
+  if (!swipe) return;
+  const dx = e.clientX - swipe.x, dy = e.clientY - swipe.y;
+  swipe = null;
+  if (Math.abs(dx) > 56 && Math.abs(dy) < 40) featStep(dx < 0 ? 1 : -1);
+});
+document.addEventListener('keydown', e => {
+  if (!feat.on || e.ctrlKey || e.metaKey || e.altKey) return;
+  const tag = document.activeElement && document.activeElement.tagName;
+  if (e.key === 'ArrowRight') { e.preventDefault(); featStep(1); }
+  else if (e.key === 'ArrowLeft') { e.preventDefault(); featStep(-1); }
+  else if (e.key === ' ' && tag !== 'BUTTON' && tag !== 'INPUT') { e.preventDefault(); setSpin(!feat.userSpin); }
+});
+document.addEventListener('checklist:change', () => { if (feat.on && feat.id) fillCard(feat.id); });
+
+// First visit: a hint that parts can be tapped. Goes after a few seconds, on the first touch, or once a part is opened.
+const coachEl = $('feat-coach'), COACH = 'nas-mockup-coach-v1';
+function showCoach() {
+  let seen = false;
+  try { seen = !!localStorage.getItem(COACH); } catch (e) { /* storage unavailable */ }
+  if (seen) return;
+  coachEl.textContent = matchMedia('(hover: hover)').matches ? 'Click any part to take a closer look' : 'Tap any part to take a closer look';
+  coachEl.hidden = false;
+  requestAnimationFrame(() => requestAnimationFrame(() => coachEl.classList.add('show')));
+  feat.coachT = setTimeout(() => hideCoach(false), 9000);
+}
+function hideCoach(done) {
+  clearTimeout(feat.coachT);
+  if (!coachEl.hidden) { coachEl.classList.remove('show'); setTimeout(() => { coachEl.hidden = true; }, 450); }
+  if (done) try { localStorage.setItem(COACH, '1'); } catch (e) { /* ignore */ }
+}
+
+$('feat-hint').textContent = matchMedia('(hover: hover)').matches
+  ? 'drag to turn it · scroll to zoom · ← → next part · Space pauses · Esc goes back'
+  : 'drag to turn it · pinch to zoom · swipe the card for the next part';
+
 tunnelScenes = await tunnelGLB;
 window.__checklist?.setTwo(state.two);
 buildStatic();
@@ -2661,6 +3483,7 @@ function frame() {
     controls.target.lerpVectors(tween.t0, tween.t1, e);
     if (tween.k >= 1) tween = null;
   }
+  stepFeat(dt);
   controls.update();
   stepFinder(dt);
   const goal = state.fit ? 1 : 0;
@@ -2676,6 +3499,7 @@ function frame() {
   const fromBack = camera.position.z < controls.target.z - 60;
   if (fromBack !== stageEl.classList.contains('from-back')) stageEl.classList.toggle('from-back', fromBack);
   if (Q.post) composer.render(dt); else renderer.render(scene, camera);
+  runAfterRender();
   labelRenderer.render(scene, camera);
   tuneQuality(raw);
   requestAnimationFrame(frame);
@@ -2688,9 +3512,10 @@ document.addEventListener('checklist:change', () => { applyChecks(); updatePanel
 document.addEventListener('checklist:show', e => {
   if (appEl.classList.contains('drawer') && innerWidth < 720) setDrawer(false);
   if (!appEl.classList.contains('full') && matchMedia('(max-width: 900px)').matches) stageEl.scrollIntoView({ block: 'start', behavior: reduceMotion ? 'auto' : 'smooth' });
-  showPart(e.detail);
+  if (featHas(e.detail)) featOpen(e.detail); else showPart(e.detail);
 });
 window.__checklist?.modelReady();
+setTimeout(showCoach, 1400);
 applyChecks();
 updatePanel();
 </script>

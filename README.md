@@ -20,6 +20,7 @@ An interactive 3D mockup of my NAS build: a DARKROCK Classico Storage Master cas
 - The tunnel parts are the real print models: GLBs written by the same Blender scripts as the STL files, stored base64 in `v100_tunnel_v10.json` (one card) and `v100_tunnel_v11.json` (two).
 - The small cards as installed: a FENVI 2.5 GbE card in PCIEX1_1, just above the V100, and the Wi-Fi card in PCIEX16_3.
 - An airflow simulation through the whole case, with an X-ray mode that makes the hardware see-through.
+- A closer look at any part: click or tap it (or its label, or Show in the build checklist) and it lifts out of the case onto a glowing turntable in front of the glass, while the rest of the PC fades to a ghost and a card beside it says what the part is. Drag to turn it, scroll or pinch to zoom; the arrows (or ← →, or a swipe on the card) step through the parts, and Back, the round ✕, Esc or a tap on empty space put it back.
 - Camera presets (Tunnel, 3/4, Side, Front, Top, Back), dimension lines, full-screen mode (F) and the X-ray toggle (X).
 - The switch row folds away to one Switches button (folded at first on phones), and each part in the build checklist has an eye button that hides it in the model or brings it back. A Checkmarks switch turns off the ✓ marks on ticked parts' labels and their green edges.
 
