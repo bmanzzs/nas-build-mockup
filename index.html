@@ -155,6 +155,9 @@ ul.parts .note { grid-column: 1 / -1; color: var(--muted); font-size: 13px; }
 .pill.todo, .pill.printing { color: var(--accent); }
 .pill.later { color: var(--muted); border-style: dashed; }
 .pill.need { color: var(--warn); }
+.pill.test { color: var(--accent); border-style: dashed; }
+/* One card or two: blocks marked for the other build are hidden. */
+.app.two [data-cards="1"], .app:not(.two) [data-cards="2"] { display: none !important; }
 .model { display: block; font: 500 12px/1.5 var(--mono); color: var(--muted); font-variant-numeric: tabular-nums; }
 .fine { margin: 0; padding-top: 14px; border-top: 1px solid var(--line); color: var(--muted); font-size: 12px; }
 .drawer-close { display: none; float: right; margin: -2px -4px 0 12px; width: 34px; height: 34px; place-items: center; color: var(--ink); background: var(--panel); border: 1px solid var(--line); border-radius: 8px; cursor: pointer; }
@@ -227,7 +230,8 @@ ul.cl { margin: 0; padding: 0; list-style: none; display: grid; gap: 6px; }
           <label title="The fans’ and the pump’s ARGB, and the ROG eye"><input type="checkbox" id="tg-rgb" checked> RGB</label>
           <label><input type="checkbox" id="tg-dims"> Dimensions</label>
           <label><input type="checkbox" id="tg-glass"> Side panels</label>
-          <label title="The card and the duct partway into place, the way they slide in"><input type="checkbox" id="tg-fit"> Slide-in</label>
+          <label title="The second V100 in PCIEX16_2 and the twin duct v11. Off: one card and duct v10."><input type="checkbox" id="tg-two" checked> Card 2</label>
+          <label title="The cards and the duct partway into place, the way they slide in"><input type="checkbox" id="tg-fit"> Slide-in</label>
         </div>
         <div class="chipbar">
           <button type="button" id="btn-full" aria-pressed="false" title="Full screen (F)"><svg width="14" height="14" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.7" aria-hidden="true"><path id="full-icon" d="M2 6V2h4M10 2h4v4M14 10v4h-4M6 14H2v-4"/></svg><span>Full screen</span></button>
@@ -250,7 +254,8 @@ ul.cl { margin: 0; padding: 0; list-style: none; display: grid; gap: 6px; }
       <button type="button" class="drawer-close" id="drawer-close" aria-label="Close details"><svg width="14" height="14" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path d="M3 3l10 10M13 3L3 13"/></svg></button>
       <p class="eyebrow">NAS-T-BOX · DARKROCK Classico Storage Master</p>
       <h1>Build mockup</h1>
-      <p class="lede">Your parts as the case stands now, modeled part by part from your photos: both drive cages in bays 3 and 4, and a Tesla V100 in the top x16 slot, fed by tunnel v10. Two Arctic P12 Pros hang on the adapter you already have, in one column with the top front fan and the card, and blow through a one-piece duct whose sleeve is fitted to the card’s end and screwed to it, with two fills that steer the air into the fins. Six screws at the front, as now, and three on the card’s end strip; behind fan 1 it snaps and slides together by hand.</p>
+      <p class="lede" data-cards="1">Your parts as the case stands now, modeled part by part from your photos: both drive cages in bays 3 and 4, and a Tesla V100 in the top x16 slot, fed by tunnel v10. Two Arctic P12 Pros hang on the adapter you already have, in one column with the top front fan and the card, and blow through a one-piece duct whose sleeve is fitted to the card’s end and screwed to it, with two fills that steer the air into the fins. Six screws at the front, as now, and three on the card’s end strip; behind fan 1 it snaps and slides together by hand.</p>
+      <p class="lede" data-cards="2">Your parts as the case stands now, modeled part by part from your photos, with the second V100 you ordered: both drive cages in bays 3 and 4, and two Tesla V100s, in PCIEX16_1 and PCIEX16_2, fed by the twin duct v11. The same two Arctic P12 Pros on the adapter you already have blow through one duct with a sleeve on each card’s end, each screwed to its card, and a web between them gives each card half the air. Untick Card 2 to see the one-card build with duct v10.</p>
     </header>
 
     <section class="readout" aria-live="polite">
@@ -277,7 +282,12 @@ ul.cl { margin: 0; padding: 0; list-style: none; display: grid; gap: 6px; }
       <h2>What the model shows</h2>
       <ul class="list">
         <li>Both drive cages are in, as in your photos of 17 Nov: bays 3 and 4, four drives, right under the radiator fans. Bays 1 and 2 are open, so the tunnel has a clear run back to the card. In the model the fan stack’s top sits about 8 mm under the bay 3 cage; that gap is an estimate (±15 mm), but fan 1 already sits there today and fan 2 is the same height.</li>
-        <li>The V100 sits in PCIEX16_1 at PCIe 3.0 x16. Its end is 158.5 mm behind the front steel, measured in the case, and that’s the room the tunnel has.</li>
+        <li data-cards="1">The V100 sits in PCIEX16_1 at PCIe 3.0 x16. Its end is 158.5 mm behind the front steel, measured in the case, and that’s the room the tunnel has.</li>
+        <li data-cards="2">Card 2 is the same HPE Tesla V100 32 GB (250 W, EPS 8-pin), arriving 19–21 Nov. It sits in PCIEX16_2, three slots (60.96 mm) below card 1; with both slots in use the board runs each at PCIe 3.0 x8. Their ends line up, 158.5 mm behind the front steel, the room the tunnel has.</li>
+        <li data-cards="2">The twin duct v11 is v10 grown to both cards: the same flange, rail frame and fan stack, and one block that holds two of v9’s sleeves 60.96 mm apart. Its walls are nearly flat (8° at most), because the box round both card ends is about as big as the fans.</li>
+        <li data-cards="2">A web between the cards splits the air from 64.5 mm in front of their ends, so each card gets its half. The stack’s axis sits only 3 mm above the middle of the two, so the halves come out nearly even.</li>
+        <li data-cards="2">Each card keeps v10’s plate with its three end screws, and the two fills that steer the air into its fins. Card 1’s plug trough and lead are v10’s. Card 2’s trough bends straight up into the web, and its lead leaves through a window in the duct’s glass side, then runs down to its own EPS adapter. The model parks that adapter beside the duct just above the PSU shroud; any spot its leads reach is fine.</li>
+        <li data-cards="2">Power: about 750 W at full load on the 850 W PSU. Each card needs its own EPS adapter on its own two PCIe leads, and for stress tests cap both cards at about 200 W (nvidia-smi -pl 200).</li>
         <li>Lined up the way it is in your case: the front fans, the fan stack and the card share one column across the case, so fan 1 sits right under the top stock fan. Your adapter hangs fan 1 about 27 mm below the card’s centre, so the duct climbs that much on the way back, with straight walls and no bend, narrowing from the fans’ 116 mm bore to the card’s 98.5 × 37 mm end over 72.5 mm.</li>
         <li>The duct is one piece: flange, loft and the sleeve over the card end. The funnel, collar and cap of v2, and the taped joints between them, are gone.</li>
         <li>The sleeve started from frame 1’s 98.5 × 37 mm and the card end’s shape in your close-up photos, then was fitted on the card itself with three test pieces. v6 showed where light got through, v8 fitted each wall to close it, and v9 added two slots for the board’s edge and moved two screw slots. You called v9’s fit perfect, and every surface of v10 that touches the card is exactly v9’s.</li>
@@ -307,17 +317,20 @@ ul.cl { margin: 0; padding: 0; list-style: none; display: grid; gap: 6px; }
         <li>On the bench: fan 1 onto your adapter with its four fan screws from the plate’s front, as it is now.</li>
         <li>On the bench: rail frame on fan 2’s back, then fan 2 and the straightener. Push the four pins in from the rail frame side until their arrowheads poke out of the straightener, then press the lot onto fan 1’s back until all four click.</li>
         <li>Front panel off: hang the stack on two fan screws through the middle fan’s top holes, from the outside. Leave them loose.</li>
-        <li>On the bench: plug the EPS lead into the card, then push the duct’s sleeve onto the card end until the plate inside sits on the card’s end strip. It’s a snug push fit, like the v9 test piece.</li>
-        <li>Still on the bench: drive the card’s three end screws through the plate from inside the duct, with a long screwdriver through the duct’s inlet. B and C go straight in; A, at the tray end, takes the screwdriver tilted a little toward the middle.</li>
-        <li>Lay the case on its side and lower the card into its slot. The duct’s flange drops into the rail frame from the glass side and slides down with the card; the rail’s lead-in lifts or lowers the loose stack into line.</li>
-        <li>Snug the two front screws last, just until their heads touch the steel; don’t pull the stack forward. The lead lies in the trough and sweeps up over the stack; park the EPS adapter on top and plug in the two PCIe leads.</li>
+        <li data-cards="1">On the bench: plug the EPS lead into the card, then push the duct’s sleeve onto the card end until the plate inside sits on the card’s end strip. It’s a snug push fit, like the v9 test piece.</li>
+        <li data-cards="1">Still on the bench: drive the card’s three end screws through the plate from inside the duct, with a long screwdriver through the duct’s inlet. B and C go straight in; A, at the tray end, takes the screwdriver tilted a little toward the middle.</li>
+        <li data-cards="1">Lay the case on its side and lower the card into its slot. The duct’s flange drops into the rail frame from the glass side and slides down with the card; the rail’s lead-in lifts or lowers the loose stack into line.</li>
+        <li data-cards="1">Snug the two front screws last, just until their heads touch the steel; don’t pull the stack forward. The lead lies in the trough and sweeps up over the stack; park the EPS adapter on top and plug in the two PCIe leads.</li>
+        <li data-cards="2">On the bench: plug each card’s EPS lead in. Push card 1’s end into the twin duct’s top sleeve until the plate inside sits on its end strip, and drive its three screws through the plate with a long screwdriver through the inlet. Then card 2 into the bottom sleeve, the same way. Card 2’s lead goes up its trough and out of the window in the glass side.</li>
+        <li data-cards="2">The duct now holds the two cards 60.96 mm apart, exactly three slots. Lay the case on its side and lower both cards in together: the flange drops into the rail frame from the glass side, and both cards meet their slots at once.</li>
+        <li data-cards="2">Snug the two front screws last, just until their heads touch the steel. Card 1’s lead lies in its trough and sweeps up over the stack to its adapter on top; card 2’s comes down the duct’s glass side to its own adapter. Each adapter gets its own two PCIe leads from the PSU.</li>
       </ol>
     </section>
 
     <section>
-      <h2>Check when the duct is done</h2>
+      <h2>Check duct v10 on the card</h2>
       <ol class="list">
-        <li>Snap off the supports: inside the sleeve under the screw plate and the trough’s climb, and now also under the two fills. They’re the same thin breakaway kind as on the test pieces.<span class="model">duct v10 · about 16 h 07 min · 179 g · started 16 Nov 23:52</span></li>
+        <li>Snap off the supports: inside the sleeve under the screw plate and the trough’s climb, and now also under the two fills. They’re the same thin breakaway kind as on the test pieces.<span class="model">duct v10 · about 16 h 07 min · 179 g · printed 16–17 Nov</span></li>
         <li>Push the duct onto the card. It should go on just like the v9 test piece; the fills sit in front of the end strip and don’t touch the card.<span class="model">fit surfaces exactly v9 · fills 0.5 mm off the strip, 1.2 mm off the board</span></li>
         <li>Screw it on through the plate: B and C straight in, A with the screwdriver tilted a little toward the middle. The fills leave each screw room even at either end of its slot.<span class="model">slots 5.6 × 3.6 mm, ±1 mm play · 4 mm clear round each screw</span></li>
         <li>The card’s end screws. The plate adds 2 mm under each head, so if the ones from the card come up short, use ones 2 mm longer, probably M3.<span class="model">model: 2 mm plate</span></li>
@@ -330,7 +343,19 @@ ul.cl { margin: 0; padding: 0; list-style: none; display: grid; gap: 6px; }
       </ol>
     </section>
 
-    <p class="fine">Part sizes come from spec sheets: V100 267 × 111 mm, ATX board 305 × 244 mm, slot pitch 20.32 mm, EVGA 850 G5 150 × 150 × 86 mm, Pure Loop 2 radiator 397 × 120 × 27 mm, Arctic P12 Pro 120 × 120 × 25 mm. The tunnel parts are the v10 print files and your printed adapter v1, from the same model as the STLs. The card end’s size started from frame 1’s 98.5 × 37 mm and its outline and screw holes from your close-up photos; the sleeve was then fitted on the card with three test pieces, and v9’s fit was perfect. The card’s place (158.5 mm behind the front steel) comes from ruler photos in the case, good to about ±3 mm; the front fans line up with it across the case, as you found in the case. The rest of the case interior is estimated from your build photos and DARKROCK’s side diagram, roughly ±15 mm. The parts themselves (board, cooler, RAM, fans, drives, cables) are modeled at their spec sizes and dressed from your photos of 17 Nov; the cable side is from 31 Oct.</p>
+    <section data-cards="2">
+      <h2>Before the twin duct prints</h2>
+      <ol class="list">
+        <li>First, the fit and length test with duct v10 on card 1. The twin uses the same adapter, stack and rail, so if v10 sits tight against the front steel, the fix goes into the adapter (a thinner one, or 0.5 mm shims) and the twin gets it too.<span class="model">same flange, rail and stack as v10</span></li>
+        <li>When card 2 arrives, slide the v9 test piece onto its end. It’s the same model, so it should fit just like card 1; if it feels different, tell me how before the twin prints.<span class="model">twin sleeves are v9’s, exactly</span></li>
+        <li>If you want to check the spacing first: the twin card-end test piece is the duct’s last 12 mm with both sleeves, for both cards in their slots.<span class="model">about 3 h 39 min · sleeves 60.96 mm apart</span></li>
+        <li>Card 2’s power: its own EPS adapter, on its own two PCIe leads from the PSU.</li>
+        <li>Then print the twin duct, sleeves down, with supports from the bed and a 5 mm brim.<span class="model">duct v11 · about 21 h 39 min · 245 g of PLA</span></li>
+        <li>First power-on of card 2 only with its EPS plug in and both fans running. Watch both cards with nvidia-smi, and cap them at about 200 W for stress tests.</li>
+      </ol>
+    </section>
+
+    <p class="fine">Part sizes come from spec sheets: V100 267 × 111 mm, ATX board 305 × 244 mm, slot pitch 20.32 mm, EVGA 850 G5 150 × 150 × 86 mm, Pure Loop 2 radiator 397 × 120 × 27 mm, Arctic P12 Pro 120 × 120 × 25 mm. The tunnel parts are the v10 print files and your printed adapter v1, from the same model as the STLs. The card end’s size started from frame 1’s 98.5 × 37 mm and its outline and screw holes from your close-up photos; the sleeve was then fitted on the card with three test pieces, and v9’s fit was perfect. The card’s place (158.5 mm behind the front steel) comes from ruler photos in the case, good to about ±3 mm; the front fans line up with it across the case, as you found in the case. The rest of the case interior is estimated from your build photos and DARKROCK’s side diagram, roughly ±15 mm. The parts themselves (board, cooler, RAM, fans, drives, cables) are modeled at their spec sizes and dressed from your photos of 17 Nov; the cable side is from 31 Oct.<span data-cards="2"> Card 2 is drawn as card 1’s twin, the same model three slots lower, and the twin duct is the v11 print file, from the same script as its STL.</span></p>
   </aside>
 </div>
 
@@ -357,12 +382,15 @@ ul.cl { margin: 0; padding: 0; list-style: none; display: grid; gap: 6px; }
     { id: 'adapter', group: 'print', name: 'Adapter v1', ready: true, on: 'Printed · black PETG · fits the case holes', off: 'Not ready yet' },
     { id: 'rail', group: 'print', name: 'Rail frame v3', ready: true, on: 'Printed 15 Nov · white PLA', off: 'To print · about 2 h 25 min' },
     { id: 'straightener', group: 'print', name: 'Straightener v4', ready: true, on: 'Printed 16 Nov · came out perfect', off: 'Printed · not ticked as ready' },
-    { id: 'pins', group: 'print', name: 'Snap pins × 4', ready: false, on: 'Printed · ready to fit', off: 'Two good · two more printed 16 Nov, check them' },
-    { id: 'duct', group: 'print', name: 'Duct v10', ready: false, on: 'Printed · supports off, ready to fit', off: 'Printing · done about 17:00–18:00 on 17 Nov' },
+    { id: 'pins', group: 'print', name: 'Snap pins × 4', ready: false, offKind: 'test', on: 'Printed · ready to fit', off: 'Two good · two more printed 16 Nov, check them' },
+    { id: 'duct', group: 'print', only: 1, name: 'Duct v10', ready: false, offKind: 'test', on: 'Printed 17 Nov · fits the card, ready to go in', off: 'Printed 17 Nov · fit test on the card next' },
+    { id: 'duct2', group: 'print', only: 2, name: 'Twin duct v11', ready: false, on: 'Printed · supports off, ready to fit', off: 'To print · about 21 h 39 min · after the v10 test and card 2' },
     { id: 'fan1', group: 'have', name: 'Fan 1 · Arctic P12 Pro', ready: true, on: 'In hand', off: 'Not here yet' },
     { id: 'fan2', group: 'have', name: 'Fan 2 · Arctic P12 Pro', ready: true, on: 'In hand', off: 'Not here yet' },
-    { id: 'eps', group: 'have', name: 'EPS 8-pin adapter', ready: true, on: 'In hand · plugs into the card first', off: 'Not here yet' },
-    { id: 'screws', group: 'have', name: 'Card end screws × 3', ready: true, on: 'The card’s own · 2 mm longer M3 if short', off: 'Not here yet' }
+    { id: 'card2', group: 'have', only: 2, name: 'V100 #2 · HPE 32 GB', ready: false, on: 'Here · the v9 test piece fits its end', off: 'Ordered 17 Nov · arriving 19–21 Nov' },
+    { id: 'eps', group: 'have', name: 'EPS 8-pin adapter', name2: 'EPS 8-pin adapter · card 1', ready: true, on: 'In hand · plugs into the card first', off: 'Not here yet' },
+    { id: 'eps2', group: 'have', only: 2, name: 'EPS 8-pin adapter · card 2', ready: false, on: 'In hand · on its own two PCIe leads', off: 'Needed · on its own two PCIe leads' },
+    { id: 'screws', group: 'have', name: 'Card end screws × 3', name2: 'Card end screws × 6', ready: true, on: 'The card’s own · 2 mm longer M3 if short', on2: 'Each card’s own 3 · 2 mm longer M3 if short', off: 'Not here yet' }
   ];
   var BY = {};
   ITEMS.forEach(function (it) { BY[it.id] = it; });
@@ -380,6 +408,11 @@ ul.cl { margin: 0; padding: 0; list-style: none; display: grid; gap: 6px; }
   function saveLocal() { try { localStorage.setItem(KEY, JSON.stringify(ticks)); } catch (e) { /* ignore */ } }
   function isDone(id) { return Object.prototype.hasOwnProperty.call(ticks, id) ? ticks[id] : !!(BY[id] && BY[id].ready); }
   function setSave(t) { saveEl.textContent = t; }
+  // One card or two, as the model's Card 2 toggle last left it (it starts on).
+  var two = true;
+  try { var st = JSON.parse(localStorage.getItem('nas-mockup-v6') || '{}'); if (typeof st.two === 'boolean') two = st.two; } catch (e) { /* storage unavailable */ }
+  var appEl = document.querySelector('.app');
+  function shown(it) { return !it.only || it.only === (two ? 2 : 1); }
 
   var rows = {};
   ITEMS.forEach(function (it) {
@@ -401,20 +434,25 @@ ul.cl { margin: 0; padding: 0; list-style: none; display: grid; gap: 6px; }
     box.addEventListener('change', function () { tick(it.id, box.checked); });
     li.append(label, show);
     document.getElementById(it.group === 'print' ? 'cl-print' : 'cl-have').append(li);
-    rows[it.id] = { li: li, box: box, sub: sub };
+    rows[it.id] = { li: li, box: box, sub: sub, name: b };
   });
 
   function render() {
-    var n = 0;
+    var n = 0, total = 0;
+    appEl.classList.toggle('two', two);
     ITEMS.forEach(function (it) {
-      var d = isDone(it.id), r = rows[it.id];
+      var d = isDone(it.id), r = rows[it.id], on = shown(it);
+      r.li.hidden = !on;
+      if (!on) return;
+      total++;
       if (d) n++;
       r.box.checked = d;
       r.li.classList.toggle('done', d);
-      r.sub.textContent = d ? it.on : it.off;
+      r.name.textContent = two && it.name2 || it.name;
+      r.sub.textContent = d ? (two && it.on2 || it.on) : (two && it.off2 || it.off);
     });
-    document.getElementById('cl-count').textContent = n + ' of ' + ITEMS.length + ' ready';
-    document.getElementById('cl-bar').style.width = (100 * n / ITEMS.length) + '%';
+    document.getElementById('cl-count').textContent = n + ' of ' + total + ' ready';
+    document.getElementById('cl-bar').style.width = (100 * n / total) + '%';
     document.dispatchEvent(new CustomEvent('checklist:change'));
   }
 
@@ -488,6 +526,7 @@ ul.cl { margin: 0; padding: 0; list-style: none; display: grid; gap: 6px; }
     items: ITEMS,
     item: function (id) { return BY[id] || null; },
     isDone: isDone,
+    setTwo: function (v) { if (two !== v) { two = v; render(); } },
     modelReady: function () { section.classList.add('model-ready'); },
     // From a label in the model: bring its row into view and flash it.
     reveal: function (id) {
@@ -521,16 +560,17 @@ import { GTAOPass } from 'three/addons/postprocessing/GTAOPass.js';
 import { UnrealBloomPass } from 'three/addons/postprocessing/UnrealBloomPass.js';
 import { OutputPass } from 'three/addons/postprocessing/OutputPass.js';
 
-// The v10 tunnel's printed parts: a GLB written by the same Blender script as the print files, kept base64 in a JSON
-// file (the artifact host doesn't serve .glb). Start loading it now.
-const tunnelGLB = fetch('v100_tunnel_v10.json')
+// The tunnels' printed parts, v10 for one card and the twin v11 for two: GLBs written by the same Blender scripts as
+// the print files, kept base64 in JSON files (the artifact host doesn't serve .glb). Start loading both now.
+const loadTunnel = file => fetch(file)
   .then(r => { if (!r.ok) throw new Error(`HTTP ${r.status}`); return r.json(); })
   .then(j => {
     const bin = atob(j.glb), bytes = new Uint8Array(bin.length);
     for (let i = 0; i < bin.length; i++) bytes[i] = bin.charCodeAt(i);
     return new GLTFLoader().parseAsync(bytes.buffer, '');
   })
-  .then(g => g.scene, e => { console.warn('tunnel model:', e); return null; });
+  .then(g => g.scene, e => { console.warn(`tunnel model ${file}:`, e); return null; });
+const tunnelGLB = Promise.all(['v100_tunnel_v10.json', 'v100_tunnel_v11.json'].map(loadTunnel));
 
 // ---------------------------------------------------------------------------
 // Dimensions in mm. X runs rear wall → front, Y floor → top, Z motherboard tray → side panel.
@@ -564,12 +604,12 @@ const DRIVES = ['WD Purple 4TB', 'WD Purple 4TB', 'WD Purple 4TB', 'SkyHawk 4TB'
 
 const reduceMotion = matchMedia('(prefers-reduced-motion: reduce)').matches;
 const narrow = matchMedia('(max-width: 560px)').matches;
-const state = { labels: true, air: true, xray: false, dims: false, glass: false, fit: false, rgb: true };
+const state = { labels: true, air: true, xray: false, dims: false, glass: false, fit: false, rgb: true, two: true };
 // Bumped with the defaults, so saved settings from an older version don't hide them. The slide-in view isn't saved.
 const STORE = 'nas-mockup-v6';
 try {
   const saved = JSON.parse(localStorage.getItem(STORE) || '{}');
-  for (const k of ['labels', 'air', 'xray', 'dims', 'glass', 'rgb']) if (typeof saved[k] === 'boolean') state[k] = saved[k];
+  for (const k of ['labels', 'air', 'xray', 'dims', 'glass', 'rgb', 'two']) if (typeof saved[k] === 'boolean') state[k] = saved[k];
 } catch (e) { /* storage unavailable */ }
 const save = () => { try { localStorage.setItem(STORE, JSON.stringify(state)); } catch (e) { /* ignore */ } };
 
@@ -1738,7 +1778,7 @@ function buildCard(g, p) {
   g.add(rbox(-4, -2, slotY(pos + 1) - 17, slotY(pos) + 3, 10, 124, MAT_BRACKET, 0.3));
   g.add(rbox(-14, -2, slotY(pos) + 1.4, slotY(pos) + 3, 10, 30, MAT.silver, 0.3));
   // The EPS 8-pin plug on the end face and its lead come with the tunnel model: the plug sits in the duct's trough.
-  g.add(tag(`Tesla V100 32 GB · ${slot}`, 80, c.y1 + 4, c.z1));
+  if (!p.id) g.add(tag(`Tesla V100 32 GB · ${slot}`, 80, c.y1 + 4, c.z1));   // card 2's is a checklist label
 }
 
 function buildStatic() {
@@ -1786,6 +1826,7 @@ function buildStatic() {
 const TUN = { fan1: 20.5, fan2: 65.5, rear: 166.5, side: 62, sy: -27.5, top: 36.5, low: -91.5, earY: 83, slot: 4 };
 const CAGES = [2, 3];                                                            // bays 3 and 4, as in your photos of 17 Nov
 const CARD = { slot: 'PCIEX16_1' };
+const CARD2 = { slot: 'PCIEX16_2' };                                               // the second V100, three slots lower
 const SLIDE = 60;                                                                // slide-in view: mm toward the glass
 const smooth = t => t * t * (3 - 2 * t);
 function cardRect(slot) {
@@ -1795,19 +1836,21 @@ function cardRect(slot) {
 // Where the tunnel lands: the card's axis, the gaps round the stack, and where the case's fan holes fall against it.
 function planTunnel() {
   const c = cardRect(CARD.slot), cy = (c.y0 + c.y1) / 2, cz = (c.z0 + c.z1) / 2;
+  const c2 = cardRect(CARD2.slot), cy2 = (c2.y0 + c2.y1) / 2;
   const top = cy + TUN.top, low = cy + TUN.low;
   // The share of fan 1's width behind the open steel between the rails; the rails cover the rest.
   const open = Math.max(0, Math.min(cz + 60, D.frontZ + 48) - Math.max(cz - 60, D.frontZ - 48)) / 120;
   const holeY = D.frontFanY[1] + 52.5 - cy;
   return {
-    card: { ...CARD, c, cy, cz }, cy, cz, top, low, open,
+    card: { ...CARD, c, cy, cz }, cy, cz, c2, cy2, top, low, open,
     holeY, holeZ: [D.frontZ - 52.5 - cz, D.frontZ + 52.5 - cz], slotOff: holeY - TUN.earY,
     caseOff: D.frontZ - cz, trayGap: cz - TUN.side,
     cageGap: Math.min(...CAGES.map(i => D.bays[i].y0)) - top, shroudGap: low - D.shroudTop,
   };
 }
 
-let tunnelScene = null;      // the loaded GLB, set before the first build
+let tunnelScene = null;      // the loaded GLB for the build shown, set before each build
+let tunnelScenes = [null, null];   // v10 (one card), v11 (two)
 let slideGroups = [];        // the card and everything on it move together in the slide-in view
 let pcieLeads = [];          // not plugged in yet while the card goes in
 const edgeOfPart = new Map();
@@ -1826,7 +1869,9 @@ const SCREW = {
 };
 // Checklist links: each checklist id to its label and its parts in the model.
 const itemTags = new Map(), itemObjs = new Map();
-const ITEM_OF = name => name.startsWith('adapter') ? 'adapter' : name.startsWith('rail') ? 'rail'
+const ITEM_OF = name => state.two && name.startsWith('duct') ? 'duct2'
+  : state.two && (name.startsWith('plug2') || name.startsWith('eps_cable2')) ? 'eps2'
+  : name.startsWith('adapter') ? 'adapter' : name.startsWith('rail') ? 'rail'
   : name.startsWith('straightener') ? 'straightener' : name.startsWith('pin') ? 'pins' : name.startsWith('duct') ? 'duct'
   : name.startsWith('screw') ? 'screws' : name.startsWith('plug') || name.startsWith('eps_cable') ? 'eps' : null;
 function linkItem(id, ...objs) { if (!itemObjs.has(id)) itemObjs.set(id, []); itemObjs.get(id).push(...objs); }
@@ -1874,25 +1919,48 @@ function buildTunnel(g, p) {
   const epsBox = rbox(-30, -8, 33, 55, -1, 40, MAT.plastic, 2);
   S.add(epsBox);
   linkItem('eps', epsBox);
+  // Card 2's EPS adapter: beside the duct's glass side just above the PSU shroud, where its lead comes down. Its own
+  // two PCIe leads run under the duct to the tray cutout.
+  let epsBox2 = null, leads2 = [];
+  if (state.two) {
+    epsBox2 = rbox(-128, -106, -100, -80, 58, 80, MAT.plastic, 2);
+    S.add(epsBox2);
+    linkItem('eps2', epsBox2);
+    leads2 = [-4, 4].map(dx => {
+      const pts = [[-117 + dx, -99, 69], [-117 + dx, -104, 52], [-128 + dx, -106, 14], [-146 + dx, -106, -40], [-152 + dx, -105, -64], [-154 + dx, -103, -74]];
+      const m = new THREE.Mesh(tubeGeo(pts, 3.4, { seg: 64, radial: 10 }), MAT.braid);
+      T.add(m);
+      return m;
+    });
+  }
   pcieLeads = [-4, 4].map(dy => {
     const pts = [[-12, 52 + dy, -1], [-24, 58 + dy, -34], [-66, 64 + dy, -54], [-124, 68 + dy, -61], [-150, 72 + dy, -64], [-154, 72 + dy, -74]];
     const m = new THREE.Mesh(tubeGeo(pts, 3.4, { seg: 64, radial: 10 }), MAT.braid);
     T.add(m);
     return m;
-  });
+  }).concat(leads2);
   T.add(itemTag('adapter', 'Adapter v1 · yours · 6 screws', -5, p.holeY + 22, p.holeZ[0] + 6));
   T.add(itemTag('fan1', 'Fan 1 · Arctic P12 Pro', -TUN.fan1, TUN.sy - 70, -30));
   T.add(itemTag('straightener', 'Straightener v4', -43, TUN.sy - 84, -30));
   T.add(itemTag('fan2', 'Fan 2 · Arctic P12 Pro', -TUN.fan2, TUN.sy - 98, -30));
   T.add(itemTag('rail', 'Rail frame v3 · dovetail', -80.5, TUN.sy + 84, -30));
   T.add(itemTag('pins', '4 snap pins · click into fan 1', -43.5, TUN.sy + 66, -58));
-  S.add(itemTag('duct', 'Duct v10 · one piece, fitted to the card', -122, -64, 36));
-  S.add(tag('Fills · air into the fins', -148, 10, 46, 'petg'));
-  S.add(itemTag('screws', '3 screws into the card’s end strip', -152, 24, -30));
-  S.add(tag('EPS lead · trough, then up and over', -112, 40, 30));
+  if (state.two) {
+    S.add(itemTag('duct2', 'Twin duct v11 · both cards, one piece', -122, -90, 36));
+    S.add(tag('Fills · two per card, air into the fins', -148, 10, 46, 'petg'));
+    S.add(itemTag('screws', '3 screws into each card’s end strip', -152, 24, -30));
+    S.add(tag('Card 1’s EPS lead · trough, then up and over', -112, 40, 30));
+    S.add(tag('Card 2’s EPS lead · up the web, out the glass side', -131, -24, 74));
+    S.add(itemTag('eps2', 'Card 2’s EPS adapter · own PCIe leads', -117, -108, 84));
+  } else {
+    S.add(itemTag('duct', 'Duct v10 · one piece, fitted to the card', -122, -64, 36));
+    S.add(tag('Fills · air into the fins', -148, 10, 46, 'petg'));
+    S.add(itemTag('screws', '3 screws into the card’s end strip', -152, 24, -30));
+    S.add(tag('EPS lead · trough, then up and over', -112, 40, 30));
+  }
   S.add(itemTag('eps', 'EPS adapter · parked on top', -19, 70, 20));
   // The prints and the stack's fans keep their look in X-ray; the EPS adapter and its leads are hardware.
-  for (const G of [T, S]) G.traverse(o => { if (o.isMesh && o !== epsBox && !pcieLeads.includes(o)) o.userData.x = false; });
+  for (const G of [T, S]) G.traverse(o => { if (o.isMesh && o !== epsBox && o !== epsBox2 && !pcieLeads.includes(o)) o.userData.x = false; });
   return S;
 }
 
@@ -1967,19 +2035,23 @@ function makeStream(nodes, { count, speed, color, seed = 1 }) {
 // and out its bracket; each front fan's share through the cage or across the board; the radiator fans out the top,
 // the rear exhaust and the PSU's own path. X-ray shows it inside the parts.
 const cut = (spans, c0, c1) => spans.flatMap(([a, b]) => [[a, Math.min(b, c0)], [Math.max(a, c1), b]]).filter(([a, b]) => b - a > 1);
-let gpuStream = null;
+let gpuStreams = [];
 function buildAir(p) {
   const out = [];
   let seed = 1;
   const stream = (nodes, opts) => { const s = makeStream(nodes, { seed: seed++, ...opts }); out.push(s); return s; };
   const F = D.frontFrameX, { cy, cz } = p, sy = cy + TUN.sy;
   // The tunnel: in through the open steel and fan 1, straight through the stack, up the duct into the card end.
-  gpuStream = stream([
-    { x: F + 57, y: sy, z: D.frontZ, a: 44, b: 40 }, { x: F + 2, y: sy, z: D.frontZ, a: 46, b: 44 },
-    { x: F - 10, y: sy, z: cz, a: 46, b: 46 }, { x: F - 86, y: sy, z: cz, a: 46, b: 46 },
-    { x: F - 122, y: cy + TUN.sy / 2, z: cz, a: 30, b: 46 },
-    { x: D.card.len, y: cy, z: cz, a: 14, b: 44 }, { x: 0, y: cy, z: cz, a: 14, b: 44 }, { x: -70, y: cy, z: cz, a: 28, b: 56 },
-  ], { count: 340, speed: 150, color: gpuColor });
+  const gpuPath = (y0, ty, k) => [
+    { x: F + 57, y: y0, z: D.frontZ, a: 44 * k, b: 40 }, { x: F + 2, y: y0, z: D.frontZ, a: 46 * k, b: 44 },
+    { x: F - 10, y: y0, z: cz, a: 46 * k, b: 46 }, { x: F - 86, y: y0, z: cz, a: 46 * k, b: 46 },
+    { x: F - 122, y: (y0 + ty) / 2, z: cz, a: 30 * k, b: 46 },
+    { x: D.card.len, y: ty, z: cz, a: 14, b: 44 }, { x: 0, y: ty, z: cz, a: 14, b: 44 }, { x: -70, y: ty, z: cz, a: 28, b: 56 },
+  ];
+  gpuStreams = state.two
+    ? [stream(gpuPath(sy + 23, cy, 0.5), { count: 200, speed: 150, color: gpuColor }),
+      stream(gpuPath(sy - 23, p.cy2, 0.5), { count: 200, speed: 150, color: gpuColor })]
+    : [stream(gpuPath(sy, cy, 1), { count: 340, speed: 150, color: gpuColor })];
 
   // What the tunnel doesn't take: through the gap between the drives in the cage, or straight across the board.
   // The top stock fan pushes; the parts of the middle and bottom holes the tunnel doesn't cover only breathe.
@@ -2067,10 +2139,12 @@ function buildDynamic() {
   airG = new THREE.Group();
   dynG.add(dimsG, airG);
   plan = planTunnel();
+  tunnelScene = tunnelScenes[state.two ? 1 : 0];
   const p = plan, k = p.card, F = D.frontFrameX;
 
   // Covers for the empty slots, hex-vented like the case's own.
   const occupied = new Set([1, 7, SLOTS[k.slot].pos, SLOTS[k.slot].pos + 1]);
+  if (state.two) occupied.add(SLOTS[CARD2.slot].pos).add(SLOTS[CARD2.slot].pos + 1);
   const coverG = new THREE.Group();
   for (let n = 1; n <= 7; n++) if (!occupied.has(n)) {
     coverG.add(rbox(-4, -2, slotY(n) - 17, slotY(n) + 3, 12, 122, perf('hex', 110, 20), 0.3));
@@ -2080,8 +2154,14 @@ function buildDynamic() {
   CAGES.forEach((b, i) => buildCage(cageG, b, i * 2));
   const cardG = new THREE.Group();
   buildCard(cardG, k);
-  for (const g of [coverG, cageG, cardG]) { bake(g); dynG.add(g); }
-  slideGroups = [cardG, buildTunnel(dynG, p)];
+  const card2G = new THREE.Group();
+  if (state.two) buildCard(card2G, { ...CARD2, c: p.c2, id: 'card2' });
+  for (const g of [coverG, cageG, cardG, card2G]) { bake(g); dynG.add(g); }
+  slideGroups = [cardG, card2G, buildTunnel(dynG, p)];
+  if (state.two) {
+    card2G.add(itemTag('card2', 'V100 #2 · PCIEX16_2 · due 19–21 Nov', 80, p.c2.y1 + 4, p.c2.z1));
+    linkItem('card2', card2G);
+  }
 
   dimsG.add(dimLine(D.card.len, F, D.shroudTop - 12, 177, `${F - D.card.len} mm · card end → front steel`));
   dimsG.add(dimLineV(F - 78, D.shroudTop, p.low, 177, `${Math.round(p.shroudGap)} mm · stack → PSU shroud`, 0.5));
@@ -2144,7 +2224,7 @@ let slideK = 0;
 function applySlide() {
   const e = smooth(slideK);
   for (const g of slideGroups) g.position.z = SLIDE * e;
-  if (gpuStream) gpuStream.points.visible = slideK === 0;
+  for (const s of gpuStreams) s.points.visible = slideK === 0;
   for (const m of pcieLeads) m.visible = slideK === 0;
 }
 
@@ -2161,13 +2241,13 @@ const PRINT = { duct: ' About 16 h 07 min and 179 g, with supports from the bed 
   rail: ' About 2 h 25 min and 26 g.', pins: ' One pin alone takes about 6 min; all four on one plate, about 24 min and 4 g.',
   test: ' About 1 h 35 min each.' };
 const PRINT_ROWS = [['Duct v10 print', 'about 16 h 07 min · 179 g of PLA'],
-  ['Started', '16 Nov 23:52 · done about 17:00–18:00']];
-const PILL = { have: 'have it', printed: 'printed', printing: 'printing', todo: 'to print', later: 'later', need: 'not yet' };
+  ['Printed', '16–17 Nov · fit test on the card next']];
+const PILL = { have: 'have it', printed: 'printed', printing: 'printing', todo: 'to print', later: 'later', need: 'not yet', test: 'fit test' };
 function setParts(el, items) {
   const CL = window.__checklist;
   el.replaceChildren(...items.map(([name, kind, note, id]) => {
     const it = id && CL ? CL.item(id) : null;
-    if (it) kind = CL.isDone(id) ? (it.group === 'print' ? 'printed' : 'have') : (it.group === 'print' ? 'todo' : 'need');
+    if (it) kind = CL.isDone(id) ? (it.group === 'print' ? 'printed' : 'have') : (it.offKind || (it.group === 'print' ? 'todo' : 'need'));
     const li = document.createElement('li');
     const b = document.createElement('b'); b.textContent = name;
     const pill = document.createElement('span'); pill.className = `pill ${kind}`; pill.textContent = PILL[kind];
@@ -2176,11 +2256,31 @@ function setParts(el, items) {
     return li;
   }));
 }
+// The parts list with two cards: the twin duct in place of v10, card 2 and its power.
+const PARTS2 = () => [
+  ['Adapter v1', 'have', 'The one you printed, black PETG, shared by both builds. It hangs inside the front steel on two fan screws through the middle fan’s top holes; its 13 mm slots let it slide ±4 mm up or down. If the v10 test shows the length is tight, a thinner adapter or shims fix it for the twin too.', 'adapter'],
+  ['Fan 1 · Arctic P12 Pro', 'have', 'Black, 120 × 120 × 25 mm, the high-pressure model. Screwed to the adapter at the front; the pins click into its open corners at the back.', 'fan1'],
+  ['Straightener v4', 'printed', 'Nine vanes and an open hub, clamped between the fans at its corners by the pins. Printed 16 Nov; it came out perfect.', 'straightener'],
+  ['Fan 2 · Arctic P12 Pro', 'have', 'The same fan, pushing in series with fan 1; the straightener takes the swirl out between them.', 'fan2'],
+  ['Rail frame v3', 'printed', 'On fan 2’s back. The twin duct’s flange is v10’s, so it slides into the same rail from the glass side as both cards go in. Printed 15 Nov.', 'rail'],
+  ['Snap pins × 4', 'printed', 'In from the rail frame through fan 2 and the straightener until the arrowheads click into fan 1’s open corners.', 'pins'],
+  ['Duct v10', 'printed', 'The one-card duct, printed 16–17 Nov. Its fit and length test on card 1 comes first: it shares the adapter, stack and rail with the twin, so anything it shows goes into the twin too.'],
+  ['Twin duct v11', 'todo', `v10 grown to both cards, in one piece: v10’s flange and straight walls (8° at most), one block that holds two of v9’s sleeves 60.96 mm apart, and a web between the cards that splits the air from 64.5 mm in front of their ends. Each card has v10’s plate with its three end screws and two fills that steer the air into its fins. Card 1’s plug trough is v10’s; card 2’s bends up into the web and lets its lead out through a window in the glass side. Prints sleeves-down; about 21 h 39 min and 245 g, with supports from the bed and a 5 mm brim. A card-end test piece with both sleeves takes about 3 h 39 min.`, 'duct2'],
+  ['V100 #2 · HPE 32 GB', 'need', 'The same HPE Tesla V100 32 GB HBM2 (250 W, EPS 8-pin), ordered 17 Nov and arriving 19–21 Nov. It goes in PCIEX16_2, three slots below card 1; both then run at PCIe 3.0 x8. Slide the v9 test piece onto its end when it’s here.', 'card2'],
+  ['Card end screws × 6', 'have', 'Each card’s own three, in holes A, B and C on its end strip. The plate adds 2 mm under each head; if they come up short, use ones 2 mm longer (probably M3).', 'screws'],
+  ['EPS 8-pin power · card 1', 'have', 'The 030-0571-000 style adapter. Plug it into card 1 before the duct goes on; the lead runs up the trough and over the stack, with the adapter parked on top.', 'eps'],
+  ['EPS 8-pin power · card 2', 'need', 'A second adapter of the same kind, on its own two PCIe leads from the PSU. Its lead leaves the duct through the window in the glass side and runs down to it.', 'eps2'],
+  ['Thin foam strip', 'later', 'Probably not needed, since v9’s test piece fit perfectly. If either sleeve shows a gap, a strip of thin foam tape inside it closes it.'],
+];
 function updatePanel() {
   const p = plan;
   const st = $('status'), note = $('status-note');
-  st.className = 'status ok'; st.textContent = 'Test piece fit · duct v10 printing';
-  note.textContent = tunnelScene
+  st.className = 'status ok'; st.textContent = state.two ? 'Twin duct v11 designed · card 2 due 19–21 Nov' : 'Duct v10 printed · fit test next';
+  note.textContent = !tunnelScene
+    ? 'The tunnel’s printed parts didn’t load, so only the fans show. Reload the page to see them; the list below still has every part.'
+    : state.two
+    ? 'Both cards line up with the stack, three slots apart. The twin duct is v10 grown to two card ends: the same flange and rail, one block with two of v9’s sleeves, and a web that splits the stack’s air between the cards. Each card is screwed into its sleeve, so both go in together, and the flange slides into its rail as they do. Tick Slide-in to see them partway in.'
+    : tunnelScene
     ? 'Lined up the way it is in your case: the front fans, the stack and the card share one column. Your adapter hangs the stack 27 mm below the card’s centre, so the one-piece duct climbs that much with straight walls to a sleeve fitted to the card’s end, screwed to its end strip, with two fills that steer the air into the fins. Six screws at the front, as now; behind fan 1 it snaps together, and the duct slides into its rail as the card goes in. Tick Slide-in to see the card and duct partway in.'
     : 'The tunnel’s printed parts didn’t load, so only the fans show. Reload the page to see them; the list below still has every part.';
   const rows = [
@@ -2205,12 +2305,31 @@ function updatePanel() {
     ['PCIe link', SLOTS[p.card.slot].link],
     ['Full-load power (est.)', 'about 500 W of 850 W'],
   ];
-  $('metrics').replaceChildren(...rows.flatMap(([k, val]) => {
+  const rows2 = [
+    ['Card end → front steel', `${D.frontFrameX - D.card.len} mm · measured · both cards`],
+    ['Steel → back of the sleeves', `${TUN.rear} mm`],
+    ['Fans in series', '2 × Arctic P12 Pro, straightener between'],
+    ['Cards', `2 × V100 · ${(p.cy - p.cy2).toFixed(2)} mm apart, 3 slots`],
+    ['Stack vs cards, across', `${Math.round(p.caseOff)} mm · lined up`],
+    ['Stack axis', `${-TUN.sy} mm below card 1’s · ${(p.cy + TUN.sy - p.cy2).toFixed(1)} above card 2’s`],
+    ['Duct contraction', 'about 1.5 : 1 by area, into both card ends'],
+    ['Steepest duct wall', '8°, straight, no bend'],
+    ['Air split', 'a web from 64.5 mm in front of the card ends'],
+    ['Card ends', '2 × 98.5 × 37 mm · v9’s sleeve on each'],
+    ['Air into the fins', '2 fills per card · 30° lean'],
+    ['EPS leads', 'card 1’s as v10 · card 2’s up the web, out the glass side'],
+    ['Screws', '6 at the front · 3 into each card’s end strip'],
+    ...rows.slice(12, 17),
+    ['Duct v11 print', 'about 21 h 39 min · 245 g of PLA · not printed yet'],
+    ['PCIe links', 'PCIe 3.0 x8 each, x8/x8'],
+    ['Full-load power (est.)', 'about 750 W of 850 W · cap at 200 W for stress tests'],
+  ];
+  $('metrics').replaceChildren(...(state.two ? rows2 : rows).flatMap(([k, val]) => {
     const dt = document.createElement('dt'); dt.textContent = k;
     const dd = document.createElement('dd'); dd.textContent = val;
     return [dt, dd];
   }));
-  setParts($('parts'), [
+  setParts($('parts'), state.two ? PARTS2() : [
     ['Adapter v1', 'have', 'The one you printed, black PETG. It hangs inside the front steel on two fan screws through the middle fan’s top holes; its 13 mm slots let it slide ±4 mm up or down. Four fan screws hold fan 1 to it from the plate’s front, their heads in the 3.5 mm gap its pads leave.', 'adapter'],
     ['Fan 1 · Arctic P12 Pro', 'have', 'Black, 120 × 120 × 25 mm, the high-pressure model. Screwed to the adapter at the front; the pins click into its open corners at the back.', 'fan1'],
     ['Straightener v4', 'printed', 'v2’s nine vanes and open hub, no lugs or screw pockets. The pins run through its corners in 4.6 mm holes and clamp it between the fans, where v2 leaked. Printed 16 Nov; it came out perfect.', 'straightener'],
@@ -2218,7 +2337,7 @@ function updatePanel() {
     ['Rail frame v3', 'printed', 'On fan 2’s back. Dovetail rails top and bottom hold the duct’s flange tight against it; open at both ends. 4.4 mm pin holes, with counterbores so the heads sit below the flange, and a 2 mm chamfer along its back face’s glass edge, so the flange can’t catch it as the card goes in. Printed 15 Nov.', 'rail'],
     ['Snap pins × 4', 'printed', 'The snap test’s pin 1 (0.30 mm barb), 60 mm long. In from the rail frame through fan 2 and the straightener until the arrowheads click into fan 1’s open corners; the test pin clicked into fan 1 just right. Two came out clean from the four-pin plate; the two stringy ones were reprinted one at a time on 16 Nov.', 'pins'],
     ['Card-end test pieces', 'printed', `The duct’s last 12 mm: the sleeve, the screw plate and the trough’s end. v6 and v8 showed what to change; v9’s fit was perfect (16 Nov), so the duct went to print.${PRINT.test}`],
-    ['Duct v10', 'printing', `One piece from the flange to the card end: no collar, no cap, no tape. A dovetail flange on the fans’ axis, a straight-walled loft that climbs 27.5 mm to the card, and an 8 mm sleeve with rigid walls fitted to the card end, exactly v9’s. Inside the sleeve, a 2 mm plate sits on the card’s end strip and takes its three end screws, and two fills in front of the strip steer the air down into the fins. The EPS plug sits in an open-top trough whose end meets the card. Prints sleeve-down; printing since 16 Nov 23:52, done about 17:00–18:00 on 17 Nov.${PRINT.duct}`, 'duct'],
+    ['Duct v10', 'printing', `One piece from the flange to the card end: no collar, no cap, no tape. A dovetail flange on the fans’ axis, a straight-walled loft that climbs 27.5 mm to the card, and an 8 mm sleeve with rigid walls fitted to the card end, exactly v9’s. Inside the sleeve, a 2 mm plate sits on the card’s end strip and takes its three end screws, and two fills in front of the strip steer the air down into the fins. The EPS plug sits in an open-top trough whose end meets the card. Prints sleeve-down; printed 16–17 Nov, and the fit test on the card is next.${PRINT.duct}`, 'duct'],
     ['Card end screws × 3', 'have', 'The card’s own screws, in holes A, B and C on its end strip. The plate adds 2 mm under each head; if they come up short, use ones 2 mm longer (probably M3).', 'screws'],
     ['EPS 8-pin power', 'have', 'The 030-0571-000 style adapter. Plug it into the card before the duct goes on; the lead runs up the trough and over the stack, with the adapter parked on top.', 'eps'],
     ['Thin foam strip', 'later', 'Probably not needed, since v9’s test piece fit perfectly. If the duct shows a gap anyway, a strip of thin foam tape inside the sleeve closes it.'],
@@ -2371,7 +2490,7 @@ function resize() {
 new ResizeObserver(resize).observe(stageEl);
 
 // Wire up the panel and the dock
-const TOGGLES = { labels: 'tg-labels', air: 'tg-air', xray: 'tg-xray', dims: 'tg-dims', glass: 'tg-glass', fit: 'tg-fit', rgb: 'tg-rgb' };
+const TOGGLES = { labels: 'tg-labels', air: 'tg-air', xray: 'tg-xray', dims: 'tg-dims', glass: 'tg-glass', fit: 'tg-fit', rgb: 'tg-rgb', two: 'tg-two' };
 function setToggle(key, val) {
   state[key] = val;
   $(TOGGLES[key]).checked = val;
@@ -2380,6 +2499,7 @@ function setToggle(key, val) {
     if (val && !state.air) { state.air = true; $(TOGGLES.air).checked = true; }
   }
   if (key === 'rgb') applyRGB();
+  if (key === 'two') { buildDynamic(); window.__checklist?.setTwo(val); }
   save();
   applyToggles();
 }
@@ -2443,7 +2563,8 @@ document.addEventListener('keydown', e => {
 });
 
 // ---------------------------------------------------------------------------
-tunnelScene = await tunnelGLB;
+tunnelScenes = await tunnelGLB;
+window.__checklist?.setTwo(state.two);
 buildStatic();
 syncTheme();
 resize();
