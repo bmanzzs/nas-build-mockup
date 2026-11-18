@@ -21,6 +21,7 @@ An interactive 3D mockup of my NAS build: a DARKROCK Classico Storage Master cas
 - The small cards as installed: a FENVI 2.5 GbE card in PCIEX1_1, just above the V100, and the Wi-Fi card in PCIEX16_3.
 - An airflow simulation through the whole case, with an X-ray mode that makes the hardware see-through.
 - Camera presets (Tunnel, 3/4, Side, Front, Top, Back), dimension lines, full-screen mode (F) and the X-ray toggle (X).
+- The switch row folds away to one Switches button (folded at first on phones), and each part in the build checklist has an eye button that hides it in the model or brings it back.
 
 Part sizes come from spec sheets. Positions inside the case come from ruler photos (roughly ±3 mm). The snap pins and the dovetail are sized from a printed snap test; the sleeve started from a printed test frame and close-up photos, then was fitted on the card with three printed test pieces.
 

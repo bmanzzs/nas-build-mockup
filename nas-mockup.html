@@ -68,6 +68,13 @@ body {
 .chipbar button:disabled { opacity: .4; cursor: not-allowed; }
 .chipbar button:disabled:hover { background: none; }
 .chipbar svg { flex: none; }
+/* The switch bar folds down to its Switches button. */
+.chipbar.folded label { display: none; }
+#btn-fold { color: var(--muted); }
+#btn-fold:hover { color: var(--ink); }
+.chipbar:not(.folded) #btn-fold { border-right: 1px solid var(--line); border-radius: 5px 0 0 5px; margin-right: 2px; }
+.chipbar:not(.folded) #btn-fold span { display: none; }   /* open: just the fold arrow */
+#btn-fold ~ label { padding-inline: 7px; gap: 5px; }   /* a little tighter, so the row still fits one line */
 .foot { position: absolute; left: 10px; right: 10px; bottom: 10px; z-index: 2; display: flex; flex-wrap: wrap-reverse; align-items: flex-end; justify-content: space-between; gap: 8px; pointer-events: none; }
 .legend { display: flex; align-items: center; gap: 8px; padding: 6px 10px; font: 500 11px/1 var(--mono); color: var(--muted); border: 1px solid var(--line); border-radius: 8px; background: color-mix(in srgb, var(--panel) 88%, transparent); }
 .legend .ramp { width: 84px; height: 6px; border-radius: 3px; background: linear-gradient(90deg, var(--air), var(--hot)); }
@@ -152,6 +159,7 @@ ul.parts .note { grid-column: 1 / -1; color: var(--muted); font-size: 13px; }
 .pill.test { color: var(--accent); border-style: dashed; }
 /* One card or two: blocks marked for the other build are hidden. */
 .app.two [data-cards="1"], .app:not(.two) [data-cards="2"] { display: none !important; }
+.cl-item[hidden] { display: none; }   /* the other build's checklist rows (.cl-item sets display: grid) */
 .model { display: block; font: 500 12px/1.5 var(--mono); color: var(--muted); font-variant-numeric: tabular-nums; }
 .fine { margin: 0; padding-top: 14px; border-top: 1px solid var(--line); color: var(--muted); font-size: 12px; }
 .drawer-close { display: none; float: right; margin: -2px -4px 0 12px; width: 34px; height: 34px; place-items: center; color: var(--ink); background: var(--panel); border: 1px solid var(--line); border-radius: 8px; cursor: pointer; }
@@ -174,6 +182,17 @@ ul.cl { margin: 0; padding: 0; list-style: none; display: grid; gap: 6px; }
 .cl-show { font: 600 11px/1 var(--mono); color: var(--ink); background: none; border: 1px solid var(--line); border-radius: 6px; padding: 7px 9px; cursor: pointer; }
 .cl-show:hover { background: color-mix(in srgb, var(--ink) 8%, transparent); }
 .checklist:not(.model-ready) .cl-show { display: none; }
+/* Hide or show a part in the model */
+.cl-btns { display: flex; align-items: center; gap: 6px; }
+.cl-eye { display: inline-grid; place-items: center; width: 30px; height: 27px; padding: 0; color: var(--muted); background: none; border: 1px solid var(--line); border-radius: 6px; cursor: pointer; }
+.cl-eye:hover { color: var(--ink); background: color-mix(in srgb, var(--ink) 8%, transparent); }
+.cl-eye[aria-pressed="true"] { color: var(--accent); border-color: var(--accent); }
+.checklist:not(.model-ready) .cl-eye { display: none; }
+.cl-item.gone { border-style: dashed; }
+.cl-tools { display: inline-flex; align-items: center; gap: 10px; }
+.cl-unhide { font: 600 11px/1 var(--mono); color: var(--accent); background: none; border: 1px solid var(--accent); border-radius: 6px; padding: 5px 8px; cursor: pointer; }
+.cl-unhide:hover { background: color-mix(in srgb, var(--accent) 10%, transparent); }
+.tag.gone { opacity: .45; text-decoration: line-through; }
 .cl-item.flash { animation: clflash 1.6s ease-out 1; }
 @keyframes clflash { 0% { box-shadow: 0 0 0 3px var(--accent); } 100% { box-shadow: 0 0 0 3px transparent; } }
 .cl-save { margin: 10px 0 0; font: 500 11px/1.45 var(--mono); color: var(--muted); }
@@ -217,6 +236,7 @@ ul.cl { margin: 0; padding: 0; list-style: none; display: grid; gap: 6px; }
       </div>
       <div class="hud-right">
         <div class="chipbar" role="group" aria-label="Show in the model">
+          <button type="button" id="btn-fold" aria-expanded="true" title="Fold the switches away"><svg width="12" height="12" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path id="fold-icon" d="M3 10l5-5 5 5"/></svg><span>Switches</span></button>
           <label><input type="checkbox" id="tg-labels"> Labels</label>
           <label><input type="checkbox" id="tg-air" checked> Airflow</label>
           <label><input type="checkbox" id="tg-xray"> X-ray</label>
@@ -260,10 +280,10 @@ ul.cl { margin: 0; padding: 0; list-style: none; display: grid; gap: 6px; }
     <section class="checklist" id="checklist" aria-labelledby="cl-title">
       <div class="cl-head">
         <h2 id="cl-title">Build checklist</h2>
-        <span class="cl-count" id="cl-count"></span>
+        <span class="cl-tools"><button type="button" class="cl-unhide" id="cl-unhide" hidden>Show all</button><span class="cl-count" id="cl-count"></span></span>
       </div>
       <div class="cl-bar" aria-hidden="true"><span id="cl-bar"></span></div>
-      <p class="cl-hint">Tick a part once it’s printed or in hand and ready to go in. Ticked parts get a green ✓ on their label in the model; Show finds a part in the model, and clicking a label there finds it here.</p>
+      <p class="cl-hint">Tick a part once it’s printed or in hand and ready to go in. Ticked parts get a green ✓ on their label in the model; Show finds a part in the model, the eye hides it or brings it back, and clicking a label there finds it here.</p>
       <h3>Printed parts</h3>
       <ul class="cl" id="cl-print"></ul>
       <h3>Bought, in hand</h3>
@@ -387,7 +407,9 @@ ul.cl { margin: 0; padding: 0; list-style: none; display: grid; gap: 6px; }
   ];
   var BY = {};
   ITEMS.forEach(function (it) { BY[it.id] = it; });
-  var KEY = 'nas-mockup-checklist-v1';
+  var KEY = 'nas-mockup-checklist-v1', HIDE_KEY = 'nas-mockup-hidden-v1';
+  var EYE = '<svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true"><path d="M1.5 8s2.4-4.5 6.5-4.5S14.5 8 14.5 8 12.1 12.5 8 12.5 1.5 8 1.5 8z"/><circle cx="8" cy="8" r="2"/></svg>';
+  var EYE_OFF = EYE.replace('</svg>', '<path d="M2.5 2.5l11 11"/></svg>');
   var SAVED_DB = 'Ticks are saved with this artifact, on every device you open it on.';
   var section = document.getElementById('checklist'), saveEl = document.getElementById('cl-save');
   var reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
@@ -399,6 +421,14 @@ ul.cl { margin: 0; padding: 0; list-style: none; display: grid; gap: 6px; }
   var ticks = {};
   try { ticks = clean(JSON.parse(localStorage.getItem(KEY) || '{}')); } catch (e) { /* storage unavailable */ }
   function saveLocal() { try { localStorage.setItem(KEY, JSON.stringify(ticks)); } catch (e) { /* ignore */ } }
+  // Parts hidden in the model with the eye buttons: a viewing choice, so it stays in this browser.
+  var hidden = {};
+  try { (JSON.parse(localStorage.getItem(HIDE_KEY) || '[]') || []).forEach(function (id) { if (BY[id]) hidden[id] = true; }); } catch (e) { /* storage unavailable */ }
+  function setHidden(id, h) {
+    if (h) hidden[id] = true; else delete hidden[id];
+    try { localStorage.setItem(HIDE_KEY, JSON.stringify(Object.keys(hidden))); } catch (e) { /* ignore */ }
+    render();
+  }
   function isDone(id) { return Object.prototype.hasOwnProperty.call(ticks, id) ? ticks[id] : !!(BY[id] && BY[id].ready); }
   function setSave(t) { saveEl.textContent = t; }
   // One card or two, as the model's Card 2 toggle last left it (it starts on).
@@ -423,15 +453,30 @@ ul.cl { margin: 0; padding: 0; list-style: none; display: grid; gap: 6px; }
     var show = document.createElement('button');
     show.type = 'button'; show.className = 'cl-show'; show.textContent = 'Show';
     show.setAttribute('aria-label', 'Show ' + it.name + ' in the model');
-    show.addEventListener('click', function () { document.dispatchEvent(new CustomEvent('checklist:show', { detail: it.id })); });
+    show.addEventListener('click', function () {
+      if (hidden[it.id]) setHidden(it.id, false);
+      document.dispatchEvent(new CustomEvent('checklist:show', { detail: it.id }));
+    });
+    var eye = document.createElement('button');
+    eye.type = 'button'; eye.className = 'cl-eye';
+    eye.addEventListener('click', function () { setHidden(it.id, !hidden[it.id]); });
+    var btns = document.createElement('div');
+    btns.className = 'cl-btns';
+    btns.append(eye, show);
     box.addEventListener('change', function () { tick(it.id, box.checked); });
-    li.append(label, show);
+    li.append(label, btns);
     document.getElementById(it.group === 'print' ? 'cl-print' : 'cl-have').append(li);
-    rows[it.id] = { li: li, box: box, sub: sub, name: b };
+    rows[it.id] = { li: li, box: box, sub: sub, name: b, eye: eye, gone: null };
   });
 
+  var unhide = document.getElementById('cl-unhide');
+  unhide.addEventListener('click', function () {
+    hidden = {};
+    try { localStorage.removeItem(HIDE_KEY); } catch (e) { /* ignore */ }
+    render();
+  });
   function render() {
-    var n = 0, total = 0;
+    var n = 0, total = 0, nh = 0;
     appEl.classList.toggle('two', two);
     ITEMS.forEach(function (it) {
       var d = isDone(it.id), r = rows[it.id], on = shown(it);
@@ -443,7 +488,16 @@ ul.cl { margin: 0; padding: 0; list-style: none; display: grid; gap: 6px; }
       r.li.classList.toggle('done', d);
       r.name.textContent = two && it.name2 || it.name;
       r.sub.textContent = d ? (two && it.on2 || it.on) : (two && it.off2 || it.off);
+      var h = !!hidden[it.id], nm = two && it.name2 || it.name;
+      r.li.classList.toggle('gone', h);
+      r.eye.setAttribute('aria-pressed', String(h));
+      r.eye.setAttribute('aria-label', (h ? 'Bring back ' : 'Hide ') + nm + ' in the model');
+      r.eye.title = h ? 'Hidden in the model · click to bring it back' : 'Hide it in the model';
+      if (r.gone !== h) { r.eye.innerHTML = h ? EYE_OFF : EYE; r.gone = h; }
+      if (h) nh++;
     });
+    unhide.hidden = !nh;
+    unhide.textContent = 'Show all · ' + nh + ' hidden';
     document.getElementById('cl-count').textContent = n + ' of ' + total + ' ready';
     document.getElementById('cl-bar').style.width = (100 * n / total) + '%';
     document.dispatchEvent(new CustomEvent('checklist:change'));
@@ -519,6 +573,7 @@ ul.cl { margin: 0; padding: 0; list-style: none; display: grid; gap: 6px; }
     items: ITEMS,
     item: function (id) { return BY[id] || null; },
     isDone: isDone,
+    isHidden: function (id) { return !!hidden[id]; },
     setTwo: function (v) { if (two !== v) { two = v; render(); } },
     modelReady: function () { section.classList.add('model-ready'); },
     // From a label in the model: bring its row into view and flash it.
@@ -597,12 +652,12 @@ const DRIVES = ['WD Purple 4TB', 'WD Purple 4TB', 'WD Purple 4TB', 'SkyHawk 4TB'
 
 const reduceMotion = matchMedia('(prefers-reduced-motion: reduce)').matches;
 const narrow = matchMedia('(max-width: 560px)').matches;
-const state = { labels: true, air: true, xray: false, dims: false, glass: false, fit: false, rgb: true, two: true };
+const state = { labels: true, air: true, xray: false, dims: false, glass: false, fit: false, rgb: true, two: true, fold: narrow };
 // Bumped with the defaults, so saved settings from an older version don't hide them. The slide-in view isn't saved.
 const STORE = 'nas-mockup-v6';
 try {
   const saved = JSON.parse(localStorage.getItem(STORE) || '{}');
-  for (const k of ['labels', 'air', 'xray', 'dims', 'glass', 'rgb', 'two']) if (typeof saved[k] === 'boolean') state[k] = saved[k];
+  for (const k of ['labels', 'air', 'xray', 'dims', 'glass', 'rgb', 'two', 'fold']) if (typeof saved[k] === 'boolean') state[k] = saved[k];
 } catch (e) { /* storage unavailable */ }
 const save = () => { try { localStorage.setItem(STORE, JSON.stringify(state)); } catch (e) { /* ignore */ } };
 
@@ -1867,6 +1922,10 @@ const ITEM_OF = name => state.two && name.startsWith('duct') ? 'duct2'
   : name.startsWith('adapter') ? 'adapter' : name.startsWith('rail') ? 'rail'
   : name.startsWith('straightener') ? 'straightener' : name.startsWith('pin') ? 'pins' : name.startsWith('duct') ? 'duct'
   : name.startsWith('screw') ? 'screws' : name.startsWith('plug') || name.startsWith('eps_cable') ? 'eps' : null;
+// More that hides with a checklist part (its PCIe leads) and labels that fade with it, but that Show doesn't frame.
+const hideObjs = new Map(), partTags = new Map();
+function linkHide(id, ...objs) { if (!hideObjs.has(id)) hideObjs.set(id, []); hideObjs.get(id).push(...objs); }
+function partTag(id, o) { if (!partTags.has(id)) partTags.set(id, []); partTags.get(id).push(o.element); return o; }
 function linkItem(id, ...objs) { if (!itemObjs.has(id)) itemObjs.set(id, []); itemObjs.get(id).push(...objs); }
 function itemTag(id, text, x, y, z) {
   const o = tag(text, x, y, z, 'item');
@@ -1877,7 +1936,7 @@ function itemTag(id, text, x, y, z) {
   return o;
 }
 function buildTunnel(g, p) {
-  itemTags.clear(); itemObjs.clear();
+  itemTags.clear(); itemObjs.clear(); hideObjs.clear(); partTags.clear();
   const T = new THREE.Group();
   T.position.set(D.frontFrameX, p.cy, p.cz);
   g.add(T);
@@ -1932,6 +1991,8 @@ function buildTunnel(g, p) {
     T.add(m);
     return m;
   }).concat(leads2);
+  linkHide('eps', ...pcieLeads.slice(0, 2));
+  linkHide('eps2', ...leads2);
   T.add(itemTag('adapter', 'Adapter v1 · yours · 6 screws', -5, p.holeY + 22, p.holeZ[0] + 6));
   T.add(itemTag('fan1', 'Fan 1 · Arctic P12 Pro', -TUN.fan1, TUN.sy - 70, -30));
   T.add(itemTag('straightener', 'Straightener v4', -43, TUN.sy - 84, -30));
@@ -1940,16 +2001,16 @@ function buildTunnel(g, p) {
   T.add(itemTag('pins', '4 snap pins · click into fan 1', -43.5, TUN.sy + 66, -58));
   if (state.two) {
     S.add(itemTag('duct2', 'Twin duct v11 · both cards, one piece', -122, -90, 36));
-    S.add(tag('Fills · two per card, air into the fins', -148, 10, 46, 'petg'));
+    S.add(partTag('duct2', tag('Fills · two per card, air into the fins', -148, 10, 46, 'petg')));
     S.add(itemTag('screws', '3 screws into each card’s end strip', -152, 24, -30));
-    S.add(tag('Card 1’s EPS lead · trough, then up and over', -112, 40, 30));
-    S.add(tag('Card 2’s EPS lead · up the web, out the glass side', -131, -24, 74));
+    S.add(partTag('eps', tag('Card 1’s EPS lead · trough, then up and over', -112, 40, 30)));
+    S.add(partTag('eps2', tag('Card 2’s EPS lead · up the web, out the glass side', -131, -24, 74)));
     S.add(itemTag('eps2', 'Card 2’s EPS adapter · own PCIe leads', -117, -108, 84));
   } else {
     S.add(itemTag('duct', 'Duct v10 · one piece, fitted to the card', -122, -64, 36));
-    S.add(tag('Fills · air into the fins', -148, 10, 46, 'petg'));
+    S.add(partTag('duct', tag('Fills · air into the fins', -148, 10, 46, 'petg')));
     S.add(itemTag('screws', '3 screws into the card’s end strip', -152, 24, -30));
-    S.add(tag('EPS lead · trough, then up and over', -112, 40, 30));
+    S.add(partTag('eps', tag('EPS lead · trough, then up and over', -112, 40, 30)));
   }
   S.add(itemTag('eps', 'EPS adapter · parked on top', -19, 70, 20));
   // The prints and the stack's fans keep their look in X-ray; the EPS adapter and its leads are hardware.
@@ -2180,6 +2241,12 @@ function applyChecks() {
     const d = CL.isDone(id);
     for (const o of objs) for (const c of o.children) if (c.isLineSegments && (c.material === MAT.partEdge || c.material === MAT.doneEdge)) c.material = d ? MAT.doneEdge : MAT.partEdge;
   }
+  // Parts hidden with the checklist's eye buttons: the parts go, their labels fade (still clickable).
+  const gone = id => !!(CL.isHidden && CL.isHidden(id));
+  for (const map of [itemObjs, hideObjs]) for (const [id, objs] of map) for (const o of objs) { o.userData.hidden = gone(id); o.visible = !o.userData.hidden; }
+  for (const [id, el] of itemTags) el.classList.toggle('gone', gone(id));
+  for (const [id, els] of partTags) for (const el of els) el.classList.toggle('gone', gone(id));
+  for (const m of pcieLeads) m.visible = slideK === 0 && !m.userData.hidden;
 }
 // Show: fly to a checklist part from the tunnel view's side and outline it for a moment.
 let finder = null;
@@ -2218,7 +2285,7 @@ function applySlide() {
   const e = smooth(slideK);
   for (const g of slideGroups) g.position.z = SLIDE * e;
   for (const s of gpuStreams) s.points.visible = slideK === 0;
-  for (const m of pcieLeads) m.visible = slideK === 0;
+  for (const m of pcieLeads) m.visible = slideK === 0 && !m.userData.hidden;
 }
 
 // ---------------------------------------------------------------------------
@@ -2502,6 +2569,17 @@ for (const [key, id] of Object.entries(TOGGLES)) {
   el.addEventListener('change', () => setToggle(key, el.checked));
 }
 document.querySelectorAll('[data-cam]').forEach(b => b.addEventListener('click', () => goCam(b.dataset.cam)));
+// The switch bar folds down to its Switches button, so it covers less of the model (folded at first on a phone).
+const foldBtn = $('btn-fold');
+function applyFold() {
+  foldBtn.closest('.chipbar').classList.toggle('folded', state.fold);
+  foldBtn.setAttribute('aria-expanded', String(!state.fold));
+  foldBtn.title = state.fold ? 'Show the switches' : 'Fold the switches away';
+  foldBtn.setAttribute('aria-label', foldBtn.title);
+  $('fold-icon').setAttribute('d', state.fold ? 'M3 6l5 5 5-5' : 'M3 10l5-5 5 5');
+}
+foldBtn.addEventListener('click', () => { state.fold = !state.fold; save(); applyFold(); });
+applyFold();
 
 // Full screen. Uses the browser's full screen when the page may, and otherwise fills the frame it's in.
 const appEl = document.querySelector('.app');
