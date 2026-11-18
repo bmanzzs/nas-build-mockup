@@ -422,6 +422,7 @@ dl.feat-facts dd { margin: 0; min-width: 0; overflow-wrap: anywhere; text-align:
         <li>The EPS plug sits in an open-top trough in the duct’s roof, out of the air. The lead runs straight out for 15 mm, then sweeps up at 58° and over the stack instead of kinking. The trough’s end stops 0.1 mm from the card, so it needs no foam.</li>
         <li>Fan 1 sits behind the opening between the steel rails, which cover about 12 mm of it on each side. The adapter’s 3.5 mm pads, 1.5 mm off the steel, leave a gap behind it, so air reaches that part from the side.</li>
         <li>The AIO tubes leave the pump’s front side downward, loop over the M.2 heatsink and rest just above the card, then climb the rear past the exhaust fan to the radiator, as in your photos. They don’t touch the card.</li>
+        <li>The sag bracket v1 stands on the PSU shroud just in front of the 2.5″ plate, screwed through its long slot into the two holes near the shroud’s glass edge. Its fork’s arms touch both cards’ undersides, 60.96 mm apart. The holes’ place is from your photos (±8 mm), so the slot lets the stand slide along the case, and the nut sets the height.</li>
         <li>The Back view shows the cable side from your photo of 31 Oct, with the cages where they are now: the board’s back and the pump’s backplate in the CPU cutout, the be quiet! fan hub, the 2.5″ plate, the PSU’s other label and the main bundles. Turn on Side panels to close the case.</li>
         <li>The FENVI 2.5 GbE card stays in PCIEX1_1, just above the V100. Its heatsink hangs a few millimeters over the card’s backplate. It fits, but it gets little air, so watch its temperature.</li>
         <li>The Wi-Fi card is in PCIEX16_3, the bottom slot.</li>
@@ -506,6 +507,7 @@ dl.feat-facts dd { margin: 0; min-width: 0; overflow-wrap: anywhere; text-align:
     { id: 'straightener', group: 'print', name: 'Straightener v4', ready: true, on: 'Printed 16 Nov · came out perfect', off: 'Printed · not ticked as ready' },
     { id: 'pins', group: 'print', name: 'Snap pins × 4', ready: false, offKind: 'test', on: 'Printed · ready to fit', off: 'Two good · two more printed 16 Nov, check them' },
     { id: 'duct', group: 'print', only: 1, name: 'Duct v10', ready: false, offKind: 'test', on: 'Printed 17 Nov · fits the card, ready to go in', off: 'Printed 17 Nov · fit test on the card next' },
+    { id: 'sag', group: 'print', name: 'Sag bracket v1', ready: false, offKind: 'printing', on: 'Printed · under both cards', off: 'Printing 18 Nov · about 6 h 13 min' },
     { id: 'duct2', group: 'print', only: 2, name: 'Twin duct v11', ready: false, on: 'Printed · supports off, ready to fit', off: 'To print · about 21 h 39 min · after the v10 test and card 2' },
     { id: 'fan1', group: 'have', name: 'Fan 1 · Arctic P12 Pro', ready: true, on: 'In hand', off: 'Not here yet' },
     { id: 'fan2', group: 'have', name: 'Fan 2 · Arctic P12 Pro', ready: true, on: 'In hand', off: 'Not here yet' },
@@ -729,6 +731,7 @@ const loadTunnel = file => fetch(file)
   })
   .then(g => g.scene, e => { console.warn(`tunnel model ${file}:`, e); return null; });
 const tunnelGLB = Promise.all(['v100_tunnel_v10.json', 'v100_tunnel_v11.json'].map(loadTunnel));
+const sagGLB = loadTunnel('v100_sag_bracket_v1.json');          // the sag bracket under both cards, case frame
 
 // ---------------------------------------------------------------------------
 // Dimensions in mm. X runs rear wall → front, Y floor → top, Z motherboard tray → side panel.
@@ -2014,6 +2017,8 @@ function planTunnel() {
 
 let tunnelScene = null;      // the loaded GLB for the build shown, set before each build
 let tunnelScenes = [null, null];   // v10 (one card), v11 (two)
+const sagEdges = new Map();        // the sag bracket's outlines (50°, so the threads' flanks don't draw)
+let sagScene = null;               // sag bracket v1: base + post, nut, fork, already in the case frame
 let slideGroups = [];        // the card and everything on it move together in the slide-in view
 let pcieLeads = [];          // not plugged in yet while the card goes in
 const edgeOfPart = new Map();
@@ -2334,6 +2339,22 @@ function buildDynamic() {
   if (state.two) buildCard(card2G, { ...CARD2, c: p.c2, id: 'card2' });
   for (const g of [coverG, ...cageGs, cardG, card2G]) { bake(g); dynG.add(g); }
   slideGroups = [cardG, card2G, buildTunnel(dynG, p)];
+  // The sag bracket v1: a jack stand screwed to two holes in the shroud top just in front of the 2.5″ plate, its
+  // fork's arms touching both cards' undersides (the fork sits where they meet card 1 and card 2's slot).
+  if (sagScene) {
+    const sagG = new THREE.Group();
+    sagScene.traverse(o => {
+      if (!o.isMesh) return;
+      const m = new THREE.Mesh(keep(o.geometry), MAT.plaSolid);
+      m.name = o.name;
+      if (!sagEdges.has(o.geometry)) sagEdges.set(o.geometry, keep(new THREE.EdgesGeometry(o.geometry, 50)));
+      m.add(new THREE.LineSegments(sagEdges.get(o.geometry), MAT.partEdge));
+      sagG.add(m);
+    });
+    dynG.add(sagG);
+    linkItem('sag', sagG);
+    sagG.add(itemTag('sag', 'Sag bracket v1 · a jack under both cards', 182, D.shroudTop + 14, 172));
+  }
   if (state.two) {
     card2G.add(itemTag('card2', 'V100 #2 · PCIEX16_2 · due 19–21 Nov', 80, p.c2.y1 + 4, p.c2.z1));
     linkItem('card2', card2G);
@@ -2452,6 +2473,7 @@ const PARTS2 = () => [
   ['Card end screws × 6', 'have', 'Each card’s own three, in holes A, B and C on its end strip. The plate adds 2 mm under each head; if they come up short, use ones 2 mm longer (probably M3).', 'screws'],
   ['EPS 8-pin power · card 1', 'have', 'The 030-0571-000 style adapter. Plug it into card 1 before the duct goes on; the lead runs up the trough and over the stack, with the adapter parked on top.', 'eps'],
   ['EPS 8-pin power · card 2', 'need', 'A second adapter of the same kind, on its own two PCIe leads from the PSU. Its lead leaves the duct through the window in the glass side and runs down to it.', 'eps2'],
+  ['Sag bracket v1', 'printing', 'A jack stand that holds the cards’ ends up from the PSU shroud. Base: a plate with one long slot for two short screws into the holes near the shroud’s glass edge (M3 or 6-32, about 6 mm; the slot takes any spacing up to about 45 mm). Post: 20 mm thread, 3 mm a turn. Fork: two arms 60.96 mm apart, one under each card, riding on a thumb nut. Slide it in with the nut all the way down, screw the base, then turn the nut the way its arrows point until both arms touch, plus a quarter turn. Printing 18 Nov, about 6 h 13 min, three parts on one plate.', 'sag'],
   ['Thin foam strip', 'later', 'Probably not needed, since v9’s test piece fit perfectly. If either sleeve shows a gap, a strip of thin foam tape inside it closes it.'],
 ];
 function updatePanel() {
@@ -2522,6 +2544,7 @@ function updatePanel() {
     ['Duct v10', 'printing', `One piece from the flange to the card end: no collar, no cap, no tape. A dovetail flange on the fans’ axis, a straight-walled loft that climbs 27.5 mm to the card, and an 8 mm sleeve with rigid walls fitted to the card end, exactly v9’s. Inside the sleeve, a 2 mm plate sits on the card’s end strip and takes its three end screws, and two fills in front of the strip steer the air down into the fins. The EPS plug sits in an open-top trough whose end meets the card. Prints sleeve-down; printed 16–17 Nov, and the fit test on the card is next.${PRINT.duct}`, 'duct'],
     ['Card end screws × 3', 'have', 'The card’s own screws, in holes A, B and C on its end strip. The plate adds 2 mm under each head; if they come up short, use ones 2 mm longer (probably M3).', 'screws'],
     ['EPS 8-pin power', 'have', 'The 030-0571-000 style adapter. Plug it into the card before the duct goes on; the lead runs up the trough and over the stack, with the adapter parked on top.', 'eps'],
+    ['Sag bracket v1', 'printing', 'A jack stand that holds the cards’ ends up from the PSU shroud. Base: a plate with one long slot for two short screws into the holes near the shroud’s glass edge (M3 or 6-32, about 6 mm; the slot takes any spacing up to about 45 mm). Post: 20 mm thread, 3 mm a turn. Fork: two arms 60.96 mm apart, one under each card, riding on a thumb nut. Slide it in with the nut all the way down, screw the base, then turn the nut the way its arrows point until both arms touch, plus a quarter turn. Printing 18 Nov, about 6 h 13 min, three parts on one plate.', 'sag'],
     ['Thin foam strip', 'later', 'Probably not needed, since v9’s test piece fit perfectly. If the duct shows a gap anyway, a strip of thin foam tape inside the sleeve closes it.'],
   ]);
   const ds = $('dock-status');
@@ -2767,7 +2790,7 @@ document.addEventListener('keydown', e => {
 // round it. Drag to look round it yourself, scroll to zoom; the arrows (or a swipe on the card, or a tap on another ghost
 // part) move the focus; the round X, Esc or a tap on empty space pulls back out.
 const FEAT_ORDER = ['card1', 'card2', 'duct2', 'duct', 'fan1', 'straightener', 'fan2', 'rail', 'pins', 'adapter', 'screws', 'eps', 'eps2',
-  'board', 'cooler', 'psu', 'nic', 'wifi', 'cage3', 'cage4', 'frontfan', 'rearfan'];
+  'board', 'cooler', 'psu', 'nic', 'wifi', 'cage3', 'cage4', 'frontfan', 'rearfan', 'sag'];
 const Q90 = Math.PI / 2;
 const FEAT_CAT = {
   card1: { name: 'Tesla V100 32 GB', kind: () => `GPU · card 1 · PCIEX16_1`, yaw: 0.35,
@@ -2833,6 +2856,9 @@ const FEAT_CAT = {
   frontfan: { name: 'Front intake fan', kind: 'Fan · DARKROCK stock · 120 mm', yaw: Q90,
     blurb: 'The top front fan, kept from the stock three. It feeds the drive cages; the middle and bottom ones came out to make room for the tunnel.',
     facts: () => [['Connector', '3-pin'], ['Feeds', 'bays 3 and 4']] },
+  sag: { name: 'Sag bracket v1', kind: 'Printed part · PLA · 3 pieces', item: 'sag', yaw: 0.75,
+    blurb: 'A small jack stand that holds up both cards from the PSU shroud. Its base screws into the two holes near the shroud’s glass edge through one long slot, a thumb nut runs up its threaded post, and a fork rides on the nut with one arm under each card, 60.96 mm apart. Turn the nut the way its arrows point and both arms come up until they touch.',
+    facts: () => [['Print', '6 h 13 min · one plate'], ['Lift', '3 mm per turn · 17–45 mm of travel'], ['Arms', '60.96 mm apart · 28 mm under the cards'], ['Screws', '2 · M3 or 6-32, about 6 mm']] },
   rearfan: { name: 'Rear exhaust fan', kind: 'Fan · DARKROCK stock · 120 mm', yaw: Q90,
     blurb: 'Pulls warm air from the CPU, RAM and VRM out through the back grille, level with the CPU.',
     facts: () => [['Position', 'rear, level with the CPU']] },
@@ -3319,6 +3345,7 @@ function hideCoach(done) {
 }
 
 tunnelScenes = await tunnelGLB;
+sagScene = await sagGLB;
 window.__checklist?.setTwo(state.two);
 buildStatic();
 syncTheme();

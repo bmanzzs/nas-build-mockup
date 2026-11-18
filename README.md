@@ -19,6 +19,7 @@ An interactive 3D mockup of my NAS build: a DARKROCK Classico Storage Master cas
 - The Slide-in toggle shows how it goes together: the duct is screwed to the card at the bench, and its flange slides into the rail as the card goes into its slot.
 - The tunnel parts are the real print models: GLBs written by the same Blender scripts as the STL files, stored base64 in `v100_tunnel_v10.json` (one card) and `v100_tunnel_v11.json` (two).
 - The small cards as installed: a FENVI 2.5 GbE card in PCIEX1_1, just above the V100, and the Wi-Fi card in PCIEX16_3.
+- Sag bracket v1 under both cards: a printed jack stand on the PSU shroud, screwed through one long slot into two holes near the shroud's glass edge. A thumb nut on its threaded post (3 mm a turn) lifts a fork whose two arms sit under the cards, 60.96 mm apart. It is the print script's own model, like the tunnel parts.
 - An airflow simulation through the whole case, with an X-ray mode that makes the hardware see-through.
 - Focus on any part: click or tap it (or its label, or Show in the build checklist) and the camera zooms in on it where it sits. It stays solid with an accent outline while the rest of the PC fades to a faint ghost, and the view turns slowly round it (it pauses while you drag, and picks up again a few seconds after). A small card says what the part is, with its checklist tick as one quiet line (click it to find the row). The arrows (or ← →, or a swipe on the card, or a tap on another part) move the focus; the round ✕, Esc or a tap on empty space pull back out.
 - Camera presets (Tunnel, 3/4, Side, Front, Top, Back), dimension lines, full-screen mode (F) and the X-ray toggle (X).
@@ -32,5 +33,6 @@ Part sizes come from spec sheets. Positions inside the case come from ruler phot
 - `index.html`: the full page GitHub Pages serves, generated from the source.
 - `build.py`: rebuilds `index.html`. Run `python build.py` after editing `nas-mockup.html`.
 - `v100_tunnel_v10.json`, `v100_tunnel_v11.json`: the tunnel's printed parts for one card and for two, loaded by the page.
+- `v100_sag_bracket_v1.json`: the sag bracket (base and post, nut, fork) in the case's own frame, loaded by the page.
 
 Rendering uses [three.js](https://threejs.org/) 0.160.0 and its GLTFLoader, loaded from jsDelivr; there's nothing to install.
