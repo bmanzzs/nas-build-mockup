@@ -193,6 +193,10 @@ ul.cl { margin: 0; padding: 0; list-style: none; display: grid; gap: 6px; }
 .cl-unhide { font: 600 11px/1 var(--mono); color: var(--accent); background: none; border: 1px solid var(--accent); border-radius: 6px; padding: 5px 8px; cursor: pointer; }
 .cl-unhide:hover { background: color-mix(in srgb, var(--accent) 10%, transparent); }
 .tag.gone { opacity: .45; text-decoration: line-through; }
+/* Checkmarks off: checklist labels look like the rest, and with Labels off they go too. */
+.stage.hide-ticks .tag.item::before { content: none; }
+.stage.hide-ticks .tag.item.todo, .stage.hide-ticks .tag.item.done { color: var(--ink); border-color: var(--line); background: color-mix(in srgb, var(--panel) 90%, transparent); }
+.stage.hide-ticks.hide-tags .tag.item.done { display: none !important; }
 .cl-item.flash { animation: clflash 1.6s ease-out 1; }
 @keyframes clflash { 0% { box-shadow: 0 0 0 3px var(--accent); } 100% { box-shadow: 0 0 0 3px transparent; } }
 .cl-save { margin: 10px 0 0; font: 500 11px/1.45 var(--mono); color: var(--muted); }
@@ -238,6 +242,7 @@ ul.cl { margin: 0; padding: 0; list-style: none; display: grid; gap: 6px; }
         <div class="chipbar" role="group" aria-label="Show in the model">
           <button type="button" id="btn-fold" aria-expanded="true" title="Fold the switches away"><svg width="12" height="12" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path id="fold-icon" d="M3 10l5-5 5 5"/></svg><span>Switches</span></button>
           <label><input type="checkbox" id="tg-labels"> Labels</label>
+          <label title="The green ✓ on ticked parts’ labels, the ring on the rest, and ticked prints’ green edges"><input type="checkbox" id="tg-ticks" checked> Checkmarks</label>
           <label><input type="checkbox" id="tg-air" checked> Airflow</label>
           <label><input type="checkbox" id="tg-xray"> X-ray</label>
           <label title="The fans’ and the pump’s ARGB, and the ROG eye"><input type="checkbox" id="tg-rgb" checked> RGB</label>
@@ -283,7 +288,7 @@ ul.cl { margin: 0; padding: 0; list-style: none; display: grid; gap: 6px; }
         <span class="cl-tools"><button type="button" class="cl-unhide" id="cl-unhide" hidden>Show all</button><span class="cl-count" id="cl-count"></span></span>
       </div>
       <div class="cl-bar" aria-hidden="true"><span id="cl-bar"></span></div>
-      <p class="cl-hint">Tick a part once it’s printed or in hand and ready to go in. Ticked parts get a green ✓ on their label in the model; Show finds a part in the model, the eye hides it or brings it back, and clicking a label there finds it here.</p>
+      <p class="cl-hint">Tick a part once it’s printed or in hand and ready to go in. Ticked parts get a green ✓ on their label in the model (the Checkmarks switch turns them off); Show finds a part in the model, the eye hides it or brings it back, and clicking a label there finds it here.</p>
       <h3>Printed parts</h3>
       <ul class="cl" id="cl-print"></ul>
       <h3>Bought, in hand</h3>
@@ -652,12 +657,12 @@ const DRIVES = ['WD Purple 4TB', 'WD Purple 4TB', 'WD Purple 4TB', 'SkyHawk 4TB'
 
 const reduceMotion = matchMedia('(prefers-reduced-motion: reduce)').matches;
 const narrow = matchMedia('(max-width: 560px)').matches;
-const state = { labels: true, air: true, xray: false, dims: false, glass: false, fit: false, rgb: true, two: true, fold: narrow };
+const state = { labels: true, air: true, xray: false, dims: false, glass: false, fit: false, rgb: true, two: true, fold: narrow, ticks: true };
 // Bumped with the defaults, so saved settings from an older version don't hide them. The slide-in view isn't saved.
 const STORE = 'nas-mockup-v6';
 try {
   const saved = JSON.parse(localStorage.getItem(STORE) || '{}');
-  for (const k of ['labels', 'air', 'xray', 'dims', 'glass', 'rgb', 'two', 'fold']) if (typeof saved[k] === 'boolean') state[k] = saved[k];
+  for (const k of ['labels', 'air', 'xray', 'dims', 'glass', 'rgb', 'two', 'fold', 'ticks']) if (typeof saved[k] === 'boolean') state[k] = saved[k];
 } catch (e) { /* storage unavailable */ }
 const save = () => { try { localStorage.setItem(STORE, JSON.stringify(state)); } catch (e) { /* ignore */ } };
 
@@ -2239,7 +2244,7 @@ function applyChecks() {
   for (const [id, el] of itemTags) { const d = CL.isDone(id); el.classList.toggle('done', d); el.classList.toggle('todo', !d); }
   for (const [id, objs] of itemObjs) {
     const d = CL.isDone(id);
-    for (const o of objs) for (const c of o.children) if (c.isLineSegments && (c.material === MAT.partEdge || c.material === MAT.doneEdge)) c.material = d ? MAT.doneEdge : MAT.partEdge;
+    for (const o of objs) for (const c of o.children) if (c.isLineSegments && (c.material === MAT.partEdge || c.material === MAT.doneEdge)) c.material = d && state.ticks ? MAT.doneEdge : MAT.partEdge;
   }
   // Parts hidden with the checklist's eye buttons: the parts go, their labels fade (still clickable).
   const gone = id => !!(CL.isHidden && CL.isHidden(id));
@@ -2411,6 +2416,7 @@ function updatePanel() {
 function applyToggles() {
   stageEl.classList.toggle('hide-tags', !state.labels);
   stageEl.classList.toggle('hide-dims', !state.dims);
+  stageEl.classList.toggle('hide-ticks', !state.ticks);
   if (dimsG) dimsG.visible = state.dims;
   if (airG) airG.visible = state.air;
   if (glassG) glassG.visible = state.glass;
@@ -2550,7 +2556,7 @@ function resize() {
 new ResizeObserver(resize).observe(stageEl);
 
 // Wire up the panel and the dock
-const TOGGLES = { labels: 'tg-labels', air: 'tg-air', xray: 'tg-xray', dims: 'tg-dims', glass: 'tg-glass', fit: 'tg-fit', rgb: 'tg-rgb', two: 'tg-two' };
+const TOGGLES = { labels: 'tg-labels', air: 'tg-air', xray: 'tg-xray', dims: 'tg-dims', glass: 'tg-glass', fit: 'tg-fit', rgb: 'tg-rgb', two: 'tg-two', ticks: 'tg-ticks' };
 function setToggle(key, val) {
   state[key] = val;
   $(TOGGLES[key]).checked = val;
@@ -2560,6 +2566,7 @@ function setToggle(key, val) {
   }
   if (key === 'rgb') applyRGB();
   if (key === 'two') { buildDynamic(); window.__checklist?.setTwo(val); }
+  if (key === 'ticks') applyChecks();
   save();
   applyToggles();
 }
